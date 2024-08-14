@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>篮球计分板</title>
+    <!-- 添加logo -->
+    <link rel="shortcut icon" href="https://t.tutu.to/img/BtfIM" type="image/x-icon">
+    <style>
+        * {
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE/Edge */
+            user-select: none; /* 标准语法 */
+        }
+        /* 引入LED字体 */
+        @font-face {
+            font-family: 'LEDFont';
+            src: url('./UnidreamLED.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        .scoreboard-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            width: 100%; /* 确保容器宽度为100% */
+        }
+        .scoreboard {
+            display: flex;
+            width: 75%; /* 调整宽度以适应两个队伍面板各占3/8的屏幕宽度 */
+            justify-content: space-between;
+        }
+        .team-panel {
+            flex: 1; /* 使每个队伍面板占一半空间 */
+            border: 3px solid #333;
+            padding: 30px;
+            text-align: center;
+            background-color: #f9f9f9;
+            transition: background-color 0.3s;
+            position: relative;
+            /* 调整为3/8屏幕宽度 */
+            width: calc(25% - 10px); /* 减去间隔宽度 */
+            margin: 0 5px; /* 与相邻元素间隔5px */
+        }
+        .team-panel:hover {
+            background-color: #e9e9e9;
+        }
+        .team-name {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .score {
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-family: 'LEDFont', sans-serif; /* 使用LED字体 */
+        }
+        .minus {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            cursor: pointer;
+        }
+        .control-panel {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .button {
+            width: 50px; /* 保持按钮宽度 */
+            height: 50px; /* 保持按钮高度 */
+            font-size: 1em;
+            margin: 5px; /* 按钮间间隔 */
+            border: 1px solid #ddd;
+            border-radius: 0; /* 按钮变为方形 */
+            background-color: #fff;
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .button.selected {
+            background-color: #666;
+            color: #fff;
+        }
+        /* 明亮主题 */
+        .bright-theme {
+            background-color: #f0f0f0;
+        }
+        .bright-theme .team-panel {
+            border-color: #333;
+        }
+        /* LED屏幕主题 */
+        .led-theme {
+            background-color: #000;
+        }
+        .led-theme .team-panel {
+            border-color: #0f0;
+            background-color: #111;
+            color: #0f0;
+        }
+        .LEDFont {
+            font-family: 'LEDFont', sans-serif;
+            font-size: 36px; /* 根据需要调整字体大小 */
+        }
+        @media (max-width: 600px) {
+            .scoreboard {
+                width: 90%;
+            }
+            .team-panel {
+                padding: 30px; /* 保留内边距 */
+                text-align: center;
+                background-color: #f9f9f9; /* 保留背景颜色 */
+                transition: background-color 0.3s;
+                position: relative;
+                width: calc(25% - 10px); /* 保留宽度计算 */
+                margin: 0 5px; /* 保留外边距 */
+                /* 删除边框 */
+                border: none; /* 或者使用 border: 0; */
+            }
+            .team-name {
+                font-size: 1.2em;
+            }
+            .score {
+                font-size: 3em; /* 根据需要调整字体大小 */
+                margin-bottom: 20px;
+                font-family: 'LEDFont', sans-serif; /* 确保使用LED字体 */
+            }
+            .button {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body class="bright-theme">
+
+<div class="scoreboard-container">
+    <div class="scoreboard">
+        <div class="team-panel" id="teamA">
+            <div class="team-name" data-default="队伍A" onclick="editTeamName(this, 'A')">队伍A</div>
+            <div class="score" id="scoreA">0</div>
+            <button class="minus" onclick="changeScore('A', -1)">-</button>
+        </div>
+        <div class="team-panel" id="teamB">
+            <div class="team-name" data-default="队伍B" onclick="editTeamName(this, 'B')">队伍B</div>
+            <div class="score" id="scoreB">0</div>
+            <button class="minus" onclick="changeScore('B', -1)">-</button>
+        </div>
+    </div>
+</div>
+
+<div class="control-panel">
+    <!-- 加减分按钮 -->
+    <button class="button" onclick="selectChange(-1)">-1</button>
+    <button class="button selected" onclick="selectChange(1)">+1</button>
+    <button class="button" onclick="selectChange(5)">+5</button>
+    <button class="button" onclick="selectChange(10)">+10</button>
+    <!-- 主题切换按钮 -->
+    <button id="theme-selector">切换主题</button>
+    <!-- 重置分数按钮 -->
+    <button id="reset-scores">重置分数</button>
+</div>
+
+<script>
+    let selectedChange = 1;
+    const changeButtons = document.querySelectorAll('.button');
+    const themeSelector = document.getElementById('theme-selector');
+    const resetScores = document.getElementById('reset-scores');
+    const scoreboard = document.querySelector('.scoreboard-container');
+
+    function changeScore(team, amount) {
+        const scoreElement = document.getElementById('score' + team);
+        scoreElement.textContent = parseInt(scoreElement.textContent, 10) + amount;
+    }
+
+    function selectChange(change) {
+        changeButtons.forEach(button => {
+            button.classList.remove('selected');
+        });
+        const button = document.querySelector(`.button[onclick="selectChange(${change})"]`);
+        if (button) button.classList.add('selected');
+        selectedChange = change;
+    }
+
+    themeSelector.addEventListener('click', function() {
+        document.body.classList.toggle('bright-theme');
+        document.body.classList.toggle('led-theme');
+    });
+
+    resetScores.addEventListener('click', function() {
+        document.getElementById('scoreA').textContent = 0;
+        document.getElementById('scoreB').textContent = 0;
+        selectChange(1); // Reset selected change to default +1
+    });
+
+    function editTeamName(element, team) {
+        let newName = prompt('请输入队伍名称', element.getAttribute('data-default'));
+        if (newName) {
+            element.textContent = newName;
+        }
+    }
+
+    // 鼠标点击事件处理分数改变
+    scoreboard.addEventListener('mousedown', function(e) {
+        if (e.button === 0) { // 鼠标左键
+            changeScore('A', selectedChange);
+        } else if (e.button === 2) { // 鼠标右键
+            changeScore('B', selectedChange);
+            e.preventDefault(); // Prevent context menu
+        }
+    });
+
+    // Prevent context menu from appearing on right-click elsewhere on the page
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+
+    // Initialize selected change to +1
+    selectChange(1);
+</script>
+
+</body>
+</html>
