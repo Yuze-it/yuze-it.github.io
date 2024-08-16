@@ -164,11 +164,35 @@
 </div>
 
 <script>
-    let selectedChange = 1;
-    const changeButtons = document.querySelectorAll('.button');
-    const themeSelector = document.getElementById('theme-selector');
-    const resetScores = document.getElementById('reset-scores');
-    const scoreboard = document.querySelector('.scoreboard-container');
+    // 保存分数到localStorage
+    function saveScore(team) {
+        const scoreElement = document.getElementById('score' + team);
+        localStorage.setItem('score' + team, scoreElement.textContent);
+    }
+    
+    // 加载分数
+    function loadScores() {
+        const scoreA = localStorage.getItem('scoreA');
+        const scoreB = localStorage.getItem('scoreB');
+        if (scoreA) document.getElementById('scoreA').textContent = scoreA;
+        if (scoreB) document.getElementById('scoreB').textContent = scoreB;
+    }
+    
+    // 修改changeScore函数以保存分数
+    function changeScore(team, amount) {
+        const scoreElement = document.getElementById('score' + team);
+        const currentScore = parseInt(scoreElement.textContent, 10);
+        scoreElement.textContent = currentScore + amount;
+        saveScore(team); // 保存分数
+    }
+    
+    // 页面加载时调用loadScores
+    document.addEventListener('DOMContentLoaded', loadScores);
+        let selectedChange = 1;
+        const changeButtons = document.querySelectorAll('.button');
+        const themeSelector = document.getElementById('theme-selector');
+        const resetScores = document.getElementById('reset-scores');
+        const scoreboard = document.querySelector('.scoreboard-container');
 
     function changeScore(team, amount) {
         const scoreElement = document.getElementById('score' + team);
