@@ -4,7 +4,46 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的AI网站</title>
-    <!-- 其他样式保持不变 -->
+    <style>
+      body {
+          font-family: Arial, sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+      }
+      #chat-container {
+          width: 400px;
+          border: 1px solid #ccc;
+          padding: 20px;
+          border-radius: 5px;
+      }
+      #input-message {
+          width: 100%;
+          padding: 10px;
+          margin-bottom: 10px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+      }
+      #send-button {
+          width: 100%;
+          padding: 10px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+      }
+      #chat-history {
+          height: 300px;
+          overflow-y: scroll;
+          border: 1px solid #ccc;
+          padding: 10px;
+          margin-bottom: 10px;
+          border-radius: 5px;
+      }
+  </style>
 <style data-id="immersive-translate-input-injected-css">.immersive-translate-input {
   position: absolute;
   top: 0;
