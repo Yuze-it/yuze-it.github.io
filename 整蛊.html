@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>整蛊</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-image: url('https://i.postimg.cc/NFDh1cDb/b-079f4f43d177b6218482b2b02c216620.jpg'); /* 设置背景图片 */
+            background-size: cover; /* 背景图片覆盖整个页面 */
+            background-position: center; /* 背景图片居中 */
+            background-repeat: no-repeat; /* 背景图片不重复 */
+            background-attachment: fixed; /* 背景图片固定 */
+        }
+        h1 {
+            color: white; /* 标题文字颜色，根据背景调整 */
+            text-shadow: 2px 2px 4px #000000; /* 添加文字阴影，提高可读性 */
+        }
+    </style>
+</head>
+<body>
+    <h1 style="font-size: 50px; text-align: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" >bl我要整蛊你</h1>
+
+    <script>
+        function shake() {
+            var shakeInterval = setInterval(function() {
+                var randomX = Math.floor(Math.random() * 21) - 10;
+                var randomY = Math.floor(Math.random() * 21) - 10;
+                document.body.style.transform = 'translate(' + randomX + 'px, ' + randomY + 'px)';
+            }, 50);
+
+            setTimeout(function() {
+                clearInterval(shakeInterval);
+                alert('哈哈哈，你被我整蛊了！');
+                document.body.style.transform = 'translate(0, 0)';
+            }, 3000); // 3秒后停止
+        }
+
+        function zoomText() {
+            var text = document.body;
+            var scale = Math.random() * 1; // 随机放大倍数
+            text.style.transform = 'scale(' + scale + ')';
+            var Interval = setTimeout(zoomText, 1000); // 每秒变化一次
+
+            setTimeout(function() {
+                clearTimeout(Interval);
+                text.style.transform = 'scale(1)';
+            }, 3000); // 持续3秒后停止
+        }
+
+        function changeText() {
+            document.body.innerHTML = document.body.innerHTML.replace(/[\u4e00-\u9fa5]/g, function(c) {
+                return String.fromCharCode(c.charCodeAt(0) ^ 0xA5); // 将中文字符转为乱码
+            });
+        }
+
+        function changeBgColor() {
+            setInterval(function() {
+                document.body.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+            }, 1000);
+        }
+
+        function changeTitle() {
+            document.title = '你的电脑已被我控制!';
+        }
+
+        function hideCursor() {
+            document.body.style.cursor = 'none'; // 隐藏鼠标
+            setTimeout(function() {
+                document.body.style.cursor = 'auto'; // 显示
+            }, 2000);
+        }
+
+        function preventContextMenu() {
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+        }
+
+        function reverseText() {
+            var node = document.body;
+            reverseText(node);
+
+            function reverseText(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    node.nodeValue = node.nodeValue.split('').reverse().join('');
+                } else {
+                    node = node.firstChild;
+                    while (node) {
+                        reverseText(node);
+                        node = node.nextSibling;
+                    }
+                }
+            }
+        }
+
+        function HiddenPage() {
+            var text = document.body;
+            text.style.display = 'none';
+            setTimeout(function() {
+                alert('哈哈哈，你被我整蛊了!');
+                text.style.display = 'block';
+            }, 3000); // 持续3秒后停止
+        }
+
+        // 每隔5秒执行一个函数
+        setInterval(function() {
+            shake();
+            setTimeout(zoomText, 5000);
+            setTimeout(changeText, 10000);
+            setTimeout(changeBgColor, 15000);
+            setTimeout(changeTitle, 20000);
+            setTimeout(hideCursor, 25000);
+            setTimeout(preventContextMenu, 30000);
+            setTimeout(reverseText, 35000);
+            setTimeout(HiddenPage, 40000);
+        }, 5000);
+    </script>
+</body>
+</html>
