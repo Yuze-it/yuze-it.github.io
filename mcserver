@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>自动连接</title>
+</head>
+<body>
+    <p>点击下面的链接尝试自动连接到指定地址：</p>
+    <a href="s2.wemc.cc:13868" target="_blank">连接到 s2.wemc.cc:13868</a>
+</body>
+</html>
