@@ -137,7 +137,87 @@
                     <img id="tanChiShe" src="./static/svg/snake-Light.svg" alt="">
                 </div>
             </header>
-
+<!-- 模态窗口开始 -->
+<div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <p>请输入密码：</p>
+      <input type="password" id="passwordInput">
+      <button onclick="checkPassword()">确认</button>
+    </div>
+  </div>
+  <!-- 模态窗口结束 -->
+  
+  <script>
+  // 点击“站长私有”时调用此函数显示模态窗口
+  function openModal() {
+      document.getElementById('myModal').style.display = "block";
+  }
+  
+  // 检查密码是否正确
+  function checkPassword() {
+      var password = document.getElementById('passwordInput').value;
+      if (password === "114514") {
+          window.location.href = "https://yuze-it.github.io/simi-pages/simi";
+      } else {
+          alert("密码错误！");
+      }
+  }
+  
+  // 点击关闭按钮时调用此函数
+  var close = document.getElementsByClassName("close")[0];
+  close.onclick = function() {
+      var modal = document.getElementById('myModal');
+      modal.style.display = "none";
+  }
+  
+  // 点击窗口以外的地方关闭模态窗口
+  window.onclick = function(event) {
+      var modal = document.getElementById('myModal');
+      if (event.target == modal) {
+          modal.style.display = "none";
+      }
+  }
+  </script>
+  
+  <style>
+  .modal {
+      display: none;
+      position: fixed;
+      z-index: 10;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+      align-items: center;
+      justify-content: center;
+  }
+  
+  .modal-content {
+      background-color: #fefefe;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 60%; /* 调整为屏幕宽度的4/3 */
+      max-width: 600px; /* 你可以根据需要调整最大宽度 */
+  }
+  
+  .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+  }
+  
+  .close:hover,
+  .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+  }
+  </style>
 
 
 
@@ -187,7 +267,7 @@
                             <img src="./static/img/i3.png" alt="">
                         </div>
 
-                    <</a><a class="projectItem a" target="_blank" href="https://yuze-it.github.io/blog">
+                    </a><a class="projectItem a" target="_blank" href="https://yuze-it.github.io/blog">
                         <div class="projectItemLeft">
                             <h1>blog</h1>
                             <p>记录日常</p>
@@ -195,7 +275,11 @@
                         <div class="projectItemRight">
                             <img src="./static/img/i6.png" alt="">
                         </div>
-
+                    <a class="projectItem a" onclick="openModal()">
+                        <div class="projectItemLeft">
+                            <h1>站长私有</h1>
+                        </div>
+                        </a>
                     </a>
                 </div>
 
