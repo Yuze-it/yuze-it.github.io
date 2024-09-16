@@ -13,17 +13,40 @@
     .login-panel {
       display: none;
       position: fixed;
-      top: 60px;
-      right: 20px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       width: 300px;
       padding: 20px;
       background: #fff;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       z-index: 1000;
+      border-radius: 5px;
+    }
+    .login-panel .form-group {
+      margin-bottom: 15px;
+    }
+    .login-panel .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .login-panel .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    .login-panel .btn:hover {
+      background-color: #0056b3;
     }
     .user-info {
       display: none;
-      position: absolute;
+      position: fixed;
       right: 20px;
       top: 20px;
       display: flex;
@@ -43,17 +66,6 @@
     .user-name:hover {
       text-decoration: underline;
     }
-    .login-button {
-      position: absolute;
-      right: 20px;
-      top: 20px;
-      padding: 10px 20px;
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
@@ -66,7 +78,8 @@
             <li><a href="https://yuze-it.github.io/simi-pages/index" class="active">站长专属页面</a></li>
             <li><a href="https://github.com/Yuze-it/yuze-it.github.io/tree/main" id="inggp">后台</a></li>
             <li><a href="https://htmlpage.cn/download"></a></li>
-            <li></li>
+            <!-- 登录按钮 -->
+            <li style="margin-left: auto;"><button class="login-button" id="loginButton">登录</button></li>
           </ul>
         </nav>
       </div>
@@ -98,9 +111,6 @@
     </div>
   </section>
 
-  <!-- 登录按钮 -->
-  <button class="login-button" id="loginButton">登录</button>
-
   <!-- 登录面板 -->
   <div class="login-panel" id="loginPanel">
     <h2>Login</h2>
@@ -113,7 +123,7 @@
         <label for="loginPassword">Password</label>
         <input type="password" class="form-control" id="loginPassword" placeholder="Password">
       </div>
-      <button type="submit" class="btn btn-primary">Login</button>
+      <button type="submit" class="btn">Login</button>
     </form>
   </div>
 
@@ -136,7 +146,7 @@
       var password = document.getElementById('loginPassword').value;
 
       // 简单的前端验证逻辑
-      if (email === '3569339239@qq.com' && password === 'niyuze417') {
+      if (email === 'nyz' && password === 'niyuze417') {
         // 登录成功，隐藏登录面板，显示用户信息
         var loginPanel = document.getElementById('loginPanel');
         var userInfo = document.getElementById('userInfo');
