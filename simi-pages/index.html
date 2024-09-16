@@ -3,34 +3,26 @@
 <head>
   <meta charset="utf-8">
   <link rel="stylesheet" href="./css/style.css">
-  <link href="https://cdn.bootcss.com/bootstrap/4.1.0/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.bootcss.com/bootstrap/4.1.0/css/bootstrap-grid.min.css" rel="stylesheet">
+  <link href="https://cdn.bootcss.com/bootstrap/4.1.0/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.bootcss.com/bootstrap/4.1.0/css/bootstrap-grid.min.css" rel="stylesheet"/>
   <style>
-    .login-section, .register-section {
-      padding: 40px 0;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-control {
-      display: block;
-      width: 100%;
-      padding: .375rem .75rem;
-      font-size: 1rem;
-      line-height: 1.5;
-      color: #495057;
-      background-color: #fff;
-      background-clip: padding-box;
-      border: 1px solid #ced4da;
-      border-radius: .25rem;
-      transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-    }
-    .btn-primary {
-      color: #fff;
-      background-color: #007bff;
-      border-color: #007bff;
+    /* 你原有的样式 */
+    /* ... */
+    
+    /* 新增的样式 */
+    .login-panel {
+      display: none;
+      position: fixed;
+      top: 60px;
+      right: 20px;
+      width: 300px;
+      padding: 20px;
+      background: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      z-index: 1000;
     }
     .user-info {
+      display: none;
       position: absolute;
       right: 20px;
       top: 20px;
@@ -51,6 +43,17 @@
     .user-name:hover {
       text-decoration: underline;
     }
+    .login-button {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -70,47 +73,16 @@
     </div>
   </header>
 
-  <section class="login-section">
+  <section data-block-type="contents" data-id="1" draggable="true" class="fdb-block">
     <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-12 col-lg-6">
-          <h2>Login</h2>
-          <form id="loginForm">
-            <div class="form-group">
-              <label for="loginEmail">Email address</label>
-              <input type="email" class="form-control" id="loginEmail" aria-describedby="emailHelp" placeholder="Enter email">
+      <div class="row">
+        <div class="col-12">
+          <div class="row justify-content-center pb-5">
+            <div class="col-12 col-lg-8 text-center">
+              <h1>YUZE-IT 站长专属页面</h1>
             </div>
-            <div class="form-group">
-              <label for="loginPassword">Password</label>
-              <input type="password" class="form-control" id="loginPassword" placeholder="Password">
-            </div>
-            <button type="submit" class="btn btn-primary">Login</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="register-section">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-12 col-lg-6">
-          <h2>Register</h2>
-          <form id="registerForm">
-            <div class="form-group">
-              <label for="registerEmail">Email address</label>
-              <input type="email" class="form-control" id="registerEmail" aria-describedby="emailHelp" placeholder="Enter email">
-            </div>
-            <div class="form-group">
-              <label for="registerPassword">Password</label>
-              <input type="password" class="form-control" id="registerPassword" placeholder="Password">
-            </div>
-            <div class="form-group">
-              <label for="registerConfirmPassword">Confirm Password</label>
-              <input type="password" class="form-control" id="registerConfirmPassword" placeholder="Confirm Password">
-            </div>
-            <button type="submit" class="btn btn-primary">Register</button>
-          </form>
+          </div>
+          <img alt="image" src="https://lcim.guozhufeng.com/storage/image/51/2024-09-08/66ddc254b1c29.gif" class="img-fluid"/>
         </div>
       </div>
     </div>
@@ -126,7 +98,37 @@
     </div>
   </section>
 
+  <!-- 登录按钮 -->
+  <button class="login-button" id="loginButton">登录</button>
+
+  <!-- 登录面板 -->
+  <div class="login-panel" id="loginPanel">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="loginEmail">Email address</label>
+        <input type="email" class="form-control" id="loginEmail" aria-describedby="emailHelp" placeholder="Enter email">
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <input type="password" class="form-control" id="loginPassword" placeholder="Password">
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+  </div>
+
+  <!-- 用户信息 -->
+  <div class="user-info" id="userInfo">
+    <img src="path/to/your/avatar.jpg" alt="User Avatar" class="user-avatar">
+    <a href="https://yuze-it.github.io/simi-pages/index" class="user-name">nyz</a>
+  </div>
+
   <script>
+    document.getElementById('loginButton').addEventListener('click', function() {
+      var loginPanel = document.getElementById('loginPanel');
+      loginPanel.style.display = 'block';
+    });
+
     document.getElementById('loginForm').addEventListener('submit', function(event) {
       event.preventDefault(); // 阻止表单默认提交行为
 
@@ -134,23 +136,16 @@
       var password = document.getElementById('loginPassword').value;
 
       // 简单的前端验证逻辑
-      if (email === 'nyz' && password === 'niyuze417') {
-        // 登录成功，显示用户名和头像
-        showUserInterface();
+      if (email === '3569339239@qq.com' && password === 'niyuze417') {
+        // 登录成功，隐藏登录面板，显示用户信息
+        var loginPanel = document.getElementById('loginPanel');
+        var userInfo = document.getElementById('userInfo');
+        loginPanel.style.display = 'none';
+        userInfo.style.display = 'flex';
       } else {
         alert('用户名或密码错误');
       }
     });
-
-    function showUserInterface() {
-      var userInterface = `
-        <div class="user-info">
-          <img src="https://codingtang.oss-cn-hangzhou.aliyuncs.com/avatar_1719796078.jpg" alt="User Avatar" class="user-avatar">
-          <a href="https://yuze-it.github.io/simi-pages/index" class="user-name">nyz</a>
-        </div>
-      `;
-      document.querySelector('.header-inner').innerHTML += userInterface;
-    }
   </script>
 </body>
 </html>
