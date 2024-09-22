@@ -178,6 +178,15 @@
           modal.style.display = "none";
       }
   }
+  function toggleSidebar() {
+    var sidebar = document.getElementById('sidebar');
+    if (sidebar.style.right === '0px') {
+        sidebar.style.right = '-250px';
+    } else {
+        sidebar.style.right = '0px';
+    }
+}
+
   </script>
   
   <style>
@@ -217,6 +226,48 @@
       text-decoration: none;
       cursor: pointer;
   }
+  .sidebar-toggle {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    background: #fff;
+    border-radius: 10px 0 0 10px;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.sidebar-toggle:hover {
+    background: #f0f0f0;
+}
+
+.sidebar-icon {
+    width: 100%;
+    height: 100%;
+    background: url('./static/svg/ai-icon.svg') center center no-repeat;
+    background-size: 70%;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -250px;
+    width: 250px;
+    height: 100%;
+    background: #fff;
+    transition: right 0.3s;
+    overflow: hidden;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+}
+
+.sidebar iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
   </style>
 
 
@@ -306,6 +357,14 @@
         </div>
 
     </div>
+    <div class="sidebar-toggle" onclick="toggleSidebar()">
+        <div class="sidebar-icon"></div>
+    </div>
+    <div class="sidebar" id="sidebar">
+        <h5>YUZE_AI</h5>
+        <iframe src="https://yuze-it.github.io/ai" frameborder="0" style="width:100%; height:100%;"></iframe>
+    </div>
+    
 </body>
 <script src="./static/js/script.js"></script>
 </html>
