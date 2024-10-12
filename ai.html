@@ -1,6 +1,4 @@
-
 <!DOCTYPE html>
-<!-- saved from url=(0116)https://tailchat-nightly.moonrailgun.com/static/files/64bd47b93133c489f3033bb8/8df0b48620f52038ff41f13645bd7ff9.html -->
 <html lang="zh"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -518,7 +516,7 @@ body.dark-mode {
                     body: JSON.stringify({
                         model: "moonshot-v1-8k", // 指定模型
                         messages: [
-                            {"role": "system", "content": "你是 Kimi，由 Moonshot AI 提供的人工智能助手。"},
+                            {"role": "system", "content": "你是 Kimi，由 Moonshot AI 提供的人工智能助手。你回答问题时如果使用markdown，请以html形式呈现。如：#你好，就变成<h1>你好</h1>。"},
                             {"role": "user", "content": message}
                       ],
                       temperature: 0.3
