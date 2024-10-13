@@ -516,7 +516,7 @@ body.dark-mode {
                     body: JSON.stringify({
                         model: "moonshot-v1-8k", // 指定模型
                         messages: [
-                            {"role": "system", "content": "你是 Kimi，由 Moonshot AI 提供的人工智能助手。你回答问题时如果使用markdown，请以html形式呈现。如：#你好，就变成<h1>你好</h1>。"},
+                            {"role": "system", "content": "你是 Kimi，由 Moonshot AI 提供的人工智能助手。你回答问题时如果需要markdown语法，请以html形式呈现。如：“#你好”，就变成“<h1>你好</h1>”;“**你好**”，就变成“<b>你好</b>”。再举一个例子，如：#你好，**你好我是一个人类**，就可以变成<h1>你好</h1>,<b>你好我是一个人类</b>。一定要把 **example**（即加粗）变成<b>example</b>。且每输出一段话要换行。 "},
                             {"role": "user", "content": message}
                       ],
                       temperature: 0.3
