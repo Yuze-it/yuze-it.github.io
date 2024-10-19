@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小人遇见ZHZ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 50px;
+        }
+        #character {
+            font-size: 50px;
+            transition: all 1s;
+        }
+        #buttons {
+            display: none;
+            margin-top: 20px;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        #road {
+            display: inline-block;
+            width: 100%;
+            height: 200px;
+            background: #c0c0c0;
+            position: relative;
+            overflow: hidden;
+        }
+        .moving {
+            position: absolute;
+            animation: move 5s linear infinite;
+        }
+        @keyframes move {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>小人走在路上...</h1>
+    <div id="road">
+        <span id="character" class="moving">👤</span>
+    </div>
+
+    <p id="zhz-message" style="display:none;">ZHZ问：“你要来我的AI网站吗？”</p>
+
+    <div id="buttons">
+        <button class="button" id="enterButton">进入</button>
+        <button class="button" id="noEnterButton">不进入</button>
+    </div>
+
+    <script>
+        // 在一定时间后隐藏小人并显示ZHZ的提问
+        setTimeout(() => {
+            document.getElementById('character').style.display = 'none';
+            document.getElementById('zhz-message').style.display = 'block';
+            document.getElementById('buttons').style.display = 'block';
+        }, 5000); // 5000毫秒后显示ZHZ的提问
+
+        // 点击进入按钮的事件
+        document.getElementById('enterButton').onclick = function() {
+            window.location.href = "https://zhzabcd-ai-studio.hf.space/";
+        };
+
+        // 点击不进入按钮的事件
+        document.getElementById('noEnterButton').onclick = function() {
+            // 什么都不发生
+        };
+    </script>
+</body>
+</html>

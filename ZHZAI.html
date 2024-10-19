@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小人与ZHZ的故事</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        #character {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        #buttons {
+            display: none; /* 初始隐藏按钮 */
+        }
+
+        button {
+            font-size: 20px;
+            margin: 10px;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="character">🚶‍♂️</div>
+<div id="dialogue">小人走着走着遇到了ZHZ。</div>
+
+<script>
+    setTimeout(() => {
+        document.getElementById('dialogue').innerText = 'ZHZ问小人：“你要来我的AI网站吗？”';
+        setTimeout(() => {
+            // 隐藏小人，展示按钮
+            document.getElementById('character').style.display = 'none';
+            document.getElementById('dialogue').innerText = '';
+            document.getElementById('buttons').style.display = 'block';
+        }, 2000);
+    }, 3000);
+</script>
+
+<div id="buttons">
+    <button onclick="location.href='https://zhzabcd-ai-studio.hf.space/'">进入</button>
+    <button onclick="document.getElementById('buttons').style.display='none'">不进入</button>
+</div>
+
+</body>
+</html>
