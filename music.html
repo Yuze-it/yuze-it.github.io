@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐播放_YUZE-IT</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #4e7d9f, #f1c40f);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .cd-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+
+        .cd {
+            width: 100%;
+            height: 100%;
+            border: 20px solid black;
+            border-radius: 50%;
+            background: url('gp.png') no-repeat center center;
+            background-size: cover;
+            animation: spin 5s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: white;
+            color: black;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #ccc;
+        }
+
+        .progress-container {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .progress {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: #4caf50;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="cd-container">
+        <div class="cd"></div>
+    </div>
+    <div class="info">
+        <h2>Komorebi- m-taku</h2>
+        <p>作曲 : 押尾コータロー</p>
+    </div>
+    <div class="controls">
+        <button onclick="playAudio()">播放</button>
+        <button onclick="pauseAudio()">暂停</button>
+        <button onclick="resetAudio()">重置</button>
+    </div>
+    <div class="progress-container">
+        <div class="progress">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+    </div>
+    <audio id="audio" src="Komorebi - m-taku.mp3" preload="auto"></audio>
+
+    <script>
+        const audio = document.getElementById('audio');
+        const progressBar = document.getElementById('progress-bar');
+
+        audio.addEventListener('timeupdate', updateProgress);
+
+        function playAudio() {
+            audio.play();
+        }
+
+        function pauseAudio() {
+            audio.pause();
+        }
+
+        function resetAudio() {
+            audio.currentTime = 0;
+            progressBar.style.width = '0%';
+            audio.pause();
+        }
+
+        function updateProgress() {
+            const percentage = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = percentage + '%';
+        }
+    </script>
+</body>
+</html>
