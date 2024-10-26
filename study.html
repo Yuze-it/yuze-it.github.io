@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自习页面</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            transition: background-color 0.5s;
+            color: #000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .timer {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-bg {
+            position: absolute;
+            top: 20px;
+            right: 10px;
+            background: black;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            z-index: 2;
+        }
+
+        .iframe-container {
+            position: fixed;
+            right: -400px; /* Initially hidden */
+            top: 0;
+            width: 40%; 
+            height: 100%;
+            background: white;
+            border-left: 1px solid black;
+            transition: right 0.5s;
+            z-index: 1;
+        }
+
+        .iframe-container.active {
+            right: 0; /* Slide into view */
+        }
+
+        .iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        #toggleIframe {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: black;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        #leftButton {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: black;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .left-iframe-container {
+            position: fixed;
+            left: -400px; /* Initially hidden */
+            top: 0;
+            width: 40%; 
+            height: 100%;
+            background: white;
+            border-right: 1px solid black;
+            transition: left 0.5s;
+            z-index: 1;
+        }
+
+        .left-iframe-container.active {
+            left: 0; /* Slide into view */
+        }
+
+        /* 新增的样式 */
+        .music-container {
+            position: fixed;
+            bottom: -60%; /* 初始状态隐藏 */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%; 
+            height: 60%; /* 占比 3/5 */
+            background: white;
+            border-top: 1px solid black;
+            transition: bottom 0.5s;
+            z-index: 1;
+        }
+
+        .music-container.active {
+            bottom: 0; /* 从下方滑出 */
+        }
+
+        #musicButton {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: black;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            margin: 10px;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="timer" id="timer">(*/ω＼*)你已经学习了 <span id="studyTime">00:00:00</span> 时间啦~</div>
+        <button class="toggle-bg" id="toggleBg">切换背景</button>
+    </div>
+    
+    <div class="iframe-container" id="iframeContainer">
+        <iframe class="iframe" src="https://yuze.zeabur.app"></iframe>
+    </div>
+
+    <div class="left-iframe-container" id="leftIframeContainer">
+        <iframe class="iframe" src="https://yuze.zeabur.app/ai"></iframe>
+    </div>
+
+    <div class="music-container" id="musicContainer">
+        <iframe class="iframe" src="https://yuze.zeabur.app/music"></iframe>
+    </div>
+
+    <button id="toggleIframe">👉</button>
+    <button id="leftButton">🖥️</button>
+    <button id="musicButton">🎵 yuze.zeabur.app/music</button>
+
+    <script>
+        let timer = 0;
+        let interval;
+        let isPaused = false;
+
+        function startTimer() {
+            interval = setInterval(() => {
+                if (!isPaused) {
+                    timer++;
+                    const hours = String(Math.floor(timer / 3600)).padStart(2, '0');
+                    const minutes = String(Math.floor((timer % 3600) / 60)).padStart(2, '0');
+                    const seconds = String(timer % 60).padStart(2, '0');
+                    document.getElementById('studyTime').textContent = `${hours}:${minutes}:${seconds}`;
+                }
+            }, 1000);
+        }
+
+        startTimer();
+
+        document.getElementById('toggleBg').onclick = function() {
+            document.body.style.backgroundColor = 
+                document.body.style.backgroundColor === 'black' ? 'white' : 'black';
+            document.body.style.color = 
+                document.body.style.color === 'black' ? 'white' : 'black';
+        };
+
+        document.getElementById('toggleIframe').onclick = function(event) {
+            const iframeContainer = document.getElementById('iframeContainer');
+            iframeContainer.classList.toggle('active');
+            event.stopPropagation();
+        };
+
+        document.getElementById('leftButton').onclick = function(event) {
+            const leftIframeContainer = document.getElementById('leftIframeContainer');
+            leftIframeContainer.classList.toggle('active');
+            event.stopPropagation();
+        };
+
+        document.getElementById('musicButton').onclick = function(event) {
+            const musicContainer = document.getElementById('musicContainer');
+            musicContainer.classList.toggle('active');
+            event.stopPropagation();
+        };
+
+        document.addEventListener('click', function() {
+            const iframeContainer = document.getElementById('iframeContainer');
+            const leftIframeContainer = document.getElementById('leftIframeContainer');
+            const musicContainer = document.getElementById('musicContainer');
+            if (iframeContainer.classList.contains('active')) {
+                iframeContainer.classList.remove('active');
+            }
+            if (leftIframeContainer.classList.contains('active')) {
+                leftIframeContainer.classList.remove('active');
+            }
+            if (musicContainer.classList.contains('active')) {
+                musicContainer.classList.remove('active');
+            }
+        });
+
+        // 处理页面切换
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') {
+                isPaused = true;
+                document.title = '回来好不好~(┬┬﹏┬┬)';
+            } else {
+                isPaused = false;
+                document.title = '你终于回来啦(^///^)';
+            }
+        });
+    </script>
+
+</body>
+</html>
