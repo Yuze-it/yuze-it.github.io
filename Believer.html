@@ -121,7 +121,7 @@
                         lyrics.push({ time, text: match[3] });
                     }
                 });
-                lyricsDiv.textContent = '歌词加载完毕';
+                lyricsDiv.textContent = '歌词加载完毕(此歌曲nyz暂未找到歌词文件...)';
             })
             .catch(error => {
                 console.error('无法加载歌词:', error);
