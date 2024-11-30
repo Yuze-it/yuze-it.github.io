@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机抽人网页</title>
+    <style>
+        body, html {
+            margin: 0;
+            height: 100%;
+            display: flex;
+            font-family: Arial, sans-serif;
+        }
+        nav {
+            width: 200px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        nav ul li {
+            margin: 10px 0;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        nav ul li.active {
+            color: #ffffff;
+            background-color: #007bff;
+        }
+        main {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .result-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .result-box {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li id="home-link" class="active">首页</li>
+            <li id="settings-link">设置</li>
+            <li id="about-link">关于</li>
+        </ul>
+    </nav>
+    <main>
+        <div id="home" class="section active">
+            <h1>随机抽人</h1>
+            <label for="min-value">最小值:</label>
+            <input type="number" id="min-value"><br><br>
+            <label for="max-value">最大值:</label>
+            <input type="number" id="max-value"><br><br>
+            <label for="num-picks">抽取人数:</label>
+            <input type="number" id="num-picks"><br><br>
+            <button onclick="pickRandom()">开始抽取</button>
+
+            <div id="result-container" class="result-container"></div>
+        </div>
+        <div id="settings" class="section">
+            <h1>设置</h1>
+            <div id="settings-content" style="display: none;">
+                <p>概率设置：</p>
+                <textarea id="probability-settings" placeholder="格式: 学号, 概率(0.0-1.0)"></textarea>
+            </div>
+        </div>
+        <div id="about" class="section">
+            <h1>关于</h1>
+            <p>YUZE-IT 出品</p>
+            <p>yuze.zeabur.app</p>
+        </div>
+    </main>
+
+    <script>
+        const homeLink = document.getElementById('home-link');
+        const settingsLink = document.getElementById('settings-link');
+        const aboutLink = document.getElementById('about-link');
+
+        const homeSection = document.getElementById('home');
+        const settingsSection = document.getElementById('settings');
+        const aboutSection = document.getElementById('about');
+        const settingsContent = document.getElementById('settings-content');
+
+        function switchSection(activeSection, activeLink) {
+            homeSection.classList.remove('active');
+            settingsSection.classList.remove('active');
+            aboutSection.classList.remove('active');
+
+            homeLink.classList.remove('active');
+            settingsLink.classList.remove('active');
+            aboutLink.classList.remove('active');
+
+            activeSection.classList.add('active');
+            activeLink.classList.add('active');
+        }
+
+        homeLink.addEventListener('click', () => switchSection(homeSection, homeLink));
+        settingsLink.addEventListener('click', () => {
+            const password = prompt("请输入密码:");
+            if (password === "114514") {
+                settingsContent.style.display = "block";
+            } else {
+                alert('密码错误');
+            }
+            switchSection(settingsSection, settingsLink);
+        });
+        aboutLink.addEventListener('click', () => switchSection(aboutSection, aboutLink));
+
+        function pickRandom() {
+            const min = parseInt(document.getElementById('min-value').value, 10);
+            const max = parseInt(document.getElementById('max-value').value, 10);
+            const numPicks = parseInt(document.getElementById('num-picks').value, 10);
+
+            if (isNaN(min) || isNaN(max) || isNaN(numPicks) || min > max || numPicks <= 0) {
+                document.getElementById('result-container').innerText = "请输入有效的值";
+                return;
+            }
+
+            const numbers = generateRandomNumbers(min, max, numPicks);
+
+            showAnimatedResults(numbers, numPicks);
+        }
+
+        function generateRandomNumbers(min, max, count) {
+            const numbers = new Set();
+            while (numbers.size < count) {
+                numbers.add(Math.floor(Math.random() * (max - min + 1)) + min);
+            }
+            return Array.from(numbers);
+        }
+
+        function showAnimatedResults(finalResults, numPicks) {
+            const resultContainer = document.getElementById('result-container');
+            resultContainer.innerHTML = ''; // 清空之前的结果
+
+            for (let i = 0; i < numPicks; i++) {
+                const resultBox = document.createElement('div');
+                resultBox.classList.add('result-box');
+                resultContainer.appendChild(resultBox);
+    
+                animateBox(resultBox, finalResults[i]);
+            }
+        }
+
+        function animateBox(resultBox, finalNumber) {
+            let iterations = 15; // 每个正方形0.2秒显示1次，总计3秒即15次
+
+            const interval = setInterval(() => {
+                if (iterations > 0) {
+                    resultBox.innerText = Math.floor(Math.random() * 100);
+                    iterations--;
+                } else {
+                    clearInterval(interval);
+                    resultBox.innerText = finalNumber;
+                }
+            }, 200);
+        }
+    </script>
+</body>
+</html>
