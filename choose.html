@@ -159,33 +159,51 @@
                 return;
             }
 
-            const numbers = generateRandomNumbers(min, max, numPicks);
+            const probabilityInput = document.getElementById('probability-settings').value;
+            const customProbabilities = parseProbabilitySettings(probabilityInput);
+
+            const numbers = generateRandomNumbers(min, max, numPicks, customProbabilities);
 
             showAnimatedResults(numbers, numPicks);
         }
 
         function generateRandomNumbers(min, max, count, customProbabilities) {
-            // Implement custom probability logic based on user input
             const numbers = new Set();
-            while (numbers.size < count) {
-                const randNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+            const mustInclude = [];
+            const canInclude = [];
 
-                // Apply custom probabilities if provided
-                if (customProbabilities && customProbabilities[randNumber]) {
-                    const probability = Math.random() * 100;
-                    if (probability < customProbabilities[randNumber]) {
-                        numbers.add(randNumber);
+            // 处理 100% 和 0% 的特殊概率
+            for (let num = min; num <= max; num++) {
+                if (customProbabilities && customProbabilities[num] !== undefined) {
+                    if (customProbabilities[num] === 100) {
+                        mustInclude.push(num);
+                    } else if (customProbabilities[num] > 0) {
+                        canInclude.push(num);
                     }
                 } else {
-                    numbers.add(randNumber); // Default behavior
+                    canInclude.push(num);
                 }
             }
+
+            // 将所有100%概率的数字加入结果集
+            for (const num of mustInclude) {
+                if (numbers.size < count) {
+                    numbers.add(num);
+                }
+            }
+
+            // 从可选列表中随机选择剩余的数字
+            while (numbers.size < count && canInclude.length > 0) {
+                const randIndex = Math.floor(Math.random() * canInclude.length);
+                numbers.add(canInclude[randIndex]);
+            }
+
             return Array.from(numbers);
         }
 
         function showAnimatedResults(finalResults, numPicks) {
             const resultContainer = document.getElementById('result-container');
-            resultContainer.innerHTML = ''; // 清空之前的结果
+            resultContainer.innerHTML = '';
 
             for (let i = 0; i < numPicks; i++) {
                 const resultBox = document.createElement('div');
@@ -197,7 +215,7 @@
         }
 
         function animateBox(resultBox, finalNumber) {
-            let iterations = 15; // 每个正方形0.2秒显示1次，总计3秒即15次
+            let iterations = 15;
 
             const interval = setInterval(() => {
                 if (iterations > 0) {
@@ -224,13 +242,6 @@
                 }
             });
             return customProbabilities;
-        }
-
-        // Make the function available after password verification
-        if (settingsContent.style.display === 'block') {
-            const probabilityInput = document.getElementById('probability-settings');
-            const customProbabilities = parseProbabilitySettings(probabilityInput.value);
-            // Implement custom random algorithm using customProbabilities
         }
     </script>
 </body>
