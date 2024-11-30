@@ -75,7 +75,7 @@
 </head>
 <body>
     <header>
-        <img src="logo.png" alt="Logo">
+        <img src="/home/img/66f025c10699e.png" alt="Logo">
         <h1>YUZE-IT</h1>
     </header>
     <div style="display: flex; flex-grow: 1;">
@@ -102,8 +102,8 @@
             <div id="settings" class="section">
                 <h1>设置</h1>
                 <div id="settings-content" style="display: none;">
-                    <p>概率设置：</p>
-                    <textarea id="probability-settings" placeholder="格式: 学号, 概率(0.0-1.0)"></textarea>
+                    <p>概率设置（百分比）:</p>
+                    <textarea id="probability-settings" placeholder="格式: 学号, 百分比(例如: 10, 20%)"></textarea>
                 </div>
             </div>
             <div id="about" class="section">
@@ -164,10 +164,21 @@
             showAnimatedResults(numbers, numPicks);
         }
 
-        function generateRandomNumbers(min, max, count) {
+        function generateRandomNumbers(min, max, count, customProbabilities) {
+            // Implement custom probability logic based on user input
             const numbers = new Set();
             while (numbers.size < count) {
-                numbers.add(Math.floor(Math.random() * (max - min + 1)) + min);
+                const randNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+
+                // Apply custom probabilities if provided
+                if (customProbabilities && customProbabilities[randNumber]) {
+                    const probability = Math.random() * 100;
+                    if (probability < customProbabilities[randNumber]) {
+                        numbers.add(randNumber);
+                    }
+                } else {
+                    numbers.add(randNumber); // Default behavior
+                }
             }
             return Array.from(numbers);
         }
@@ -197,6 +208,29 @@
                     resultBox.innerText = finalNumber;
                 }
             }, 200);
+        }
+
+        function parseProbabilitySettings(input) {
+            const lines = input.split('\n');
+            const customProbabilities = {};
+            lines.forEach(line => {
+                const parts = line.split(',');
+                if (parts.length === 2) {
+                    const studentNumber = parseInt(parts[0].trim(), 10);
+                    const probabilityPercentage = parseFloat(parts[1].trim());
+                    if (!isNaN(studentNumber) && !isNaN(probabilityPercentage) && probabilityPercentage >= 0 && probabilityPercentage <= 100) {
+                        customProbabilities[studentNumber] = probabilityPercentage;
+                    }
+                }
+            });
+            return customProbabilities;
+        }
+
+        // Make the function available after password verification
+        if (settingsContent.style.display === 'block') {
+            const probabilityInput = document.getElementById('probability-settings');
+            const customProbabilities = parseProbabilitySettings(probabilityInput.value);
+            // Implement custom random algorithm using customProbabilities
         }
     </script>
 </body>
