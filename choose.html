@@ -9,9 +9,23 @@
             margin: 0;
             height: 100%;
             display: flex;
+            flex-direction: column;
             font-family: Arial, sans-serif;
         }
+        header {
+            display: flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        header img {
+            height: 40px;
+            margin-right: 10px;
+        }
         nav {
+            display: flex;
+            flex-direction: column;
             width: 200px;
             background-color: #f8f9fa;
             padding: 20px;
@@ -60,39 +74,45 @@
     </style>
 </head>
 <body>
-    <nav>
-        <ul>
-            <li id="home-link" class="active">首页</li>
-            <li id="settings-link">设置</li>
-            <li id="about-link">关于</li>
-        </ul>
-    </nav>
-    <main>
-        <div id="home" class="section active">
-            <h1>随机抽人</h1>
-            <label for="min-value">最小值:</label>
-            <input type="number" id="min-value"><br><br>
-            <label for="max-value">最大值:</label>
-            <input type="number" id="max-value"><br><br>
-            <label for="num-picks">抽取人数:</label>
-            <input type="number" id="num-picks"><br><br>
-            <button onclick="pickRandom()">开始抽取</button>
+    <header>
+        <img src="logo.png" alt="Logo">
+        <h1>YUZE-IT</h1>
+    </header>
+    <div style="display: flex; flex-grow: 1;">
+        <nav>
+            <ul>
+                <li id="home-link" class="active">首页</li>
+                <li id="settings-link">设置</li>
+                <li id="about-link">关于</li>
+            </ul>
+        </nav>
+        <main>
+            <div id="home" class="section active">
+                <h1>随机抽人</h1>
+                <label for="min-value">最小值:</label>
+                <input type="number" id="min-value"><br><br>
+                <label for="max-value">最大值:</label>
+                <input type="number" id="max-value"><br><br>
+                <label for="num-picks">抽取人数:</label>
+                <input type="number" id="num-picks"><br><br>
+                <button onclick="pickRandom()">开始抽取</button>
 
-            <div id="result-container" class="result-container"></div>
-        </div>
-        <div id="settings" class="section">
-            <h1>设置</h1>
-            <div id="settings-content" style="display: none;">
-                <p>概率设置：</p>
-                <textarea id="probability-settings" placeholder="格式: 学号, 概率(0.0-1.0)"></textarea>
+                <div id="result-container" class="result-container"></div>
             </div>
-        </div>
-        <div id="about" class="section">
-            <h1>关于</h1>
-            <p>YUZE-IT 出品</p>
-            <p>yuze.zeabur.app</p>
-        </div>
-    </main>
+            <div id="settings" class="section">
+                <h1>设置</h1>
+                <div id="settings-content" style="display: none;">
+                    <p>概率设置：</p>
+                    <textarea id="probability-settings" placeholder="格式: 学号, 概率(0.0-1.0)"></textarea>
+                </div>
+            </div>
+            <div id="about" class="section">
+                <h1>关于</h1>
+                <p>YUZE-IT 出品</p>
+                <p>yuze.zeabur.app</p>
+            </div>
+        </main>
+    </div>
 
     <script>
         const homeLink = document.getElementById('home-link');
@@ -160,7 +180,7 @@
                 const resultBox = document.createElement('div');
                 resultBox.classList.add('result-box');
                 resultContainer.appendChild(resultBox);
-    
+
                 animateBox(resultBox, finalResults[i]);
             }
         }
