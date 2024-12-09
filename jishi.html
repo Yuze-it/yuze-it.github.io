@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倒计时</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+            color: white;
+            font-size: 10vw;
+            text-align: center;
+            overflow: hidden;
+        }
+        .controls {
+            position: fixed;
+            bottom: 60px;
+        }
+        #time {
+            font-size: 20vw;
+        }
+        #message {
+            display: none;
+            font-size: 5vw;
+        }
+        #animated-gif {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100px; /* 控制动图大小 */
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div id="time">02:00</div>
+    <div id="message">
+        <div>已经到时间了~~~</div>
+        <div>让我看看谁还没出教室~</div>
+    </div>
+    <img id="animated-gif" src="lp.gif" alt="Animation">
+
+    <div class="controls">
+        <button onclick="startTimer()">开始</button>
+        <button onclick="pauseTimer()">暂停</button>
+    </div>
+
+    <script>
+        let countdown;
+        let running = false;
+        let remainingTime = 120;  // 2 minutes in seconds
+        const gifElement = document.getElementById('animated-gif');
+        let gifEndPosition = window.innerWidth - 100; // 100 is the width of the gif
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay(seconds) {
+            const displayElement = document.getElementById('time');
+
+            if (seconds <= 30) {
+                displayElement.style.fontSize = '30vw';
+            }
+            displayElement.textContent = formatTime(seconds);
+            
+            if (seconds === 60) {
+                const message = new SpeechSynthesisUtterance("还有一分钟哦~~~快收拾书包吧~");
+                message.lang = 'zh-CN';
+                message.rate = 1.5;
+                speechSynthesis.speak(message);
+            }
+
+            if (seconds <= 3 && seconds > 0) {
+                const sound = new Audio('https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3'); // You can change to an actual "噔" sound.
+                sound.play();
+            }
+
+            const progress = (120 - seconds) / 120; // progress from 0 to 1
+            gifElement.style.left = (gifEndPosition * progress) + 'px';
+        }
+
+        function startTimer() {
+            if (running) return;
+            running = true;
+            countdown = setInterval(() => {
+                if (remainingTime <= 0) {
+                    clearInterval(countdown);
+                    document.getElementById('time').style.display = 'none';
+                    document.getElementById('message').style.display = 'block';
+                    gifElement.src = 'lpe.gif';  // Change to the new image
+                    return;
+                }
+                remainingTime--;
+                updateDisplay(remainingTime);
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            running = false;
+            clearInterval(countdown);
+        }
+
+        window.addEventListener("resize", () => {
+            gifEndPosition = window.innerWidth - 100; // Update position when resizing
+        });
+
+        updateDisplay(remainingTime);
+    </script>
+</body>
+</html>
