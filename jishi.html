@@ -41,7 +41,7 @@
 <body>
     <div id="time">02:00</div>
     <div id="message">
-        <div>已经到时间了~~~</div>
+        <div>已经到时间了~~~~~~~</div>
         <div>让我看看谁还没出教室~</div>
     </div>
     <img id="animated-gif" src="lp.gif" alt="Animation">
@@ -73,10 +73,15 @@
             displayElement.textContent = formatTime(seconds);
             
             if (seconds === 60) {
+                gifElement.src = 'nl.gif';  // Change to a different gif
                 const message = new SpeechSynthesisUtterance("还有一分钟哦~~~快收拾书包吧~");
                 message.lang = 'zh-CN';
                 message.rate = 1.5;
                 speechSynthesis.speak(message);
+
+                setTimeout(() => {
+                    gifElement.src = 'lp.gif'; // Revert after 5 seconds
+                }, 5000);
             }
 
             if (seconds <= 3 && seconds > 0) {
@@ -91,6 +96,11 @@
         function startTimer() {
             if (running) return;
             running = true;
+
+            const message = new SpeechSynthesisUtterance("计时开始啦啦啦啦啦啦啦");
+            message.lang = 'zh-CN';
+            speechSynthesis.speak(message);
+
             countdown = setInterval(() => {
                 if (remainingTime <= 0) {
                     clearInterval(countdown);
