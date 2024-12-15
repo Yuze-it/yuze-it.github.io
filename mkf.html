@@ -64,18 +64,28 @@
             }
 
             if (isPlaying) {
-                // 如果正在播放，则暂停
                 source.disconnect(audioContext.destination);
                 isPlaying = false;
                 this.textContent = '继续录音并回放';
             } else {
-                // 如果暂停或尚未开始，则启动/恢复
                 if (!source) {
                     source = audioContext.createMediaStreamSource(stream);
                 }
                 source.connect(audioContext.destination);
                 isPlaying = true;
                 this.textContent = '暂停录音和回放';
+            }
+        });
+
+        // 禁用右键菜单
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        });
+
+        // 禁用F12键
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                e.preventDefault();
             }
         });
     </script>
