@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>麦克风音频回放</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        #container {
+            text-align: center;
+        }
+        #start {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #start:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h2>YUZE-IT</h2>
+        <h1>麦克风音频回放</h1>
+        <button id="start">开始录音并回放</button>
+    </div>
+
+    <script>
+        let audioContext;
+        let source;
+        let stream;
+        let isPlaying = false;
+
+        document.getElementById('start').addEventListener('click', async function () {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert('您的浏览器不支持录音功能。');
+                return;
+            }
+
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (!stream) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                } catch (err) {
+                    console.error('麦克风访问被拒绝:', err);
+                    return;
+                }
+            }
+
+            if (isPlaying) {
+                // 如果正在播放，则暂停
+                source.disconnect(audioContext.destination);
+                isPlaying = false;
+                this.textContent = '继续录音并回放';
+            } else {
+                // 如果暂停或尚未开始，则启动/恢复
+                if (!source) {
+                    source = audioContext.createMediaStreamSource(stream);
+                }
+                source.connect(audioContext.destination);
+                isPlaying = true;
+                this.textContent = '暂停录音和回放';
+            }
+        });
+    </script>
+</body>
+</html>
