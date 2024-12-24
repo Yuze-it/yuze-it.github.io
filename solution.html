@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>验证页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        #message {
+            color: red;
+            font-weight: bold;
+        }
+
+        #fileDirectory {
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        input, button {
+            padding: 8px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>验证页面</h1>
+
+    <!-- 第一步：输入第一个密码 -->
+    <div id="step1">
+        <p>请输入第一个密码：</p>
+        <input type="password" id="password1" placeholder="请输入第一个密码">
+        <button onclick="checkPassword1()">提交</button>
+        <p id="message1"></p>
+    </div>
+
+    <!-- 第二步：输入第二个密码 -->
+    <div id="step2" class="hidden">
+        <p>请输入第二个密码：</p>
+        <input type="password" id="password2" placeholder="请输入第二个密码">
+        <button onclick="checkPassword2()">提交</button>
+        <p id="message2"></p>
+    </div>
+
+    <!-- 文件目录部分 -->
+    <div id="fileDirectory" class="hidden">
+        <h2>文件目录</h2>
+        <p>
+            已解锁目录：<a href="/pics/cdt-2934-黑白矩阵" target="_blank">cdt-2934-黑白矩阵</a>
+        </p>
+        <h3>快速打开题目图片</h3>
+        <p>请输入题号和题目名称（用空格隔开）：</p>
+        <input type="text" id="inputTitle" placeholder="例如：2934 黑白矩阵">
+        <button onclick="openImage()">一键打开</button>
+        <p id="message3"></p>
+    </div>
+
+    <script>
+        // 第一个密码验证
+        function checkPassword1() {
+            const correctPassword1 = "niyuze417";
+            const userInput1 = document.getElementById("password1").value;
+
+            if (userInput1 === correctPassword1) {
+                document.getElementById("step1").classList.add("hidden");
+                document.getElementById("step2").classList.remove("hidden");
+                document.getElementById("message1").textContent = "";
+            } else {
+                document.getElementById("message1").textContent = "第一个密码错误，请重试！";
+            }
+        }
+
+        // 第二个密码验证
+        function checkPassword2() {
+            const correctPassword2 = "nb114514";
+            const userInput2 = document.getElementById("password2").value;
+
+            if (userInput2 === correctPassword2) {
+                document.getElementById("step2").classList.add("hidden");
+                document.getElementById("fileDirectory").classList.remove("hidden");
+                document.getElementById("message2").textContent = "";
+            } else {
+                document.getElementById("message2").textContent = "第二个密码错误，请重试！";
+            }
+        }
+
+        // 一键打开题目图片
+        function openImage() {
+            const userInput = document.getElementById("inputTitle").value.trim();
+            const message3 = document.getElementById("message3");
+
+            if (userInput === "") {
+                message3.textContent = "请输入题号和题目名称！";
+                message3.style.color = "red";
+                return;
+            }
+
+            // 按空格拆分输入内容
+            const parts = userInput.split(" ");
+            if (parts.length !== 2) {
+                message3.textContent = "输入格式错误，请输入题号和题目名称（用空格隔开）！";
+                message3.style.color = "red";
+                return;
+            }
+
+            const [id, name] = parts;
+            const url = `/pics/cdt-${id}-${name}`;
+            message3.textContent = `正在打开图片：${url}`;
+            message3.style.color = "green";
+
+            // 模拟跳转到图片链接
+            window.open(url, "_blank");
+        }
+    </script>
+</body>
+</html>
