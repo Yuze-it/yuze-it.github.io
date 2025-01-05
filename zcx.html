@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水母网页</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+            background-color: #1a1a1a;
+            overflow: hidden;
+            position: relative;
+            height: 100vh; /* 设置页面高度 */
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #333;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        nav img {
+            height: 50px;
+        }
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            margin: 0 15px;
+            transition: color 0.3s;
+            font-size: 16px;
+        }
+        nav a:hover {
+            color: #00bfff;
+        }
+        .jellyfish {
+            position: absolute;
+            width: 200px; /* 放大水母 */
+            animation: swim 5s ease-in-out infinite;
+            opacity: 0.8; /* 适当透明度 */
+        }
+        @keyframes swim {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-50px); }
+            100% { transform: translateY(0); }
+        }
+        .iframe-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 120px); /* 余留空间给导航栏和页脚 */
+        }
+        iframe {
+            width: 80%;
+            height: 80%;
+            border: none; /* 去掉边框 */
+            border-radius: 10px; /* 圆角 */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        footer {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            text-align: center;
+            color: #cccccc; /* 浅色字体 */
+            opacity: 0.8; /* 适当透明度 */
+        }
+        footer p {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <img src="shuimulogo.png" alt="Logo">
+        <div>
+            <a href="https://yuze.zeabur.app/zcx">首页</a>
+            <!-- 移除了未完待续的链接 -->
+        </div>
+    </nav>
+
+    <!-- 水母动画 -->
+    <img src="水母.gif" alt="水母" class="jellyfish" style="left: 10%; animation-delay: 0s;">
+    <img src="水母2.gif" alt="水母" class="jellyfish" style="left: 60%; animation-delay: 1s;">
+
+    <!-- 页面中间的iframe -->
+    <div class="iframe-container">
+        <iframe src="https://yuze.zeabur.app/time" title="Time Content"></iframe>
+    </div>
+
+    <!-- 公司信息 -->
+    <footer>
+        <p>©YUZE-IT</p>
+        <p>2025年</p>
+    </footer>
+
+    <script>
+        // 移除了弹窗相关代码
+    </script>
+</body>
+</html>
