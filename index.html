@@ -177,7 +177,7 @@
   function checkPassword() {
       var password = document.getElementById('passwordInput').value;
       if (password === "114514") {
-          window.location.href = "https://yuze-it.github.io/simi-pages/index";
+          window.location.href = "https://yuze.zeabur.app/simi-pages/index";
       } else {
           alert("密码错误！");
       }
@@ -373,14 +373,32 @@
                         </div>
                         <div class="projectItemRight">
                         </div>
-                     </a><a class="projectItem a" target="_blank" href="https://web.lcim.site">
-                        <div class="projectItemLeft">
-                            <h1>lcim from Guo Zhufeng</h1>
-                            <p>lcim</p>
-                        </div>
-                        <div class="projectItemRight">
-                            <img src="https://web.lcim.site/storage/avatar/1/66972f334b094.jpg" alt="">'
-                        </div>    
+                        <a class="projectItem a" onclick="checkLcimPassword()">
+                            <div class="projectItemLeft">
+                                <h1>lcim from Guo Zhufeng</h1>
+                                <p>lcim</p>
+                            </div>
+                            <div class="projectItemRight">
+                                <img src="https://web.lcim.site/storage/avatar/1/66972f334b094.jpg" alt="">
+                            </div>
+                        </a>
+                        
+                        <script>
+                            function checkLcimPassword() {
+                                // 混淆密码数据
+                                const hiddenKey = "bmIxMTQ1MTQ="; // 将密码 "nb114514" 转为 Base64 编码
+                                const decodedPassword = atob(hiddenKey); // Base64 解码
+                                
+                                const userInput = prompt("访问此页面需要密码，请输入：");
+                        
+                                if (userInput === decodedPassword) {
+                                    window.location.href = "https://web.lcim.site";
+                                } else {
+                                    alert("密码错误！");
+                                }
+                            }
+                        </script>
+                        
                     </a><a class="projectItem a" target="_blank" href="https://yuze.zeabur.app/cat">
                         <div class="projectItemLeft">
                             <h1>可爱小猫咪</h1>
