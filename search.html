@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YUZE-IT</title>
-    <link rel="icon" type="image/png" href="search-logo.png">
     <style>
         * {
             margin: 0;
@@ -158,6 +157,7 @@
 
         .link-container a:hover {
             color: #166fe5;
+            text-decoration: underline;
         }
 
         .fullscreen {
@@ -214,7 +214,7 @@
                 
                 const link = document.createElement('a');
                 link.href = getSearchUrl(engine.value, query);
-                link.target = '_blank';
+                link.target = '_blank'; // 在新窗口打开链接
                 link.textContent = '点击查看搜索结果';
                 
                 linkContainer.appendChild(link);
@@ -244,13 +244,13 @@
         function getSearchUrl(engine, query) {
             switch (engine) {
                 case 'bing': 
-                    return `https://www.bing.com/search?q=${encodeU,encoded query}`;
+                    return `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
                 case 'baidu': 
-                    return `https://www.baidu.com/s?wd=${encodeU，encoded query}`;
+                    return `https://www.baidu.com/s?wd=${encodeURIComponent(query)}`;
                 case 'yandex': 
-                    return `https://yandex.com/search?text=${encoded query}`;
+                    return `https://yandex.com/search?text=${encodeURIComponent(query)}`;
                 case 'google': 
-                    return `https://search.linkedbus.com/search?q=${encoded query}`;
+                    return `https://search.linkedbus.com/search?q=${encodeURIComponent(query)}`;
                 default: 
                     return '';
             }
