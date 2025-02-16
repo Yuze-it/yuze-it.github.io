@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUZE-IT</title>
+    <link rel="icon" type="image/png" href="search-logo.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #1877f2;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin: 2rem 0;
+            letter-spacing: -2px;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+
+        #searchInput {
+            width: 500px;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        #searchButton {
+            padding: 0 30px;
+            border: none;
+            border-radius: 30px;
+            background: #1877f2;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #searchButton:hover {
+            background: #166fe5;
+            transform: translateY(-2px);
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 1rem 0;
+            justify-content: center;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .results {
+            display: grid;
+            gap: 20px;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .search-engine {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .iframe-container,
+        .link-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .iframe-container {
+            width: 100%;
+            height: 300px;
+        }
+
+        .link-container {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .fullscreen-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background: #1877f2;
+            color: white;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .fullscreen-button:hover {
+            transform: scale(1.1);
+        }
+
+        .iframe-container iframe,
+        .link-container a {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #1877f2;
+            text-decoration: none;
+        }
+
+        .link-container a:hover {
+            color: #166fe5;
+        }
+
+        .fullscreen {
+            width: 100vw !important;
+            height: 100vh !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: 1000 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">YUZE-IT</div>
+        
+        <div class="options">
+            <label class="option-label">
+                <input type="checkbox" name="search Engines" value="bing" checked="checked"> Bing
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="search Engines" value="baidu"> 百度
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="search Engines" value="yandex"> Yandex
+            </label>
+            <label class="option-label">
+                <input type="checkbox" name="search Engines" value="google"> Google
+            </label>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="输入搜索内容...">
+            <button id="searchButton">搜索</button>
+        </div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const results = document.getElementById('results');
+        const options = document.querySelectorAll('input[name="search Engines"]');
+        
+        function createSearchEngine(engine, query) {
+            const div = document.createElement('div');
+            div.className = 'search-engine';
+            
+            if (engine.value === 'baidu' || engine.value === 'yandex') {
+                // 创建链接容器
+                const linkContainer = document.createElement('div');
+                linkContainer.className = 'link-container';
+                
+                const link = document.createElement('a');
+                link.href = getSearchUrl(engine.value, query);
+                link.target = '_blank';
+                link.textContent = '点击查看搜索结果';
+                
+                linkContainer.appendChild(link);
+                div.appendChild(linkContainer);
+            } else {
+                // 创建iframe容器
+                const iframeContainer = document.createElement('div');
+                iframeContainer.className = 'iframe-container';
+                
+                const button = document.createElement('button');
+                button.className = 'fullscreen-button';
+                button.textContent = 'Fullscreen';
+                button.onclick = () => toggleFullscreen(iframeContainer);
+
+                const iframe = document.createElement('iframe');
+                iframe.className = 'search-iframe';
+                iframe.src = getSearchUrl(engine.value, query);
+                
+                iframeContainer.appendChild(button);
+                iframeContainer.appendChild(iframe);
+                div.appendChild(iframeContainer);
+            }
+            
+            return div;
+        }
+
+        function getSearchUrl(engine, query) {
+            switch (engine) {
+                case 'bing': 
+                    return `https://www.bing.com/search?q=${encodeU,encoded query}`;
+                case 'baidu': 
+                    return `https://www.baidu.com/s?wd=${encodeU，encoded query}`;
+                case 'yandex': 
+                    return `https://yandex.com/search?text=${encoded query}`;
+                case 'google': 
+                    return `https://search.linkedbus.com/search?q=${encoded query}`;
+                default: 
+                    return '';
+            }
+        }
+
+        function toggleFullscreen(element) {
+            element.classList.toggle('fullscreen');
+        }
+
+        function performSearch() {
+            const query = searchInput.value.trim();
+            const selectedEngines = Array.from(options)
+                .filter(option => option.checked)
+                .map(option => ({ value: option.value }));
+
+            if (!query || selectedEngines.length === 0) return;
+
+            results.innerHTML = '';
+            selectedEngines.forEach(engine => {
+                const searchEngineDiv = createSearchEngine(engine, query);
+                results.appendChild(searchEngineDiv);
+            });
+
+            results.style.display = 'grid';
+            const columnCount = Math.min(selectedEngines.length, 2);
+            results.style.gridTemplateColumns = `repeat(${columnCount}, 1fr)`;
+        }
+
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>
