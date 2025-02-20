@@ -12,11 +12,12 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: black;
+            background-color: black; /* 默认黑暗主题 */
             color: white;
             font-size: 10vw;
             text-align: center;
             overflow: hidden;
+            transition: background-color 0.5s, color 0.5s; /* 过渡效果 */
         }
         .controls {
             position: fixed;
@@ -33,8 +34,56 @@
             position: fixed;
             bottom: 0;
             left: 0;
-            width: 100px; /* 控制动图大小 */
+            width: 100px;
             height: 100px;
+        }
+        #settings-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            width: 80%; /* 约占屏幕宽度的80% */
+            max-height: 33%; /* 最大高度为3分之一 */
+            overflow: auto; /* 超出部分可滚动 */
+            font-size: 16px; /* 设置适中的字体大小 */
+            text-align: left; /* 设置文本左对齐 */
+        }
+        #settings-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        /* 调整设置模态框内部标签的字体大小 */
+        #settings-modal label, #settings-modal h3 {
+            font-size: 18px; /* 设置标签和标题的字体大小 */
+        }
+        #settings-modal input, #settings-modal select {
+            font-size: 16px; /* 输入框和选择框的字体大小 */
+        }
+        /* 静音提示消息样式 */
+        #mute-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            display: none;
+            z-index: 1001;
         }
     </style>
 </head>
@@ -45,18 +94,44 @@
         <div>让我看看谁还没出教室~</div>
     </div>
     <img id="animated-gif" src="lp.gif" alt="Animation">
-
     <div class="controls">
         <button onclick="startTimer()">开始</button>
         <button onclick="pauseTimer()">暂停</button>
+        <button onclick="toggleMute()">静音</button>
+        <button onclick="toggleFullScreen()">全屏</button>
+        <button onclick="showSettings()">设置</button>
+    </div>
+
+    <!-- 静音提示消息 -->
+    <div id="mute-message"></div>
+
+    <div id="settings-overlay" onclick="hideSettings()"></div>
+    <div id="settings-modal">
+        <h3>设置</h3>
+        <label>倒计时时间（秒）: 
+            <input type="number" id="countdownTime" value="120">
+        </label><br><br>
+        <label>朗读文字: 
+            <input type="text" id="speechText" value="计时开始啦啦啦啦啦啦啦。曾子墨说，不收拾书包不给放学，不收拾书包不给放学。">
+        </label><br><br>
+        <label>主题: 
+            <select id="themeSelect" onchange="changeTheme()">
+                <option value="dark">黑暗</option>
+                <option value="light">明亮</option>
+            </select>
+        </label><br><br>
+        <button onclick="applySettings()">应用</button>
+        <button onclick="hideSettings()">关闭</button>
     </div>
 
     <script>
         let countdown;
         let running = false;
-        let remainingTime = 120;  // 2 minutes in seconds
+        let remainingTime = 120;  // 默认2分钟
+        let isMuted = false; // 静音开关
         const gifElement = document.getElementById('animated-gif');
-        let gifEndPosition = window.innerWidth - 100; // 100 is the width of the gif
+        let gifEndPosition = window.innerWidth - 100; // 动图结束位置
+        let defaultSpeechText = "计时开始啦啦啦啦啦啦啦。曾子墨说，不收拾书包不给放学，不收拾书包不给放学。";
 
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
@@ -73,23 +148,27 @@
             displayElement.textContent = formatTime(seconds);
             
             if (seconds === 60) {
-                gifElement.src = 'nl.gif';  // Change to a different gif
-                const message = new SpeechSynthesisUtterance("还有一分钟哦~~~快收拾书包吧~");
-                message.lang = 'zh-CN';
-                message.rate = 1.5;
-                speechSynthesis.speak(message);
+                gifElement.src = 'nl.gif';  
+                if (!isMuted) {
+                    const message = new SpeechSynthesisUtterance("还有一分钟哦~~~快收拾书包吧~");
+                    message.lang = 'zh-CN';
+                    message.rate = 1.5;
+                    speechSynthesis.speak(message);
+                }
 
                 setTimeout(() => {
-                    gifElement.src = 'lp.gif'; // Revert after 5 seconds
+                    gifElement.src = 'lp.gif'; // 返回默认动图
                 }, 5000);
             }
 
             if (seconds <= 3 && seconds > 0) {
-                const sound = new Audio('https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3'); // You can change to an actual "噔" sound.
-                sound.play();
+                if (!isMuted) {
+                    const sound = new Audio('https://interactive-examples.mdn.mozilla.net/media/examples/t-rex-roar.mp3');
+                    sound.play();
+                }
             }
 
-            const progress = (120 - seconds) / 120; // progress from 0 to 1
+            const progress = (120 - seconds) / 120; 
             gifElement.style.left = (gifEndPosition * progress) + 'px';
         }
 
@@ -97,16 +176,24 @@
             if (running) return;
             running = true;
 
-            const message = new SpeechSynthesisUtterance("计时开始啦啦啦啦啦啦啦");
+            const speechText = document.getElementById('speechText').value || defaultSpeechText;
+            const message = new SpeechSynthesisUtterance(speechText);
             message.lang = 'zh-CN';
-            speechSynthesis.speak(message);
+            if (!isMuted) {
+                speechSynthesis.speak(message);
+            }
 
             countdown = setInterval(() => {
                 if (remainingTime <= 0) {
                     clearInterval(countdown);
                     document.getElementById('time').style.display = 'none';
                     document.getElementById('message').style.display = 'block';
-                    gifElement.src = 'lpe.gif';  // Change to the new image
+                    gifElement.src = 'lpe.gif';  
+
+                    setTimeout(() => {
+                        window.close();
+                    }, 5000);
+
                     return;
                 }
                 remainingTime--;
@@ -119,8 +206,56 @@
             clearInterval(countdown);
         }
 
+        function toggleMute() {
+            isMuted = !isMuted;
+            const muteMessage = document.getElementById('mute-message');
+            muteMessage.textContent = isMuted ? '已静音' : '已解除静音';
+            muteMessage.style.display = 'block';
+            setTimeout(() => {
+                muteMessage.style.display = 'none';
+            }, 500); // 2秒后自动消失
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        function changeTheme() {
+            const theme = document.getElementById('themeSelect').value;
+            if (theme === 'light') {
+                document.body.style.backgroundColor = 'white';
+                document.body.style.color = 'black';
+            } else {
+                document.body.style.backgroundColor = 'black';
+                document.body.style.color = 'white';
+            }
+        }
+
+        function showSettings() {
+            document.getElementById('settings-overlay').style.display = 'block';
+            document.getElementById('settings-modal').style.display = 'block';
+        }
+
+        function hideSettings() {
+            document.getElementById('settings-overlay').style.display = 'none';
+            document.getElementById('settings-modal').style.display = 'none';
+        }
+
+        function applySettings() {
+            const countdownInput = document.getElementById('countdownTime').value;
+            remainingTime = parseInt(countdownInput, 10);
+            updateDisplay(remainingTime);
+            hideSettings();
+        }
+
         window.addEventListener("resize", () => {
-            gifEndPosition = window.innerWidth - 100; // Update position when resizing
+            gifEndPosition = window.innerWidth - 100; 
         });
 
         updateDisplay(remainingTime);
