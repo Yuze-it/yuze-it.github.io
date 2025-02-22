@@ -1,72 +1,298 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>主页</title>
-    <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5; /* 背景颜色 */
-        }
-        .logo {
-            width: 200px; /* 根据需要调整logo大小 */
-            height: auto;
-            margin-bottom: 20px; /* 减少距离 */
-            display: block; /* 使图片在flex布局中居中 */
-        }
-        .modules {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            gap: 10px; /* 模块之间的间隔缩小 */
-            flex-wrap: wrap; /* 允许换行 */
-        }
-        .module {
-            width: 100px; /* 模块宽度减小 */
-            height: 100px; /* 模块高度减小，保持正方形 */
-            border: 1px solid #ddd;
-            border-radius: 10px; /* 圆润的角 */
-            padding: 10px;
-            text-align: center;
-            background-color: #f9f9f9;
-            transition: background-color 0.3s;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .module:hover {
-            background-color: #e9e9e9;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yuze's Digital Playground</title>
+<style>
+:root {
+    --primary-color: #2c3e50;
+    --accent-color: #3498db;
+    --code-bg: #f8f9fa;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.5;
+    margin: 0;
+    padding: 10px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.container {
+    display: flex;
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.main-content {
+    flex: 4;
+    min-width: 0;
+}
+
+.sidebar {
+    flex: 1;
+    min-width: 280px;
+}
+
+header {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+.basketball {
+    width: 50px;
+    height: 50px;
+    background: #e67e22;
+    border-radius: 50%;
+    display: inline-block;
+    animation: bounce 1.5s infinite;
+}
+
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+.project-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    font-size: 0.95rem;
+}
+
+.project-card h3 {
+    font-size: 1.2rem;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.sidebar-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+.contact-info {
+    display: grid;
+    gap: 1rem;
+}
+
+.visitor-counter {
+    background: var(--accent-color);
+    color: white;
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    margin: 0.5rem 0;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+.achievement-timeline {
+    padding: 1.5rem;
+    background: white;
+    border-radius: 15px;
+    margin: 1.5rem 0;
+}
+
+.code-block {
+    background: var(--code-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    font-family: 'Consolas', monospace;
+    white-space: pre-wrap;
+}
+
+.oi-tips {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 15px;
+    border-left: 5px solid var(--accent-color);
+    margin: 1.5rem 0;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    .sidebar {
+        order: -1;
+    }
+    .main-content,
+    .sidebar {
+        flex: 1;
+    }
+}
+</style>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </head>
 <body>
+<div class="container">
+    <div class="main-content">
+        <header>
+            <div class="basketball"></div>
+            <h1>Yuze's OI Journey</h1>
+            <p>初一蒟蒻OIer | 篮球爱好者 | 全栈开发者</p>
+        </header>
 
-<div>
-    <!-- Logo -->
-    <a href="https://yuze-it.github.io/home" target="_blank">
-        <img src="https://t.tutu.to/img/B4dcm" alt="Logo" class="logo">
-    </a>
+        <section class="project-grid">
+            <a href="https://yuze.zeabur.app/md" class="project-card" target="_blank" rel="noopener">
+                <h3>📝 MD编辑器</h3>
+                <p>实时Markdown编辑预览工具</p>
+                <p class="project-link">点击体验 →</p>
+            </a>
+            <a href="https://yuze.zeabur.app/ai" class="project-card" target="_blank" rel="noopener">
+                <h3>🤖 AI实验室</h3>
+                <p>探索人工智能的奇妙世界</p>
+                <p class="project-link">点击体验 →</p>
+            </a>
+            <a href="https://yuze.zeabur.app/music" class="project-card" target="_blank">
+                <h3>🎵 音乐播放器</h3>
+                <p>在线音乐播放与歌单管理</p>
+                <p class="project-link">点击体验 →</p>
+            </a>
+            <a href="https://yuze.zeabur.app/%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2%E5%99%A8" class="project-card" target="_blank">
+                <h3>🔢 进制转换器</h3>
+                <p>支持2-36进制快速转换</p>
+                <p class="project-link">点击体验 →</p>
+            </a>
+            <a href="https://yuze.zeabur.app/jishi" class="project-card" target="_blank">
+                <h3>⏱️ 班级计时器</h3>
+                <p>定制化课程时间管理工具</p>
+                <p class="project-link">点击体验 →</p>
+            </a>
+            <a href="https://yuze.zeabur.app/clock" class="project-card" target="_blank">
+                <h3>🍅 番茄钟</h3>
+                <p>高效时间管理工具</p>
+                <p class="project-link">点击体验 →</p>
+            </a>
+        </section>
 
-    <!-- Modules -->
-    <div class="modules">
-        <div class="module" onclick="location.href='https://yuze-it.github.io/%E7%AF%AE%E7%90%83%E8%AE%A1%E5%88%86%E5%99%A8';"> 
-            篮球计分板
+        <section class="achievement-timeline">
+            <h2>🏆 2024成就墙</h2>
+            <ul>
+                <li>📅 8月：成功搭建个人第一个网站</li>
+                <li>📜 10月：CSP-J初赛一等奖</li>
+                <li>💻 11月：CSP-J复赛三等奖</li>
+                <li>🏅 区赛一等奖 / 市赛三等奖</li>
+            </ul>
+        </section>
+
+        <section class="oi-tips">
+            <h2>🔑 OIer生存指南</h2>
+            <div class="code-block">
+                ·——暴力出奇迹，骗分过样例。数学先打表，ＤＰ看运气。
+                ·——穷举ＴＬＥ，递推ＵＫＥ。模拟ＭＬＥ，贪心还ＣＥ。
+                ·——想要骗到分，就要有方法。图论背模板，数论背公式。
+                ·——动规背方程，高精背代码。如果都没背，干脆输样例。
+            </div>
+        </section>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-card">
+            <h2>🚀 YUZE-IT</h2>
+            <p>专注于全栈开发与算法研究的个人技术品牌，致力于打造有趣实用的数字产品。</p>
         </div>
-        <!-- 其他模块的占位符 -->
-        <div class="module">待制作</div>
-        <div class="module">待制作</div>
-        <div class="module">待制作</div>
+
+        <div class="sidebar-card">
+            <h3>⏰ 实时时钟</h3>
+            <div id="compact-clock"></div>
+        </div>
+
+        <div class="sidebar-card">
+            <h3>联系我们</h3>
+            <ul class="contact-info">
+                <li>📧 Email: yuze-it@outlook.com</li>
+                <li>🐧 QQ: 3569</li>
+                <li>🐱 GitHub: <a href="https://github.com/yuze-it">yuze-it</a></li>
+                <li>📖 洛谷: <a href="https://www.luogu.com.cn/user/1023108">1023108</a></li>
+                <li>💬 WeChat: Best-of-417</li>
+            </ul>
+        </div>
+
+        <div class="sidebar-card">
+            <div class="visitor-counter">
+                <span id="busuanzi_container_site_pv">
+                    👥 访客数：<span id="busuanzi_value_site_pv"></span>
+                </span>
+            </div>
+        </div>
     </div>
 </div>
 
+<footer>
+    <p align="center">🚀 持续升级中的蒟蒻OIer | 📧 yuze-it@outlook.com</p>
+    <p align="center">© 2025 Yuze's Digital Playground</p>
+</footer>
+
+<script>
+function updateCompactClock() {
+    const date = new Date();
+    const timeString = date.toLocaleTimeString('zh-CN', { hour12: false });
+    const dateString = date.toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+    document.getElementById('compact-clock').innerHTML = `
+        <div style="font-size: 1.8em; color: ${getComputedStyle(document.documentElement).getPropertyValue('--primary-color')}">${timeString}</div>
+        <div>${dateString}</div>
+    `;
+}
+setInterval(updateCompactClock, 1000);
+updateCompactClock();
+
+// 实时时钟
+function updateClock() {
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    };
+    document.getElementById('live-clock').textContent = new Date().toLocaleDateString('zh-CN', options);
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// 初始化访问统计
+setInterval(() => {
+    if(document.getElementById('busuanzi_value_site_pv')) {
+        document.getElementById('busuanzi_container_site_pv').style.display = 'block';
+    }
+}, 1000);
+
+// 随机名言
+const quotes = [
+    "「代码与篮球都需要精准的算法」",
+    "「每天进步1%，一年强大37倍」",
+    "「BUG是程序员最好的老师」"
+];
+document.querySelector('.achievement-timeline').insertAdjacentHTML('beforeend', 
+`<p style="text-align:center;margin-top:1rem">${quotes[Math.floor(Math.random()*quotes.length)]}</p>`);
+</script>
 </body>
 </html>
