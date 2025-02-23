@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>科学计算器</title>
+    <style>
+        /* 增强版计算器样式 */
+        .calculator-shell {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #2c3e50;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .calculator-display {
+            width: 340px;
+            height: 80px;
+            background: #95a5a6;
+            margin-bottom: 15px;
+            padding: 20px;
+            font-size: 36px;
+            text-align: right;
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            width: 340px;
+        }
+
+        .calc-btn {
+            padding: 25px;
+            font-size: 24px;
+            border: none;
+            background: #ecf0f1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px #bdc3c7;
+        }
+
+        .calc-btn:hover {
+            background: #dde1e3;
+        }
+
+        .calc-btn:active {
+            box-shadow: 0 2px #bdc3c7;
+            transform: translateY(2px);
+        }
+
+        .calc-equal {
+            background: #3498db;
+            color: white;
+            box-shadow: 0 4px #2980b9;
+        }
+
+        .calc-equal:active {
+            box-shadow: 0 2px #2980b9;
+        }
+
+        .error-tip {
+            color: #e74c3c;
+            margin-top: 15px;
+            font-size: 16px;
+            display: none;
+        }
+
+        /* 浏览器内容样式 */
+        .browser-content {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .header {
+            background: #34495e;
+            color: white;
+            padding: 15px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .nav-bar {
+            padding: 12px;
+            background: #ecf0f1;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #urlInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .nav-bar button {
+            padding: 10px 20px;
+            border: none;
+            background: #3498db;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .nav-bar button:hover {
+            background: #2980b9;
+        }
+
+        .add-bookmark {
+            display: flex;
+            gap: 10px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .add-bookmark input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .add-bookmark button {
+            padding: 10px 20px;
+            background: #2ecc71;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .add-bookmark button:hover {
+            background: #27ae60;
+        }
+
+        .iframe-container {
+            flex: 1;
+            position: relative;
+            min-height: 600px; /* 最低高度保证 */
+        }
+
+        #browserFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .error-message {
+            /* 保持原有样式 */
+        }
+
+        .bookmarks-bar {
+            padding: 12px;
+            background: #f8f9fa;
+            display: flex;
+            gap: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .bookmark {
+            font-size: 14px;
+            color: #3498db;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: rgba(52,152,219,0.1);
+            transition: all 0.2s;
+        }
+
+        .bookmark:hover {
+            background: rgba(52,152,219,0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 增强版计算器 -->
+    <div class="calculator-shell" id="calculatorShell">
+        <div class="calculator-display" id="calcDisplay">0</div>
+        <div class="calculator-buttons">
+            <button class="calc-btn" data-key="7">7</button>
+            <button class="calc-btn" data-key="8">8</button>
+            <button class="calc-btn" data-key="9">9</button>
+            <button class="calc-btn" data-key="+">+</button>
+            <button class="calc-btn" data-key="4">4</button>
+            <button class="calc-btn" data-key="5">5</button>
+            <button class="calc-btn" data-key="6">6</button>
+            <button class="calc-btn" data-key="-">-</button>
+            <button class="calc-btn" data-key="1">1</button>
+            <button class="calc-btn" data-key="2">2</button>
+            <button class="calc-btn" data-key="3">3</button>
+            <button class="calc-btn" data-key="*">×</button>
+            <button class="calc-btn" data-key="0">0</button>
+            <button class="calc-btn" data-key=".">.</button>
+            <button class="calc-btn" data-key="Backspace">C</button>
+            <button class="calc-btn calc-equal" data-key="Enter">=</button>
+        </div>
+        <div class="error-tip" id="errorTip">⚠️ 密码错误！请重新输入</div>
+    </div>
+
+    <!-- 浏览器内容 -->
+    <div class="browser-content" id="browserContent">
+        <div class="header">YUZE-IT</div>
+        <div class="nav-bar">
+            <input type="text" id="urlInput" placeholder="输入网址（示例：https://example.com）">
+            <button onclick="loadUrl()">前往</button>
+        </div>
+
+        <div class="add-bookmark">
+            <input type="text" id="bookmarkName" placeholder="书签名称">
+            <input type="text" id="bookmarkUrl" placeholder="书签地址">
+            <button onclick="addBookmark()">添加收藏</button>
+        </div>
+
+        <div class="iframe-container">
+            <iframe id="browserFrame"></iframe>
+            <div class="error-message" id="errorMessage">
+                <p>该网页不支持在框架中显示，<a id="externalLink" target="_blank">点击链接前往网页</a></p>
+            </div>
+        </div>
+
+        <div class="bookmarks-bar">
+            <div class="fixed-bookmarks">
+                <a href="https://yuze.zeabur.app" class="bookmark">YUZE-IT</a>
+                <a href="https://yuze.zeabur.app/search" class="bookmark">YUZE搜索</a>
+            </div>
+            <div class="custom-bookmarks" id="customBookmarks"></div>
+        </div>
+    </div>
+
+    <script>
+        // 键盘输入支持
+        document.addEventListener('keydown', (e) => {
+            const key = e.key;
+            
+            // 处理数字键
+            if (/^[0-9.]$/.test(key)) {
+                inputNumber(key);
+                e.preventDefault();
+            }
+            // 处理操作符
+            else if (['+','-','*','/'].includes(key)) {
+                inputOperator(key);
+                e.preventDefault();
+            }
+            // 处理退格键
+            else if (key === 'Backspace') {
+                backspace();
+                e.preventDefault();
+            }
+            // 处理回车键
+            else if (key === 'Enter') {
+                checkPassword();
+                e.preventDefault();
+            }
+        });
+
+        // 密码系统
+        const encryptedPassword = btoa("114514");
+        let inputBuffer = "";
+
+        function inputNumber(num) {
+            inputBuffer += num;
+            updateDisplay();
+        }
+
+        function inputOperator(op) {
+            inputBuffer += op;
+            updateDisplay();
+        }
+
+        function backspace() {
+            inputBuffer = inputBuffer.slice(0, -1);
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            inputBuffer = "";
+            updateDisplay();
+            document.getElementById('errorTip').style.display = 'none';
+        }
+
+        function updateDisplay() {
+            document.getElementById('calcDisplay').textContent = 
+                inputBuffer || "0";
+        }
+
+        function checkPassword() {
+            const encryptedInput = btoa(inputBuffer);
+            if(encryptedInput === encryptedPassword) {
+                document.getElementById('calculatorShell').style.display = 'none';
+                document.getElementById('browserContent').style.display = 'flex'; // 改为flex布局
+                // 自动聚焦到地址栏
+                document.getElementById('urlInput').focus();
+                inputBuffer = "";
+            } else {
+                showError();
+            }
+        }
+
+        function showError() {
+            const errorTip = document.getElementById('errorTip');
+            errorTip.style.display = 'block';
+            inputBuffer = "";
+            updateDisplay();
+            setTimeout(() => {
+                errorTip.style.display = 'none';
+            }, 1500);
+        }
+
+        // 浏览器功能
+        function loadUrl() {
+            const url = document.getElementById('urlInput').value;
+            const frame = document.getElementById('browserFrame');
+            const errorMessage = document.getElementById('errorMessage');
+            const externalLink = document.getElementById('externalLink');
+
+            if (url) {
+                const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+                frame.src = fullUrl;
+                errorMessage.style.display = 'none';
+
+                frame.onload = function() {
+                    try {
+                        frame.contentDocument;
+                        errorMessage.style.display = 'none';
+                    } catch (e) {
+                        errorMessage.style.display = 'block';
+                        externalLink.href = fullUrl;
+                    }
+                };
+            }
+        }
+
+        // 书签系统
+        let bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+
+        function addBookmark() {
+            const name = document.getElementById('bookmarkName').value;
+            const url = document.getElementById('bookmarkUrl').value;
+
+            if (name && url) {
+                bookmarks.push({ name, url });
+                localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                renderBookmarks();
+                // 清空输入框
+                document.getElementById('bookmarkName').value = '';
+                document.getElementById('bookmarkUrl').value = '';
+            }
+        }
+
+        function deleteBookmark(index) {
+            bookmarks.splice(index, 1);
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+            renderBookmarks();
+        }
+
+        function renderBookmarks() {
+            const container = document.getElementById('customBookmarks');
+            container.innerHTML = bookmarks.map((bookmark, index) => `
+                <div class="bookmark-item">
+                    <a href="${bookmark.url}" class="bookmark">${bookmark.name}</a>
+                    <span class="delete-btn" onclick="deleteBookmark(${index})">×</span>
+                </div>
+            `).join('');
+        }
+
+        // 初始化
+        renderBookmarks();
+        document.getElementById('urlInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loadUrl();
+        });
+    </script>
+</body>
+</html>
