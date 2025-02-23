@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>YUZE-IT浏览器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .header {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 24px;
+        }
+
+        .nav-bar {
+            padding: 10px;
+            background: #f0f0f0;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #urlInput {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .nav-bar button {
+            padding: 8px 15px;
+            border: none;
+            background: #007BFF;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .nav-bar button:hover {
+            background: #0056b3;
+        }
+
+        .add-bookmark {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f8f8;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .add-bookmark input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .add-bookmark button {
+            padding: 8px 15px;
+            border: none;
+            background: #28a745;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .add-bookmark button:hover {
+            background: #218838;
+        }
+
+        .iframe-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #browserFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: none;
+        }
+
+        .error-message a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        .error-message a:hover {
+            text-decoration: underline;
+        }
+
+        .bookmarks-bar {
+            background: #f8f8f8;
+            padding: 10px;
+            display: flex;
+            gap: 15px;
+            border-top: 1px solid #ddd;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .bookmark {
+            cursor: pointer;
+            color: #06c;
+            text-decoration: none;
+        }
+
+        .bookmark:hover {
+            text-decoration: underline;
+        }
+
+        .custom-bookmarks {
+            display: flex;
+            gap: 15px;
+        }
+
+        .delete-btn {
+            color: red;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">YUZE-IT</div>
+    <div class="nav-bar">
+        <input type="text" id="urlInput" placeholder="输入网址（示例：https://example.com）">
+        <button onclick="loadUrl()">前往</button>
+    </div>
+
+    <div class="add-bookmark">
+        <input type="text" id="bookmarkName" placeholder="书签名称">
+        <input type="text" id="bookmarkUrl" placeholder="书签地址">
+        <button onclick="addBookmark()">添加收藏</button>
+    </div>
+
+    <div class="iframe-container">
+        <iframe id="browserFrame"></iframe>
+        <div class="error-message" id="errorMessage">
+            <p>该网页不支持在框架中显示，<a id="externalLink" target="_blank">点击链接前往网页</a></p>
+        </div>
+    </div>
+
+    <div class="bookmarks-bar">
+        <div class="fixed-bookmarks">
+            <a href="https://yuze.zeabur.app" class="bookmark">YUZE-IT</a>
+            <a href="https://yuze.zeabur.app/search" class="bookmark">YUZE搜索</a>
+        </div>
+        <div class="custom-bookmarks" id="customBookmarks"></div>
+    </div>
+
+    <script>
+        // 加载网址
+        function loadUrl() {
+            const url = document.getElementById('urlInput').value;
+            const frame = document.getElementById('browserFrame');
+            const errorMessage = document.getElementById('errorMessage');
+            const externalLink = document.getElementById('externalLink');
+
+            if (url) {
+                const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+                frame.src = fullUrl;
+                errorMessage.style.display = 'none';
+
+                frame.onload = function () {
+                    try {
+                        const doc = frame.contentDocument || frame.contentWindow.document;
+                        if (doc) {
+                            // 正常加载
+                            errorMessage.style.display = 'none';
+                        }
+                    } catch (e) {
+                        // 跨域或不允许 iframe 加载
+                        errorMessage.style.display = 'block';
+                        externalLink.href = fullUrl;
+                    }
+                };
+            }
+        }
+
+        // 初始化书签
+        let bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+
+        // 添加书签
+        function addBookmark() {
+            const name = document.getElementById('bookmarkName').value;
+            const url = document.getElementById('bookmarkUrl').value;
+
+            if (name && url) {
+                bookmarks.push({ name, url });
+                localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                renderBookmarks();
+            }
+        }
+
+        // 删除书签
+        function deleteBookmark(index) {
+            bookmarks.splice(index, 1);
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+            renderBookmarks();
+        }
+
+        // 渲染书签
+        function renderBookmarks() {
+            const container = document.getElementById('customBookmarks');
+            container.innerHTML = bookmarks
+               .map((bookmark, index) => `
+                    <div class="bookmark-item">
+                        <a href="${bookmark.url}" class="bookmark">${bookmark.name}</a>
+                        <span class="delete-btn" onclick="deleteBookmark(${index})">×</span>
+                    </div>
+                `)
+               .join('');
+        }
+
+        // 初始化渲染
+        renderBookmarks();
+
+        // 回车键支持
+        document.getElementById('urlInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loadUrl();
+        });
+    </script>
+</body>
+
+</html>
