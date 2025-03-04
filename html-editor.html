@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>在线代码编辑器 - yuze-it</title>
+    <!-- CodeMirror 代码高亮依赖 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/theme/material-darker.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .toolbar {
+            background: #f4f4f4;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .toolbar button {
+            padding: 8px 12px;
+            background-color: #5599e1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .toolbar button:hover {
+            background-color: #83bffffc;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .editor-container, .preview-container {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .CodeMirror {
+            height: 100% !important;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- 工具栏 -->
+    <div class="toolbar">
+        <button id="saveButton">保存代码</button>
+    </div>
+
+    <!-- 编辑器布局 -->
+    <div class="container">
+        <div class="editor-container">
+            <textarea id="codeEditor"></textarea>
+        </div>
+        <div class="preview-container">
+            <iframe id="preview"></iframe>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer>
+        © 2025 YUZE-IT · All rights reserved · 
+        <a href="https://yuze.zearbur.app/home" target="_blank">访问官网</a>
+    </footer>
+
+    <!-- CodeMirror 依赖 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.0/mode/javascript/javascript.min.js"></script>
+
+    <script>
+        // 初始化代码编辑器
+        const editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+            mode: "htmlmixed",
+            theme: "material-darker",
+            lineNumbers: true,
+            autoCloseTags: true,
+            matchBrackets: true,
+            lineWrapping: true,
+            extraKeys: { "Ctrl-Space": "autocomplete" }
+        });
+
+        // 实时预览功能
+        editor.on("change", () => {
+            const code = editor.getValue();
+            document.getElementById('preview').srcdoc = code;
+        });
+
+        // 初始示例代码
+        editor.setValue(
+`<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { 
+            padding: 20px;
+            font-family: Arial;
+        }
+        .box {
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>欢迎使用在线编辑器</h1>
+        <p>尝试修改代码并实时查看效果！</p>
+        <button onclick="showMessage()">点击测试</button>
+    </div>
+
+    <script>
+        function showMessage() {
+            alert('Hello from yuze-it!');
+        }
+    <\/script>
+</body>
+</html>`);
+
+        // 保存代码功能
+        function saveCode() {
+            // 获取代码内容
+            const code = editor.getValue();
+
+            // 提示用户输入保存的文件名
+            const fileName = prompt("请输入保存的文件名（含扩展名）:", "index.html");
+            if (fileName) {
+                // 创建文件 Blob
+                const blob = new Blob([code], { type: "text/html" });
+
+                // 创建下载链接
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                link.click();
+
+                // 释放链接资源
+                URL.revokeObjectURL(link.href);
+            }
+        }
+
+        // 绑定保存按钮点击事件
+        document.getElementById('saveButton').addEventListener('click', saveCode);
+
+        // 退出提示功能
+        window.onbeforeunload = () => {
+            return "你确定要退出吗？退出前未保存的更改将会丢失。";
+        };
+    </script>
+</body>
+</html>
