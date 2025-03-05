@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数学每日一题</title>
+    <style>
+        /* 原有样式保持不变... */
+        body {
+            font-family: '微软雅黑', sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .question-box {
+            background: #e6f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .question-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .password-section {
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        input[type="password"] {
+            padding: 12px 20px;
+            border: 2px solid #87ceeb;
+            border-radius: 25px;
+            font-size: 16px;
+            width: 250px;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #4682b4;
+            box-shadow: 0 0 8px rgba(70, 130, 180, 0.3);
+        }
+
+        button {
+            background: #87ceeb;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #4682b4;
+            transform: translateY(-2px);
+        }
+
+        .answer-box {
+            display: none;
+            background: #e6f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .error-message {
+            color: #ff4444;
+            margin-top: 15px;
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            input[type="password"] {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+
+        /* 绘图区样式 */
+        .drawer-btn {
+            position: fixed;
+            bottom: 30px;
+            padding: 12px 25px;
+            border-radius: 25px;
+            background: #87ceeb;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        #leftDrawerBtn { left: 30px; }
+        #rightDrawerBtn { right: 30px; }
+
+        .drawing-board {
+            position: fixed;
+            bottom: -400px;
+            width: 320px;
+            height: 400px;
+            background: white;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            z-index: 999;
+        }
+
+        #leftBoard {
+            left: 30px;
+            border-left: 4px solid #87ceeb;
+        }
+
+        #rightBoard {
+            right: 30px;
+            border-right: 4px solid #87ceeb;
+        }
+
+        .board-visible {
+            bottom: 0 !important;
+        }
+
+        canvas {
+            border: 2px solid #e6f3ff;
+            border-radius: 10px;
+            touch-action: none;
+        }
+
+        .toolbar {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .color-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-btn.active {
+            transform: scale(1.2);
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+
+        .thickness-btn {
+            padding: 4px 12px;
+            border: 1px solid #87ceeb;
+            border-radius: 15px;
+            cursor: pointer;
+            background: #f8f8f8;
+        }
+
+        .clear-btn {
+            background: #ff6666;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 数学每日一题 📚</h1>
+        
+        <div class="question-box">
+            <img src="que.png" alt="今日题目" class="question-img">
+        </div>
+
+        <div class="password-section">
+            <input type="password" id="passwordInput" placeholder="请输入答案密码">
+            <button onclick="checkPassword()">查看答案</button>
+            <div class="error-message" id="errorMsg">密码错误，请再试一次</div>
+        </div>
+
+        <div class="answer-box" id="answerBox">
+            <img src="ans.png" alt="题目答案" class="question-img">
+        </div>
+    </div>
+
+    <!-- 草稿区按钮 -->
+    <button class="drawer-btn" id="leftDrawerBtn">左侧草稿</button>
+    <button class="drawer-btn" id="rightDrawerBtn">右侧草稿</button>
+
+    <!-- 左侧画板 -->
+    <div class="drawing-board" id="leftBoard">
+        <canvas width="280" height="300"></canvas>
+        <div class="toolbar">
+            <div class="color-btn active" style="background: #000" data-color="#000"></div>
+            <div class="color-btn" style="background: #ff4444" data-color="#ff4444"></div>
+            <div class="color-btn" style="background: #4682b4" data-color="#4682b4"></div>
+            <div class="thickness-btn" data-size="2">细</div>
+            <div class="thickness-btn active" data-size="4">中</div>
+            <div class="thickness-btn" data-size="6">粗</div>
+            <button class="clear-btn">清空</button>
+        </div>
+    </div>
+
+    <!-- 右侧画板 -->
+    <div class="drawing-board" id="rightBoard">
+        <canvas width="280" height="300"></canvas>
+        <div class="toolbar">
+            <div class="color-btn active" style="background: #000" data-color="#000"></div>
+            <div class="color-btn" style="background: #ff4444" data-color="#ff4444"></div>
+            <div class="color-btn" style="background: #4682b4" data-color="#4682b4"></div>
+            <div class="thickness-btn" data-size="2">细</div>
+            <div class="thickness-btn active" data-size="4">中</div>
+            <div class="thickness-btn" data-size="6">粗</div>
+            <button class="clear-btn">清空</button>
+        </div>
+    </div>
+
+    <script>
+        // 密码验证功能
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            const answerBox = document.getElementById('answerBox');
+            const errorMsg = document.getElementById('errorMsg');
+
+            if (password === 'niyuze417') {
+                answerBox.style.display = 'block';
+                errorMsg.style.display = 'none';
+            } else {
+                errorMsg.style.display = 'block';
+                answerBox.style.display = 'none';
+            }
+        }
+
+        // 支持回车键提交
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        // 绘图板功能
+        class DrawingBoard {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d', { willReadFrequently: true });
+                this.isDrawing = false;
+                this.lastX = 0;
+                this.lastY = 0;
+                this.currentColor = '#000';
+                this.currentSize = 4;
+
+                // 初始化画布
+                this.ctx.imageSmoothingEnabled = true;
+                this.ctx.strokeStyle = this.currentColor;
+                this.ctx.lineWidth = this.currentSize;
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+
+                this.initEvents();
+            }
+
+            initEvents() {
+                // 鼠标事件
+                this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
+                this.canvas.addEventListener('mousemove', this.draw.bind(this));
+                this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
+                this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
+
+                // 触摸事件
+                this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this));
+                this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this));
+                this.canvas.addEventListener('touchend', this.stopDrawing.bind(this));
+            }
+
+            getCanvasPosition(event) {
+                const rect = this.canvas.getBoundingClientRect();
+                return {
+                    x: (event.clientX || event.touches[0].clientX) - rect.left,
+                    y: (event.clientY || event.touches[0].clientY) - rect.top
+                };
+            }
+
+            startDrawing(e) {
+                this.isDrawing = true;
+                const pos = this.getCanvasPosition(e);
+                [this.lastX, this.lastY] = [pos.x, pos.y];
+            }
+
+            draw(e) {
+                if (!this.isDrawing) return;
+                
+                const pos = this.getCanvasPosition(e);
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.lastX, this.lastY);
+                this.ctx.lineTo(pos.x, pos.y);
+                this.ctx.stroke();
+
+                [this.lastX, this.lastY] = [pos.x, pos.y];
+            }
+
+            handleTouchStart(e) {
+                e.preventDefault();
+                this.startDrawing(e.touches[0]);
+            }
+
+            handleTouchMove(e) {
+                e.preventDefault();
+                this.draw(e.touches[0]);
+            }
+
+            stopDrawing() {
+                this.isDrawing = false;
+            }
+
+            setColor(color) {
+                this.currentColor = color;
+                this.ctx.strokeStyle = color;
+            }
+
+            setSize(size) {
+                this.currentSize = size;
+                this.ctx.lineWidth = size;
+            }
+
+            clear() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+        }
+
+        // 初始化所有画板
+        document.querySelectorAll('.drawing-board').forEach(board => {
+            const canvas = board.querySelector('canvas');
+            const drawingBoard = new DrawingBoard(canvas);
+
+            // 初始化工具按钮
+            board.querySelectorAll('.color-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    board.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    drawingBoard.setColor(btn.dataset.color);
+                });
+            });
+
+            board.querySelectorAll('.thickness-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    board.querySelectorAll('.thickness-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    drawingBoard.setSize(btn.dataset.size);
+                });
+            });
+
+            board.querySelector('.clear-btn').addEventListener('click', () => {
+                drawingBoard.clear();
+            });
+        });
+
+        // 切换画板显示
+        document.querySelectorAll('.drawer-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.id.replace('DrawerBtn', 'Board');
+                const board = document.getElementById(targetId);
+                board.classList.toggle('board-visible');
+            });
+        });
+    </script>
+</body>
+</html>
