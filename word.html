@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUZE-IT Word</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mammoth.js@1.4.16/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #e3f2fd;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .toolbar {
+            background: linear-gradient(145deg, #1976d2, #0d47a1);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .toolbar button {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .toolbar button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .toolbar select {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .toolbar input[type="color"] {
+            width: 30px;
+            height: 30px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .editor-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #editor {
+            min-height: 400px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            outline: none;
+            resize: none;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .file-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-start;
+        }
+
+        .file-actions button {
+            background: linear-gradient(145deg, #1976d2, #0d47a1);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .file-actions button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .file-actions input[type="file"] {
+            display: none;
+        }
+
+        .login {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .login button {
+            background: linear-gradient(145deg, #333, #555);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .login button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 280px;
+            background: #e3f2fd;
+            padding: 20px;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .main-content {
+            margin-left: 280px;
+        }
+
+        .logo {
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">YUZE-IT Word</div>
+        <div class="theme-toggle">
+            <button onclick="toggleTheme()">
+                <i class="material-icons">brightness_4</i>
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="toolbar">
+                <button onclick="document.execCommand('bold')">
+                    <i class="material-icons">format_bold</i>
+                    加粗
+                </button>
+                <button onclick="document.execCommand('italic')">
+                    <i class="material-icons">format_italic</i>
+                    斜体
+                </button>
+                <button onclick="document.execCommand('underline')">
+                    <i class="material-icons">format_underline</i>
+                    下划线
+                </button>
+                <button onclick="document.execCommand('justifyLeft')">
+                    <i class="material-icons">format_align_left</i>
+                    左对齐
+                </button>
+                <button onclick="document.execCommand('justifyCenter')">
+                    <i class="material-icons">format_align_center</i>
+                    居中
+                </button>
+                <button onclick="document.execCommand('justifyRight')">
+                    <i class="material-icons">format_align_right</i>
+                    右对齐
+                </button>
+                <button onclick="document.execCommand('insertUnorderedList')">
+                    <i class="material-icons">format_list_bulleted</i>
+                    项目符号
+                </button>
+                <button onclick="document.execCommand('insertOrderedList')">
+                    <i class="material-icons">format_list_numbered</i>
+                    编号
+                </button>
+                <select id="fontName" onchange="document.execCommand('fontName', false, this.value)">
+                    <option value="Arial">Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Courier New">Courier New</option>
+                </select>
+                <select id="fontSize" onchange="document.execCommand('fontSize', false, this.value)">
+                    <option value="1">小</option>
+                    <option value="3" selected>中</option>
+                    <option value="5">大</option>
+                </select>
+                <input type="color" id="textColor" onchange="document.execCommand('foreColor', false, this.value)">
+                <button onclick="document.execCommand('cut')">
+                    <i class="material-icons">content_cut</i>
+                    剪切
+                </button>
+                <button onclick="document.execCommand('copy')">
+                    <i class="material-icons">content_copy</i>
+                    复制
+                </button>
+                <button onclick="document.execCommand('paste')">
+                    <i class="material-icons">content_paste</i>
+                    粘贴
+                </button>
+            </div>
+
+            <div class="editor-container">
+                <div id="editor" contenteditable="true"></div>
+                <div class="file-actions">
+                    <button onclick="saveAsWord()">保存为Word</button>
+                    <button onclick="saveAsText()">保存为文本</button>
+                    <input type="file" id="fileInput" accept=".doc,.docx,.txt" onchange="loadFile(this)">
+                    <button onclick="document.getElementById('fileInput').click()">
+                        <i class="material-icons">file_upload</i>
+                        上传文件
+                    </button>
+                </div>
+            </div>
+
+            <div class="login">
+                <button onclick="githubLogin()">
+                    <i class="material-icons">github</i>
+                    使用GitHub登录
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function saveAsWord() {
+            const text = document.getElementById('editor').innerHTML;
+            mammoth.convertToDocx({html: text})
+                .then(result => {
+                    const blob = new Blob([result], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'document.docx';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(e => console.error(e));
+        }
+
+        function saveAsText() {
+            const text = document.getElementById('editor').innerHTML;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'document.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function loadFile(input) {
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            if (file.name.endsWith('.docx')) {
+                reader.onload = function(e) {
+                    mammoth.convertToHtml({arrayBuffer: e.target.result})
+                        .then(result => {
+                            document.getElementById('editor').innerHTML = result.value;
+                        })
+                        .catch(e => console.error(e));
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (file.name.endsWith('.txt')) {
+                reader.onload = function(e) {
+                    document.getElementById('editor').innerHTML = e.target.result;
+                };
+                reader.readAsText(file);
+            } else if (file.name.endsWith('.doc')) {
+                reader.onload = function(e) {
+                    // 处理 .doc 文件（需要进一步解析）
+                    alert('当前版本不支持 .doc 文件，请上传 .docx 或 .txt 文件。');
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function githubLogin() {
+            const clientId = 'Ov23liiDkyFDqZV22MMk'; // 替换为你的 GitHub Client ID
+            const redirectUri = 'https://yuze.zeabur.app/word/login?type=github';
+            const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+            window.location.href = authUrl;
+        }
+
+        // 处理 GitHub 回调
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const error = urlParams.get('error');
+
+            if (code) {
+                // 将授权码发送到你的后端服务器
+                fetch('/api/github/callback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        redirect_uri: 'https://yuze.zeabur.app/word/login?type=github'
+                    }),
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // 登录成功后跳转到主页
+                        window.location.href = '/word';
+                    } else {
+                        throw new Error('登录失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('登录失败:', error);
+                    // 处理登录失败的情况
+                });
+            } else if (error) {
+                console.error('GitHub 登录错误:', error);
+                // 处理登录错误情况
+            }
+        };
+
+        function toggleTheme() {
+            const body = document.body;
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+            } else {
+                body.classList.add('dark-mode');
+            }
+        }
+    </script>
+</body>
+</html>
