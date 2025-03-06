@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZIMO-HUB - 基尼奇的草元素工坊</title>
+    <style>
+        :root {
+            --primary-color: #c1e7c1;
+            --secondary-color: #7cb97c;
+            --accent-color: #4a694a;
+            --highlight-color: #ffeb3b;
+            --fallback-color: #cccccc;
+            --pixel-size: 2px;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Pixelify Sans', cursive;
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #e3f3e3 100%);
+            min-height: 100vh;
+            color: var(--accent-color);
+        }
+
+        h1, h2, h3 {
+            margin: 10px 0;
+        }
+
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--highlight-color);
+        }
+
+        img {
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* 像素风边框 */
+        .pixel-border {
+            border: var(--pixel-size) solid var(--accent-color);
+            position: relative;
+            box-shadow: 8px 8px 0 var(--secondary-color);
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        /* 容器 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 导航栏 */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 30px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        /* 基尼奇角色卡片 */
+        .ganyu-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* 小工具区 */
+        .widgets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        /* 像素风按钮 */
+        .pixel-btn {
+            background: var(--secondary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .pixel-btn:hover {
+            transform: translate(2px, 2px);
+            background-color: var(--highlight-color);
+            color: var(--accent-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .widgets {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 动画 */
+        @keyframes pixel-bounce {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0); }
+        }
+        .myBox {
+            cursor: url('/imgs/zhizhen.jpg'), pointer
+            // cursor: url('/imgs/zhizhen.jpg'), pointer
+            // cursor: url('/imgs/zhizhen.jpg'), pointer
+            // cursor: url('/imgs/zhizhen.jpg'), pointer
+            }
+        /* 元素反应模拟器 */
+        .element-reaction {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .element-btn {
+            padding: 8px;
+            border: none;
+            cursor: pointer;
+            transition: filter 0.2s, transform 0.1s;
+            border-radius: 4px;
+        }
+
+        .element-btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        /* 每日签到 */
+        .daily-checkin {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+        }
+
+        .checkin-day {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--accent-color);
+            border-radius: 4px;
+            text-align: center;
+            line-height: 36px;
+            background: white;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .checkin-day:hover {
+            background: var(--highlight-color);
+            transform: scale(1.1);
+        }
+
+        /* 友情链接 */
+        .friends-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .friend-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+            text-decoration: none;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .friend-link:hover {
+            transform: translate(3px, 3px);
+            background: var(--highlight-color);
+            color: black;
+        }
+
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 15px;
+            margin-top: 30px;
+            background: rgba(200, 240, 200, 0.8);
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="myBox"></div>
+    <div class="container">
+        <nav class="nav pixel-border">
+            <h1>ZIMO-HUB</h1>
+            <div class="nav-links">
+                <a href="#home">首页</a>
+                <a href="#about">关于基尼奇</a>
+                <a href="#tools">草元素工具</a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <section class="ganyu-card pixel-border">
+                <h2>🪴 基尼奇的草元素工坊</h2>
+                <img src="/imgs/geany.png" alt="像素风基尼奇" style="width: 200px; image-rendering: pixelated;">
+                <p>「林中寻道，草色长存」</p>
+                <button class="pixel-btn" onclick="triggerElementBurst()">元素爆发启动</button>
+            </section>
+
+            <div class="widgets">
+                <div class="pixel-border" style="padding: 15px;">
+                    <h3>元素能量监测</h3>
+                    <div id="energy-bar" style="height: 20px; background: #7cb97c;"></div>
+                </div>
+
+                <div class="pixel-border" style="padding: 15px;">
+                    <h3>天气小工具</h3>
+                    <div id="weather-display">🌞 晴朗</div>
+                    <button class="pixel-btn" onclick="changeWeather()">切换天气</button>
+                </div>
+
+                <div class="pixel-border" style="padding: 15px;">
+                    <h3>七圣召唤小助手</h3>
+                    <div class="dice-counter">
+                        <div>🎲 × <span id="dice-count">8</span></div>
+                        <button class="pixel-btn" onclick="rollDice()">投掷骰子</button>
+                    </div>
+                </div>
+
+                <div class="pixel-border" style="padding: 15px;">
+                    <h3>元素反应实验室</h3>
+                    <div class="element-reaction">
+                        <button class="element-btn" style="background: #7cb97c" onclick="triggerReaction('草')">🪴 草</button>
+                        <button class="element-btn" style="background: #6ab0de" onclick="triggerReaction('水')">💧 水</button>
+                        <button class="element-btn" style="background: #ffd700" onclick="triggerReaction('雷')">⚡ 雷</button>
+                    </div>
+                    <div id="reaction-result" style="margin-top:10px; min-height:40px; padding:5px; background: #f5f5f5;"></div>
+                </div>
+
+                <div class="pixel-border" style="padding: 15px;">
+                    <h3>每日签到奖励</h3>
+                    <div class="daily-checkin">
+                        <div class="checkin-day" data-day="1">🎁</div>
+                        <div class="checkin-day" data-day="2">?</div>
+                        <div class="checkin-day" data-day="3">?</div>
+                    </div>
+                    <button class="pixel-btn" onclick="dailyCheckin()">领取今日奖励</button>
+                </div>
+            </div>
+
+            <section class="pixel-border" style="padding:20px; margin-top:30px;">
+                <h2>🪻 元素伙伴</h2>
+                <div class="friends-links">
+                    <a href="https://yuze.zeabur.app/home" class="friend-link pixel-border" target="_blank">
+                        <span>Yuze的工坊</span>
+                    </a>
+                    <a href="#" class="friend-link pixel-border">
+                        <span>龙脊雪山观测站</span>
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <footer class="pixel-border">
+            <p>🏮 璃月工坊荣誉出品 - © 2024 ZIMO-HUB</p>
+        </footer>
+    </div>
+
+    <script>
+        const weathers = ['🌞 晴朗', '🌧️ 降雨', '❄️ 降雪', '🌪️ 大风'];
+        function changeWeather() {
+            const display = document.getElementById('weather-display');
+            display.textContent = weathers[Math.floor(Math.random() * weathers.length)];
+        }
+
+        function rollDice() {
+            const diceCount = document.getElementById('dice-count');
+            diceCount.textContent = Math.floor(Math.random() * 8) + 1;
+        }
+
+        setInterval(() => {
+            const energyBar = document.getElementById('energy-bar');
+            energyBar.style.width = `${Math.random() * 80 + 20}%`;
+        }, 1000);
+
+        const reactions = {
+            '草+水': { name: '绽放', damage: '🌱 124', color: '#8bc34a' },
+            '草+雷': { name: '激化', damage: '⚡ 156', color: '#9c27b0' },
+            '水+雷': { name: '感电', damage: '💥 98', color: '#3f51b5' }
+        };
+        let currentElements = [];
+        function triggerReaction(element) {
+            currentElements.push(element);
+            if (currentElements.length === 2) {
+                const reactionKey = currentElements.sort().join('+');
+                const result = reactions[reactionKey] || { name: '未知反应', damage: '❓ 0', color: '--fallback-color' };
+                const display = document.getElementById('reaction-result');
+                display.innerHTML = `<div style="background: ${result.color}; padding: 10px;">${result.name} 造成 ${result.damage} 伤害</div>`;
+                currentElements = [];
+            }
+        }
+
+        function dailyCheckin() {
+            const days = document.querySelectorAll('.checkin-day');
+            for (let i = 0; i < days.length; i++) {
+                if (days[i].innerHTML === '?') {
+                    days[i].innerHTML = '🎉';
+                    days[i].style.background = '#ffeb3b';
+                    break;
+                }
+            }
+        }
+
+        function triggerElementBurst() {
+            alert('元素爆发已启动！🌿');
+        }
+    </script>
+</body>
+</html>
