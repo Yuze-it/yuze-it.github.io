@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>高清字符画生成器</title>
+    <style>
+        :root {
+            --primary: #2196F3;
+            --bg: #f0f2f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .upload-box {
+            background: white;
+            border: 2px dashed var(--primary);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .upload-box:hover {
+            background: #e3f2fd;
+            transform: translateY(-2px);
+        }
+
+        .upload-box.dragover {
+            background: #bbdefb;
+            border-color: #1976D2;
+        }
+
+        #preview {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            white-space: pre;
+            font-family: 'Courier New', monospace;
+            font-size: 7px;
+            line-height: 5px;
+            letter-spacing: 0;
+            overflow: auto;
+            max-height: 60vh;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #1976D2;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="upload-box" id="dropZone"
+             ondragover="event.preventDefault(); this.classList.add('dragover')"
+             ondragleave="this.classList.remove('dragover')"
+             ondrop="handleDrop(event)">
+            <h2>拖放图片到这里</h2>
+            <p>或</p>
+            <button onclick="document.getElementById('fileInput').click()">选择文件</button>
+            <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
+        </div>
+        <div id="preview" class="hidden"></div>
+    </div>
+
+    <script>
+        // 89级灰度字符集（从暗到亮）
+        const chars = "MNwmd0WMB8R%$#*+oahkbdpqwmZO0QULCJYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
+        const MAX_WIDTH = 150; // 字符画宽度（建议100-200）
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            processImage(file);
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.target.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            processImage(file);
+        }
+
+        function processImage(file) {
+            if (!file.type.startsWith('image/')) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const ascii = convertToAscii(img);
+                    showPreview(ascii);
+                    downloadAscii(ascii);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function convertToAscii(img) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 计算最佳尺寸
+            const width = Math.min(img.width, MAX_WIDTH);
+            const ratio = img.height / img.width;
+            const height = Math.floor(width * ratio * 0.45);
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const pixels = ctx.getImageData(0, 0, width, height).data;
+            let ascii = '';
+
+            for (let y = 0; y < height; y++) {
+                let line = '';
+                for (let x = 0; x < width; x++) {
+                    const index = (y * width + x) * 4;
+                    const r = pixels[index];
+                    const g = pixels[index + 1];
+                    const b = pixels[index + 2];
+                    
+                    // 专业亮度计算（BT.601标准）
+                    const brightness = Math.min(1, Math.max(0, 
+                        (0.299 * r + 0.587 * g + 0.114 * b) / 255
+                    ));
+                    
+                    const charIndex = Math.floor((1 - brightness) * (chars.length - 1));
+                    line += chars[Math.max(0, Math.min(charIndex, chars.length - 1))];
+                }
+                ascii += line + '\n';
+            }
+            return ascii;
+        }
+
+        function showPreview(ascii) {
+            const preview = document.getElementById('preview');
+            preview.classList.remove('hidden');
+            preview.textContent = ascii;
+        }
+
+        function downloadAscii(ascii) {
+            const blob = new Blob([ascii], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+            
+            const date = new Date();
+            const filename = `YUZE-IT_${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}.txt`;
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function pad(n) {
+            return n.toString().padStart(2, '0');
+        }
+    </script>
+</body>
+</html>
