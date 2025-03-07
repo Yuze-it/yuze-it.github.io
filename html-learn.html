@@ -375,34 +375,116 @@
             </div>
             <img 
                 id="bing-image" 
-                src="https://bing.img.run/uhd.php" 
+                src="https://api.dujin.org/bing/1366.php" 
                 alt="Bing每日壁纸"
                 loading="lazy">
+        </div>
+
+        <div class="tool-box">
+            <h3>🎬 每日视频</h3>
+            <iframe src="//player.bilibili.com/player.html?isOutside=true&aid=114087434454472&bvid=BV11RXRYuEdL&cid=28640083971&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+            <p>点击<a href="https://www.bilibili.com/video/BV11RXRYuEdL?t=2.8" target="_blank">跳转</a></p>
         </div>
 
         <div class="tool-box">
             <h3>💡 每日箴言</h3>
             <p id="quote">「代码是人类思维的诗意表达」</p>
         </div>
+        <style>
+            /* 新增右侧滚动区域样式 */
+            #right-sidebar {
+                overflow-y: auto;
+                min-height: 0; /* 修复Flex容器滚动问题 */
+            }
+        
+            /* 统一滚动条样式 */
+            #right-sidebar::-webkit-scrollbar,
+            .content::-webkit-scrollbar {
+                width: 6px;
+                background: transparent;
+            }
+        
+            #right-sidebar::-webkit-scrollbar-thumb,
+            .content::-webkit-scrollbar-thumb {
+                background: var(--main-blue);
+                border-radius: 4px;
+                transition: opacity 0.3s;
+            }
+        
+            /* 悬停时显示滚动条 */
+            #right-sidebar:hover::-webkit-scrollbar-thumb,
+            .content:hover::-webkit-scrollbar-thumb {
+                background: var(-blue);
+            }
+        
+            /* 优化工具项布局 */
+            .tool-box {
+                flex-shrink: 0; /* 防止内容挤压 */
+                margin-bottom: 1.5rem;
+            }
+        
+            /* 移除原始gap改用margin控制间距 */
+            #right-sidebar {
+                gap: 0;
+            }
+            #live-clock {
+                font-family: 'Fira Code', monospace;
+                color: var(--dark-blue);
+                text-align: center;
+                font-size: 1.5rem;
+                padding: 1.2rem;
+                background: var(--main-blue);
+                border-radius: 12px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                transition: all 0.3s ease;
+            }
+
+            #live-clock:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            }
+
+
+        </style>
     </div>
 
     <script>
-        // 实时时钟
-        const formatTime = (num) => num.toString().padStart(2, '0');
-        function updateClock() {
-            const now = new Date();
-            const timeString = `
-                ${now.getFullYear()}年
-                ${formatTime(now.getMonth()+1)}月
-                ${formatTime(now.getDate())}日
-                ${formatTime(now.getHours())}:
-                ${formatTime(now.getMinutes())}:
-                ${formatTime(now.getSeconds())}
-            `.replace(/\s+/g, ' ');
-            document.getElementById('live-clock').textContent = timeString;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+        //时钟
+    document.addEventListener('DOMContentLoaded', () => {
+        const clockElement = document.getElementById('live-clock'); // 获取时钟 DOM 元素
+
+        // 格式化时间（如数字补零操作）
+         const formatTime = (num) => {
+             return num < 10 ? `0${num}` : num; // 如果数字小于10，则在前面补零
+         };
+
+        const updateClock = () => {
+            const now = new Date(); // 当前时间
+            const year = now.getFullYear(); // 年份
+            const month = now.getMonth() + 1; // 月份（从 0 开始，需要加 1）
+            const date = now.getDate(); // 日期
+            const hours = formatTime(now.getHours()); // 时
+            const minutes = formatTime(now.getMinutes()); // 分
+            const seconds = formatTime(now.getSeconds()); // 秒
+                // 格式化日期和时间
+                const formattedDate = `${year}年${month}月${date}日`;
+                const formattedTime = `${hours}:${minutes}:${seconds}`;
+
+                // 更新时钟 DOM 的内容
+            clockElement.innerHTML = `
+                ${formattedDate}<br>
+                ${formattedTime}
+                `;
+            };
+
+            // 每 1 秒更新一次时钟
+            setInterval(updateClock, 1000);
+
+            // 立即调用一次以显示初始时间，而无需等待 1 秒
+            updateClock();
+         });
+
+
 
         // 壁纸切换
         const tabs = document.querySelectorAll('.resolution-tab');
@@ -426,7 +508,15 @@
                 }, 300);
             });
         });
+        /* 添加在现有样式表中 */
+        iframe {
+            background: var(--main-blue);
+            transition: opacity 0.4s ease;
+        }
 
+        .tool-box iframe:hover {
+            opacity: 0.9;
+        }
         // 名言系统
         const quotes = [
             "代码如诗，逻辑如歌 —— 开发者之道",
