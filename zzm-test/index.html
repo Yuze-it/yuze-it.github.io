@@ -6,343 +6,292 @@
     <title>ZIMO-HUB - 基尼奇的草元素工坊</title>
     <style>
         :root {
-            --primary-color: #c1e7c1;
-            --secondary-color: #7cb97c;
-            --accent-color: #4a694a;
-            --highlight-color: #ffeb3b;
-            --fallback-color: #cccccc;
-            --pixel-size: 2px;
-        }
-
-        * {
-            box-sizing: border-box;
-            font-family: 'Pixelify Sans', cursive;
+            --primary-color: #e3f3e3;
+            --accent-color: #7bb17b;
+            --hover-color: #b2d8b2;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text-color: #4a694a;
+            --card-border-color: #c2e7c2;
         }
 
         body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
             margin: 0;
-            background: linear-gradient(135deg, var(--primary-color) 0%, #e3f3e3 100%);
-            min-height: 100vh;
-            color: var(--accent-color);
+            padding: 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #d4e9d4 100%);
+            color: var(--text-color);
         }
 
-        h1, h2, h3 {
-            margin: 10px 0;
-        }
-
-        a {
-            color: var(--accent-color);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        a:hover {
-            color: var(--highlight-color);
-        }
-
-        img {
-            display: block;
-            margin: 0 auto;
-        }
-
-        /* 像素风边框 */
-        .pixel-border {
-            border: var(--pixel-size) solid var(--accent-color);
-            position: relative;
-            box-shadow: 8px 8px 0 var(--secondary-color);
-            overflow: hidden;
-            border-radius: 4px;
-        }
-
-        /* 容器 */
         .container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        /* 导航栏 */
-        .nav {
+        header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            margin-bottom: 30px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 20px;
-        }
-
-        /* 主内容区 */
-        .main-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin: 30px 0;
-        }
-
-        /* 基尼奇角色卡片 */
-        .ganyu-card {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            text-align: center;
-        }
-
-        /* 小工具区 */
-        .widgets {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-
-        /* 像素风按钮 */
-        .pixel-btn {
-            background: var(--secondary-color);
+            justify-content: space-between;
+            gap: 2rem;
+            background: var(--accent-color);
             color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: transform 0.1s, background-color 0.2s;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .pixel-btn:hover {
-            transform: translate(2px, 2px);
-            background-color: var(--highlight-color);
-            color: var(--accent-color);
+        .character-profile {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
         }
 
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            .widgets {
-                grid-template-columns: 1fr;
-            }
+        .character-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid white;
         }
 
-        /* 动画 */
-        @keyframes pixel-bounce {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-            100% { transform: translateY(0); }
+        .title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
-        .myBox {
-            cursor: url('\imgs\zhizhen.jpg'), pointer
-            // cursor: url('\imgs\zhizhen.jpg'), pointer
-            // cursor: url('\imgs\zhizhen.jpg'), pointer
-            // cursor: url('\imgs\zhizhen.jpg'), pointer
-            }
-        /* 元素反应模拟器 */
-        .element-reaction {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 15px;
+
+        .geany-title {
+            font-family: 'Pixelify Sans', cursive;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+        }
+
+        .name-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            color: var(--text-color);
+            text-align: left; /* 修改为居左对齐 */
+        }
+
+        .content-wrapper {
+            display: flex;
+            gap: 2rem;
+        }
+
+        main {
+            flex: 3;
+        }
+
+        .widget-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .widget-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .element-btn {
-            padding: 8px;
+            padding: 10px 20px;
             border: none;
+            border-radius: 8px;
+            background: var(--accent-color);
+            color: white;
             cursor: pointer;
-            transition: filter 0.2s, transform 0.1s;
-            border-radius: 4px;
+            transition: all 0.2s;
         }
 
         .element-btn:hover {
-            filter: brightness(1.1);
+            background: var(--hover-color);
             transform: translateY(-2px);
         }
 
-        /* 每日签到 */
-        .daily-checkin {
+        .sidebar {
+            flex: 1;
             display: flex;
-            justify-content: space-around;
-            padding: 10px;
+            flex-direction: column;
+            gap: 1.5rem;
         }
 
-        .checkin-day {
-            width: 40px;
-            height: 40px;
-            border: 2px solid var(--accent-color);
-            border-radius: 4px;
-            text-align: center;
-            line-height: 36px;
-            background: white;
-            transition: background 0.2s, transform 0.1s;
+        .sidebar-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .checkin-day:hover {
-            background: var(--highlight-color);
-            transform: scale(1.1);
-        }
-
-        /* 友情链接 */
-        .friends-links {
+        .project-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
         }
 
-        .friend-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 4px;
+        .project-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid var(--card-border-color);
             text-decoration: none;
-            transition: transform 0.2s, background 0.2s;
+            color: inherit;
+            transition: all 0.3s ease;
+            text-align: center;
         }
 
-        .friend-link:hover {
-            transform: translate(3px, 3px);
-            background: var(--highlight-color);
-            color: black;
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: var(--hover-color);
         }
 
-        /* 页脚 */
         footer {
             text-align: center;
-            padding: 15px;
-            margin-top: 30px;
-            background: rgba(200, 240, 200, 0.8);
+            padding: 2rem;
+            color: var(--text-color);
+        }
+
+        .sidebar-card .link-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .link-grid .project-card {
+            width: 80%;
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </head>
 <body>
-    <div class="myBox"></div>
     <div class="container">
-        <nav class="nav pixel-border">
-            <h1>ZIMO-HUB</h1>
-            <div class="nav-links">
-                <a href="#home">首页</a>
-                <a href="#about">关于基尼奇</a>
-                <a href="#tools">草元素工具</a>
+        <header>
+            <div class="character-profile">
+                <img src="https://upload-bbs.miyoushe.com/upload/2024/09/12/352386279/12d3559d269f025863dc906e46f4d427_6418393457959133855.jpg" alt="基尼奇" class="character-avatar">
+                <div class="title-group">
+                    <div class="geany-title">GEANY</div>
+                    <p>草元素掌控者 | 纳塔学者 | 元素工坊主</p>
+                </div>
             </div>
-        </nav>
-
-        <main class="main-content">
-            <section class="ganyu-card pixel-border">
-                <h2>🪴 基尼奇的草元素工坊</h2>
-                <img src="https://upload-bbs.miyoushe.com/upload/2024/09/12/352386279/12d3559d269f025863dc906e46f4d427_6418393457959133855.jpg?x-oss-process=image/resize,s_600/quality,q_80/auto-orient,0/interlace,1/format,jpg" alt="像素风基尼奇" style="width: 200px; image-rendering: pixelated;">
+            <div class="name-card">
+                <h3>元素名片</h3>
                 <p>「林中寻道，草色长存」</p>
-                <button class="pixel-btn" onclick="triggerElementBurst()">元素爆发启动</button>
-            </section>
-
-            <div class="widgets">
-                <div class="pixel-border" style="padding: 15px;">
-                    <h3>元素能量监测</h3>
-                    <div id="energy-bar" style="height: 20px; background: #7cb97c;"></div>
-                </div>
-
-                <div class="pixel-border" style="padding: 15px;">
-                    <h3>天气小工具</h3>
-                    <div id="weather-display">🌞 晴朗</div>
-                    <button class="pixel-btn" onclick="changeWeather()">切换天气</button>
-                </div>
-
-                <div class="pixel-border" style="padding: 15px;">
-                    <h3>七圣召唤小助手</h3>
-                    <div class="dice-counter">
-                        <div>🎲 × <span id="dice-count">8</span></div>
-                        <button class="pixel-btn" onclick="rollDice()">投掷骰子</button>
-                    </div>
-                </div>
-
-                <div class="pixel-border" style="padding: 15px;">
-                    <h3>元素反应实验室</h3>
-                    <div class="element-reaction">
-                        <button class="element-btn" style="background: #7cb97c" onclick="triggerReaction('草')">🪴 草</button>
-                        <button class="element-btn" style="background: #6ab0de" onclick="triggerReaction('水')">💧 水</button>
-                        <button class="element-btn" style="background: #ffd700" onclick="triggerReaction('雷')">⚡ 雷</button>
-                    </div>
-                    <div id="reaction-result" style="margin-top:10px; min-height:40px; padding:5px; background: #f5f5f5;"></div>
-                </div>
-
-                <div class="pixel-border" style="padding: 15px;">
-                    <h3>每日签到奖励</h3>
-                    <div class="daily-checkin">
-                        <div class="checkin-day" data-day="1">🎁</div>
-                        <div class="checkin-day" data-day="2">?</div>
-                        <div class="checkin-day" data-day="3">?</div>
-                    </div>
-                    <button class="pixel-btn" onclick="dailyCheckin()">领取今日奖励</button>
-                </div>
+                <p>📍 所属：纳塔教令院</p>
+                <p>🌱 元素属性：草</p>
             </div>
-
-            <section class="pixel-border" style="padding:20px; margin-top:30px;">
-                <h2>🪻 元素伙伴</h2>
-                <div class="friends-links">
-                    <a href="https://yuze.zeabur.app/home" class="friend-link pixel-border" target="_blank">
-                        <span>Yuze的工坊</span>
-                    </a>
-                    <a href="#" class="friend-link pixel-border">
-                        <span>龙脊雪山观测站</span>
-                    </a>
+        </header>
+        <div class="content-wrapper">
+            <main>
+                <div class="widget-card">
+                    <h2>🪴 元素反应实验室</h2>
+                    <div>
+                        <button class="element-btn" onclick="triggerReaction('草')">🪴 草元素</button>
+                        <button class="element-btn" onclick="triggerReaction('水')">💧 水元素</button>
+                        <button class="element-btn" onclick="triggerReaction('雷')">⚡ 雷元素</button>
+                    </div>
+                    <div id="reaction-result" style="margin-top:1rem; padding:1rem; background:#f8f9fa; border-radius:8px;">双击按钮开始元素反应</div>
                 </div>
-            </section>
-        </main>
 
-        <footer class="pixel-border">
-            <p>🏮 璃月工坊荣誉出品 - © 2024 ZIMO-HUB</p>
-        </footer>
+                <div class="widget-card">
+                    <h2>📊 元素反应统计</h2>
+                    <p>总计元素反应次数：<span id="busuanzi_value_site_pv">0</span> 次</p>
+                </div>
+
+                <div class="widget-card">
+                    <h2>🌿 元素工坊项目</h2>
+                    <div class="project-grid">
+                        <a href="#" class="project-card">
+                            <h3>🍃 草元素模拟器</h3>
+                            <p>实时模拟元素反应效果的可视化工具</p>
+                        </a>
+                        <a href="#" class="project-card">
+                            <h3>🗺️ 原神地图工具</h3>
+                            <p>交互式提瓦特地图标记系统</p>
+                        </a>
+                    </div>
+                </div>
+            </main>
+            <aside class="sidebar">
+                <div class="sidebar-card">
+                    <h3>⏳ 元素时钟</h3>
+                    <div id="compact-clock" style="font-size: 1.5rem; color: var(--accent-color);"></div>
+                </div>
+                <div class="sidebar-card">
+                    <h3>🌐 元素链接</h3>
+                    <div class="link-grid">
+                        <a href="https://yuze.zeabur.app/home" class="project-card">
+                            <span>🛠️ Yuze的工坊</span>
+                        </a>
+                        <a href="#" class="project-card">
+                            <span>🏔️ 龙脊观测站</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="sidebar-card">
+                    <h3>📊 访问统计</h3>
+                    <div style="background: var(--accent-color); color:white; padding:1rem; border-radius:8px;">
+                        <span id="busuanzi_container_site_pv">
+                            👁️ 总访问量：<span id="busuanzi_value_site_pv"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="sidebar-card">
+                    <h3>📮 元素通讯</h3>
+                    <ul style="list-style:none; padding:0;">
+                        <li>📧 3569339239@qq.com</li>
+                        <li>📱 QQ：3569339239</li>
+                        <li>🌐 zimo-hub.github.io</li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
     </div>
 
+    <footer>
+        <p>© 2025 ZIMO-HUB 草元素工坊 - 璃月工坊荣誉出品</p>
+        <p>🏮 数据支持由不蒜子提供</p>
+    </footer>
+
     <script>
-        const weathers = ['🌞 晴朗', '🌧️ 降雨', '❄️ 降雪', '🌪️ 大风'];
-        function changeWeather() {
-            const display = document.getElementById('weather-display');
-            display.textContent = weathers[Math.floor(Math.random() * weathers.length)];
-        }
-
-        function rollDice() {
-            const diceCount = document.getElementById('dice-count');
-            diceCount.textContent = Math.floor(Math.random() * 8) + 1;
-        }
-
-        setInterval(() => {
-            const energyBar = document.getElementById('energy-bar');
-            energyBar.style.width = `${Math.random() * 80 + 20}%`;
-        }, 1000);
-
         const reactions = {
             '草+水': { name: '绽放', damage: '🌱 124', color: '#8bc34a' },
             '草+雷': { name: '激化', damage: '⚡ 156', color: '#9c27b0' },
             '水+雷': { name: '感电', damage: '💥 98', color: '#3f51b5' }
         };
         let currentElements = [];
+
         function triggerReaction(element) {
             currentElements.push(element);
             if (currentElements.length === 2) {
                 const reactionKey = currentElements.sort().join('+');
-                const result = reactions[reactionKey] || { name: '未知反应', damage: '❓ 0', color: '--fallback-color' };
+                const result = reactions[reactionKey] || { name: '未知反应', damage: '❓ 0', color: '#ccc' };
                 const display = document.getElementById('reaction-result');
-                display.innerHTML = `<div style="background: ${result.color}; padding: 10px;">${result.name} 造成 ${result.damage} 伤害</div>`;
+                display.innerHTML = `<div style="background: ${result.color}; padding:10px; border-radius:6px;">
+                    ${result.name} 造成 ${result.damage} 伤害</div>`;
                 currentElements = [];
             }
         }
 
-        function dailyCheckin() {
-            const days = document.querySelectorAll('.checkin-day');
-            for (let i = 0; i < days.length; i++) {
-                if (days[i].innerHTML === '?') {
-                    days[i].innerHTML = '🎉';
-                    days[i].style.background = '#ffeb3b';
-                    break;
-                }
-            }
+        function updateClock() {
+            const date = new Date();
+            const options = {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+            document.getElementById('compact-clock').textContent = date.toLocaleTimeString('zh-CN', options);
         }
-
-        function triggerElementBurst() {
-            alert('元素爆发已启动！🌿');
-        }
+        setInterval(updateClock, 1000);
+        updateClock();
     </script>
 </body>
 </html>
