@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神里绫华 - 白鹭霜华</title>
+    <link rel="icon" type="image/png" href="https://tse1-mm.cn.bing.net/th/id/OIP-C.odiFAdXkvFRkq7Tz1mJwkgHaJX?rs=1&pid=ImgDetMain">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sue+Ellen+Francisco&display=swap');
+
+        :root {
+            --primary-color: rgba(240, 248, 255, 0.9); /* AliceBlue with transparency */
+            --accent-color: #4a90e2; /* Blue */
+            --hover-color: #87ceeb; /* SkyBlue */
+            --card-bg: rgba(255, 255, 255, 0.8); /* semi-transparent white */
+            --text-color: #2c3e50;
+            --card-border-color: #b0e0e6; /* LightSteelBlue for border */
+        }
+
+        body {
+            font-family: 'Klee One', 'Sue Ellen Francisco', cursive, system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(174, 232, 255, 0.9)), 
+                        url('bk-yabo.png') no-repeat fixed center;
+            background-size: cover;
+            background-blend-mode: overlay;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(8px);
+        }
+
+        .character-profile {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .character-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
+        }
+
+        .title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .geany-title {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .name-card {
+            flex: 1;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            color: var(--text-color);
+        }
+
+        .content-wrapper {
+            display: flex;
+            gap: 2rem;
+        }
+
+        main {
+            flex: 3;
+        }
+
+        .widget-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .widget-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 14px rgba(0, 0, 0, 0.2);
+        }
+
+        .element-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(74, 144, 226, 0.2);
+            font-size: 1rem;
+        }
+
+        .element-btn:hover {
+            background: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        .sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .sidebar-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .project-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid var(--card-border-color);
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+            background: var(--hover-color);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+            backdrop-filter: blur(8px);
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @keyframes snowFall {
+            0% {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            25% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(600px);
+                opacity: 0.5;
+            }
+        }
+
+        .snow-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .snow {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation-name: snowFall;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</head>
+<body>
+    <div class="snow-container"></div>
+    <div class="container">
+        <header>
+            <div class="character-profile">
+                <img src="https://tse1-mm.cn.bing.net/th/id/OIP-C.odiFAdXkvFRkq7Tz1mJwkgHaJX?rs=1&pid=ImgDetMain" alt="神里绫华" class="character-avatar">
+                <div class="title-group">
+                    <div class="geany-title">白鹭公主</div>
+                    <p>冰元素剑士 | 稻妻名门 | 神里流太刀术皆传</p>
+                </div>
+            </div>
+            <div class="name-card">
+                <h3>霜华名片</h3>
+                <p>「风雅之事，应持之以恒」</p>
+                <p>📍 所属：社奉行神里家</p>
+                <p>❄️ 元素属性：冰</p>
+            </div>
+        </header>
+        <div class="content-wrapper">
+            <main>
+                <div class="widget-card">
+                    <h2>❄️ 元素反应实验室</h2>
+                    <div>
+                        <button class="element-btn" onclick="triggerReaction('冰')">❄️ 冰元素</button>
+                        <button class="element-btn" onclick="triggerReaction('水')">💧 水元素</button>
+                        <button class="element-btn" onclick="triggerReaction('火')">🔥 火元素</button>
+                    </div>
+                    <div id="reaction-result" style="margin-top:1rem; padding:1rem; background:#f8f9fa; border-radius:8px;">双击按钮开始元素反应</div>
+                </div>
+
+                <div class="widget-card">
+                    <h2>🗻 神里流秘传</h2>
+                    <div class="ai-dialogue">
+                        <input type="text" id="geo-input" placeholder="输入关于剑术或礼仪的问题..." 
+                               style="width:96.5%; padding:12px; border:2px solid var(--card-border-color); border-radius:8px; margin:10px 0;">
+                        <button class="element-btn" onclick="sendMessage()" 
+                                style="width:100%; padding:12px; background:var(--accent-color);">❄️ 霜之奥义</button>
+                        <div id="geo-response" style="margin-top:1rem; background:var(--card-bg); border-radius:8px; padding:1rem; min-height:100px;"></div>
+                    </div>
+                </div>
+            </main>
+            <aside class="sidebar">
+                <div class="sidebar-card">
+                    <h3>⏳ 稻妻时计</h3>
+                    <div id="compact-clock" style="font-size: 1.5rem; color: var(--accent-color);"></div>
+                </div>
+            </aside>
+        </div>
+        <footer>
+            <p>© 2025 神里屋敷 - 社奉行直属</p>
+            <p>「等雪霁之时，共赏明月可好？」</p>
+        </footer>
+    </div>
+
+    <script>
+        function createSnow() {
+            const container = document.querySelector('.snow-container');
+            for (let i = 0; i < 50; i++) {
+                const snow = document.createElement('div');
+                snow.className = 'snow';
+                snow.style.width = Math.random() * 5 + 3 + 'px';
+                snow.style.height = snow.style.width;
+                snow.style.left = Math.random() * 100 + '%';
+                snow.style.animationDuration = Math.random() * 3 + 5 + 's';
+                snow.style.opacity = Math.random();
+                container.appendChild(snow);
+            }
+        }
+        createSnow();
+
+        function updateClock() {
+            const date = new Date();
+            document.getElementById('compact-clock').textContent = date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
