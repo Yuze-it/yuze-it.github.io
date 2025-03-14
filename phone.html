@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>完整安卓模拟器</title>
+    <style>
+        /* 手机框架样式 */
+        .phone-frame {
+            width: 375px;
+            height: 667px;
+            border: 12px solid #333;
+            border-radius: 35px;
+            margin: 20px auto;
+            background: #f0f0f0;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 屏幕区域 */
+        .screen {
+            height: 100%;
+            background: #fff;
+            border-radius: 23px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 状态栏 */
+        .status-bar {
+            padding: 8px 15px;
+            background: #333;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        /* 应用网格 */
+        .app-grid {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 20px;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        /* 应用图标 */
+        .app-icon {
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            padding: 5px;
+        }
+
+        .app-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .app-icon img {
+            width: 48px;
+            height: 48px;
+        }
+
+        /* 应用界面 */
+        .app-screen {
+            display: none;
+            height: 100%;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* 返回按钮 */
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+            padding: 5px 10px;
+            background: #333;
+            color: white;
+            border-radius: 5px;
+        }
+
+        /* 相机界面 */
+        .camera-preview {
+            background: #000;
+            height: 80%;
+            margin: 10px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .shutter-button {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+        }
+
+        /* 图库界面 */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .photo-item {
+            width: 100%;
+            height: 100px;
+            background: #ddd;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+
+        /* 浏览器界面 */
+        .browser-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        #url-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+        }
+
+        .web-view {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+
+        /* 文件管理器 */
+        .file-list {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 设置界面 */
+        .settings-list li {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="phone-frame">
+        <div class="screen">
+            <!-- 状态栏 -->
+            <div class="status-bar">
+                <span id="time">12:00</span>
+                <span>📶 4G | 100% 🔋</span>
+            </div>
+
+            <!-- 主屏幕 -->
+            <div class="app-grid" id="home-screen">
+                <!-- 设置 -->
+                <div class="app-icon" onclick="showApp('settings')">
+                    <img src="https://img.icons8.com/ios-filled/50/000000/settings.png">
+                    <div>设置</div>
+                </div>
+
+                <!-- 相机 -->
+                <div class="app-icon" onclick="showApp('camera')">
+                    <img src="https://img.icons8.com/ios-filled/50/000000/camera.png">
+                    <div>相机</div>
+                </div>
+
+                <!-- 图库 -->
+                <div class="app-icon" onclick="showApp('gallery')">
+                    <img src="https://img.icons8.com/ios-filled/50/000000/picture.png">
+                    <div>图库</div>
+                </div>
+
+                <!-- 浏览器 -->
+                <div class="app-icon" onclick="showApp('browser')">
+                    <img src="https://img.icons8.com/ios-filled/50/000000/internet-browser.png">
+                    <div>浏览器</div>
+                </div>
+                <!-- 文件管理 -->
+                <div class="app-icon" onclick="showApp('files')">
+                    <img src="https://img.icons8.com/ios-filled/50/000000/file.png" alt="文件管理">
+                    <div>文件</div>
+                </div>
+            </div>
+
+            <!-- 相机应用 -->
+            <div class="app-screen" id="camera-app">
+                <div class="back-button" onclick="goHome()">返回</div>
+                <div class="camera-preview"></div>
+                <div class="shutter-button" onclick="takePhoto()">拍照</div>
+            </div>
+
+            <!-- 图库应用 -->
+            <div class="app-screen" id="gallery-app">
+                <div class="back-button" onclick="goHome()">返回</div>
+                <h2>图库</h2>
+                <input type="file" accept="image/*" multiple id="gallery-file-input" onchange="loadGalleryImages()"
+                    style="margin-top: 10px;">
+                <div class="photo-grid" id="photo-grid"></div>
+            </div>
+
+            <!-- 浏览器应用 -->
+            <div class="app-screen" id="browser-app">
+                <div class="back-button" onclick="goHome()">返回</div>
+                <h2>浏览器</h2>
+                <div class="browser-bar">
+                    <input type="text" id="url-input" placeholder="输入网址" />
+                    <button onclick="openBrowser()">访问</button>
+                </div>
+                <iframe class="web-view" id="web-view"></iframe>
+            </div>
+
+            <!-- 文件管理器 -->
+            <div class="app-screen" id="files-app">
+                <div class="back-button" onclick="goHome()">返回</div>
+                <h2>文件管理器</h2>
+                <input type="file" multiple id="file-input" onchange="listFiles()" />
+                <div class="file-list" id="file-list"></div>
+            </div>
+
+            <!-- 设置 -->
+            <div class="app-screen" id="settings-app">
+                <div class="back-button" onclick="goHome()">返回</div>
+                <h2>设置</h2>
+                <ul class="settings-list">
+                    <li>Wi-Fi 设置</li>
+                    <li>音量调节</li>
+                    <li>显示设置</li>
+                    <li>关于手机</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 切换到指定应用
+        function showApp(appId) {
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById(`${appId}-app`).style.display = 'block';
+        }
+
+        // 返回主屏
+        function goHome() {
+            const apps = document.querySelectorAll('.app-screen');
+            apps.forEach(app => app.style.display = 'none');
+            document.getElementById('home-screen').style.display = 'flex';
+        }
+
+        // 模拟拍照
+        function takePhoto() {
+            alert('模拟拍照，照片已保存到图库！');
+        }
+
+        // 加载图库图片
+        function loadGalleryImages() {
+            const fileInput = document.getElementById('gallery-file-input');
+            const photoGrid = document.getElementById('photo-grid');
+            photoGrid.innerHTML = ''; // 清空内容
+
+            Array.from(fileInput.files).forEach(file => {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'photo-item';
+                    photoGrid.appendChild(img);
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 打开网页浏览
+        function openBrowser() {
+            const urlInput = document.getElementById('url-input');
+            const webView = document.getElementById('web-view');
+            let url = urlInput.value;
+
+            if (!url.startsWith('http')) {
+                url = 'http://' + url;
+            }
+
+            webView.src = url;
+        }
+
+        // 列出文件
+        function listFiles() {
+            const fileInput = document.getElementById('file-input');
+            const fileList = document.getElementById('file-list');
+            fileList.innerHTML = ''; // 清空内容
+
+            Array.from(fileInput.files).forEach(file => {
+                const listItem = document.createElement('div');
+                listItem.className = 'file-item';
+
+                const fileTypeIcon = document.createElement('span');
+                fileTypeIcon.textContent = '📄';
+
+                const fileName = document.createElement('span');
+                fileName.textContent = file.name;
+
+                listItem.appendChild(fileTypeIcon);
+                listItem.appendChild(fileName);
+                fileList.appendChild(listItem);
+            });
+        }
+
+        // 设置当前时间
+        function updateTime() {
+            const time = document.getElementById('time');
+            const now = new Date();
+            time.textContent = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        }
+
+        // 定时更新时间
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
+</body>
+
+</html>
