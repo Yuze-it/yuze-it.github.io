@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Pro - 仿微信升级版</title>
+    <style>
+        /* 增强型基础样式 */
+        :root {
+            --primary-color: #07c160;
+            --user-bubble: #9eea6a;
+            --ai-bubble: #ffffff;
+            --shadow-color: rgba(0,0,0,0.08);
+            --nav-bg: rgba(255,255,255,0.95);
+            --blur-intensity: blur(12px);
+            --glass-effect: rgba(255,255,255,0.15);
+            --klee-color: #ff9999;
+            --zhongli-color: #e6d3a3;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            height: 100vh;
+        }
+
+        /* 增强聊天容器 */
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        /* 消息区域滚动优化 */
+        #chat-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 15px 0;
+            scroll-behavior: smooth;
+        }
+
+        /* 高级消息气泡 */
+        .message {
+            max-width: 75%;
+            margin: 12px 20px;
+            padding: 14px 18px;
+            border-radius: 22px;
+            display: flex;
+            gap: 12px;
+            align-items: start;
+            position: relative;
+            animation: messageAppear 0.3s ease;
+            background: var(--ai-bubble);
+            box-shadow: 0 4px 12px var(--shadow-color);
+            transition: transform 0.2s ease;
+        }
+
+        .message.klee-style {
+            background: var(--klee-color);
+            color: #8b0000;
+        }
+
+        .message.zhongli-style {
+            background: var(--zhongli-color);
+            color: #654321;
+        }
+
+        .user-message {
+            background: var(--user-bubble);
+            margin-left: auto;
+            flex-direction: row-reverse;
+        }
+
+        /* 头像增强 */
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 2px solid rgba(255,255,255,0.9);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+            background: #fff;
+        }
+
+        .user-message .avatar {
+            border-color: var(--user-bubble);
+        }
+
+        /* 角色名称标签 */
+        .role-tag {
+            position: absolute;
+            top: -8px;
+            left: 50px;
+            font-size: 0.8em;
+            color: #666;
+            background: rgba(255,255,255,0.9);
+            padding: 2px 8px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* 角色导航增强 */
+        .role-nav {
+            display: flex;
+            gap: 15px;
+            padding: 12px 15px;
+            overflow-x: auto;
+            background: #f9f9f9;
+            border-top: 1px solid #eee;
+        }
+
+        .role-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 8px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            background: white;
+            border: 2px solid transparent;
+            min-width: 80px;
+        }
+
+        .role-card.selected {
+            border-color: var(--primary-color);
+            background: rgba(7,193,96,0.05);
+        }
+
+        .role-card img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+        }
+
+        .role-card.selected img {
+            border-color: var(--primary-color);
+        }
+
+        .role-name {
+            font-size: 0.75em;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        /* 输入框增强 */
+        .input-box {
+            padding: 16px;
+            background: #fff;
+            border-top: 1px solid #eee;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.02);
+        }
+
+        @keyframes messageAppear {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <style>
+        /* 新增导航栏样式 */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            background: #fff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #e5e5e5;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        /* 朋友圈样式 */
+        .moment {
+            background: white;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .moment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .moment-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+            margin: 12px 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .moment-img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        /* 通讯录样式 */
+        .contact-list {
+            padding: 10px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* 设置面板增强 */
+        .settings-panel {
+            width: 80%;
+            max-width: 400px;
+            padding: 20px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--glass-effect);
+            backdrop-filter: var(--blur-intensity);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            border: 1px solid rgba(255,255,255,0.18);
+            display: none;
+            z-index: 2000;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+        <!-- 多容器内容 -->
+    <div class="chat-container" id="main-chat">
+        <div id="chat-content"></div>
+        
+        <!-- 增强角色导航 -->
+        <div class="role-nav">
+            <div class="role-card" data-role="assistant" onclick="switchRole('assistant')">
+                <img src="https://yuze.zeabur.app/home/img/66f025c10699e.png" alt="助理">
+                <span class="role-name">全能助理</span>
+            </div>
+            <div class="role-card" data-role="kimi" onclick="switchRole('kimi')">
+                <img src="https://tse3-mm.cn.bing.net/th/id/OIP-C.acRalbGPZq4w4GRC8LBJgAHaHa?rs=1&pid=ImgDetMain" alt="Kimi">
+                <span class="role-name">Kimi</span>
+            </div>
+            <div class="role-card" data-role="klee" onclick="switchRole('klee')">
+                <img src="https://ts1.tc.mm.bing.net/th?id=OIP-C.ds3hAvoUqZmOj_IPm8sAvwHaHa&w=189&h=185&c=8&rs=1&qlt=90&o=6&dpr=1.5&pid=3.1&rm=2" alt="可莉">
+                <span class="role-name">可莉</span>
+            </div>
+            <div class="role-card" data-role="zhongli" onclick="switchRole('zhongli')">
+                <img src="https://tse3-mm.cn.bing.net/th/id/OIP-C.aReg77rtMdv_Yi-2fP-I_gHaHa?w=183&h=184&c=7&r=0&o=5&dpr=1.5&pid=1.7" alt="钟离">
+                <span class="role-name">钟离</span>
+            </div>
+        </div>
+
+        <!-- 增强输入区域 -->
+        <div class="input-box">
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="text" id="user-input" 
+                       placeholder="输入消息..."
+                       style="flex:1; padding:14px 20px; border-radius:24px; border:1px solid #e5e5e5; font-size:15px;"
+                       onkeypress="if(event.keyCode===13)sendMessage()">
+                <button onclick="sendMessage()" 
+                        style="background:var(--primary-color); color:white; border:none; border-radius:24px; padding:14px 28px; font-size:15px;">
+                    发送
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const config = {
+        userAvatar: 'https://upload-bbs.miyoushe.com/upload/2024/08/12/351928121/b14de74fb64561f7ac3352485de5bf9f_6922045442527463237.gif',
+        currentRole: 'assistant',
+        roleConfig: {
+            assistant: {
+                avatar: 'https://yuze.zeabur.app/home/img/66f025c10699e.png',
+                prompt: "你是一个全能助手，请用中文简洁回答问题",
+                name: "全能助理"
+            },
+            klee: {
+                avatar: 'https://ts1.tc.mm.bing.net/th?id=OIP-C.ds3hAvoUqZmOj_IPm8sAvwHaHa&w=189&h=185&c=8&rs=1&qlt=90&o=6&dpr=1.5&pid=3.1&rm=2',
+                prompt: "你扮演《原神》的可莉，用活泼可爱的语气回答问题，带'哒'字结尾",
+                name: "可莉"
+            },
+            zhongli: {
+                avatar: 'https://tse3-mm.cn.bing.net/th/id/OIP-C.aReg77rtMdv_Yi-2fP-I_gHaHa?w=183&h=184&c=7&r=0&o=5&dpr=1.5&pid=1.7',
+                prompt: "你扮演《原神》的钟离，用沉稳文雅的古风语气回答，带'依吾之见'开头",
+                name: "钟离"
+            },
+            kimi: {
+                avatar: 'https://tse3-mm.cn.bing.net/th/id/OIP-C.acRalbGPZq4w4GRC8LBJgAHaHa?rs=1&pid=ImgDetMain',
+                prompt: "你叫Kimi，由月之暗面开发，擅长处理长文本和逻辑推理",
+                name: "Kimi"
+            }
+        },
+        apiEndpoint: 'https://api.moonshot.cn/v1/chat/completions',
+        apiKey: 'sk-N46UhIXp3ra7OqrixuUSJqrZS3HPPQ6hu73RohOwyHnlaFSu'
+    };
+
+    function switchRole(role) {
+        config.currentRole = role;
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.classList.toggle('selected', card.dataset.role === role);
+        });
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('user-input');
+        const message = input.value.trim();
+        if (!message) return;
+
+        // 添加用户消息
+        appendMessage(message, 'user');
+        input.value = '';
+
+        try {
+            const response = await fetch(config.apiEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${config.apiKey}`
+                },
+                body: JSON.stringify({
+                    model: "moonshot-v1-8k",
+                    messages: [
+                        {"role": "system", "content": config.roleConfig[config.currentRole].prompt},
+                        { role: "user", content: message }
+                    ]
+                })
+            });
+
+            const data = await response.json();
+            if (data.choices?.[0]?.message?.content) {
+                appendMessage(data.choices[0].message.content, 'assistant');
+            }
+        } catch (error) {
+            appendMessage('对话服务暂时不可用，请稍后再试', 'system');
+        }
+    }
+
+    function appendMessage(content, sender) {
+        const container = document.getElementById('chat-content');
+        const isUser = sender === 'user';
+        
+        const messageElem = document.createElement('div');
+        messageElem.className = `message ${isUser ? 'user-message' : ''}`;
+
+        // 头像部分
+        const avatar = document.createElement('img');
+        avatar.className = 'avatar';
+        avatar.src = isUser ? config.userAvatar : config.roleConfig[config.currentRole].avatar;
+
+        // 消息内容
+        const contentBox = document.createElement('div');
+        contentBox.style.flex = '1';
+        contentBox.textContent = content;
+
+        // 角色名称标签
+        if (!isUser) {
+            const roleTag = document.createElement('div');
+            roleTag.className = 'role-tag';
+            roleTag.textContent = config.roleConfig[config.currentRole].name;
+            messageElem.appendChild(roleTag);
+        }
+
+        // 组装元素
+        messageElem.appendChild(isUser ? contentBox : avatar);
+        messageElem.appendChild(isUser ? avatar : contentBox);
+
+        container.appendChild(messageElem);
+        container.scrollTop = container.scrollHeight;
+    }
+        </script>
+    <script>
+    // 容器切换功能
+    function showSection(sectionId) {
+        ['main-chat', 'moments', 'contacts'].forEach(id => {
+            document.getElementById(id).style.display = id === sectionId ? 'flex' : 'none';
+        });
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.toggle('active', item.onclick.toString().includes(sectionId));
+        });
+    }
+
+    // 设置面板切换
+    function toggleSettingsPanel() {
+        const panel = document.querySelector('.settings-panel');
+        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // 夜间模式切换
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+    }
+
+    // 字体大小调整
+    function changeFontSize(size) {
+        document.body.style.fontSize = size;
+    }
+    </script>
+</body>
+</html>
