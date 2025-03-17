@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Clone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f6f8fa;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background-color: #24292e;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+        }
+
+        .navbar-logo {
+            fill: white;
+            width: 32px;
+        }
+
+        .navbar-search {
+            background-color: #3f4448;
+            border: 1px solid #586069;
+            padding: 5px 12px;
+            border-radius: 6px;
+            color: white;
+            width: 300px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-left: auto;
+        }
+
+        /* 主体内容 */
+        .main-container {
+            margin-top: 60px;
+            display: flex;
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* 左侧边栏 */
+        .sidebar {
+            width: 240px;
+        }
+
+        .repo-list {
+            background-color: white;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 15px;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+        }
+
+        .readme-box {
+            background-color: white;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .code-block {
+            background-color: #f6f8fa;
+            padding: 16px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 15px 0;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <svg class="navbar-logo" viewBox="0 0 16 16" width="16" height="16">
+            <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+        </svg>
+        <input type="text" class="navbar-search" placeholder="Search or jump to...">
+        <div class="nav-links">
+            <span>Pull requests</span>
+            <span>Issues</span>
+            <span>Marketplace</span>
+            <span>Explore</span>
+        </div>
+        <img src="https://avatars.githubusercontent.com/u/583231?v=4" class="user-avatar">
+    </nav>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="repo-list">
+                <h2>Repositories</h2>
+                <div style="margin-top: 10px;">
+                    <div>username/repo1</div>
+                    <div>username/repo2</div>
+                    <div>username/repo3</div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="readme-box">
+                <h1>README.md</h1>
+                <p>This is a sample repository demonstrating GitHub's interface.</p>
+                
+                <h2>Getting Started</h2>
+                <div class="code-block">
+                    git clone https://github.com/username/repository.git<br>
+                    cd repository<br>
+                    npm install<br>
+                    npm start
+                </div>
+
+                <h2>Contributing</h2>
+                <p>Please read CONTRIBUTING.md for details on our code of conduct.</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

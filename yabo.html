@@ -215,6 +215,50 @@
             animation-timing-function: linear;
             animation-iteration-count: infinite;
         }
+        /* 新增视频相关样式 */
+        .pv-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .pv-item {
+            position: relative;
+            background: rgba(255,255,255,0.9);
+            border-radius: 12px;
+            padding: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .pv-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .pv-player {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            background: #000;
+            margin-top: 1rem;
+        }
+
+        .pv-player::-webkit-media-controls-panel {
+            background: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+        }
+
+        @media (max-width: 768px) {
+            .pv-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .pv-item {
+                margin-bottom: 1.5rem;
+            }
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
     <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
@@ -236,8 +280,15 @@
                 <p>📍 所属：社奉行神里家</p>
                 <p>❄️ 元素属性：冰</p>
             </div>
+            <aside class="sidebar">
+                <div class="sidebar-card">
+                    <h3>⏳ 稻妻时计</h3>
+                    <div id="compact-clock" style="font-size: 1.5rem; color: var(--accent-color);"></div>
+                </div>
+            </aside>
         </header>
         <div class="content-wrapper">
+
             <main>
                 <div class="widget-card">
                     <h2>❄️ 元素反应实验室</h2>
@@ -260,13 +311,26 @@
                     </div>
                 </div>
             </main>
-            <aside class="sidebar">
-                <div class="sidebar-card">
-                    <h3>⏳ 稻妻时计</h3>
-                    <div id="compact-clock" style="font-size: 1.5rem; color: var(--accent-color);"></div>
+            <main>
+                <div class="widget-card">
+                    <h2>❄️ 幕前华章</h2>
+                    <div class="pv-grid">
+                        <div class="pv-item">
+                            <h3>PV1 - 「白鹭归庭」</h3>
+                            <video src="https://webstatic.mihoyo.com/upload/static-resource/2021/07/15/daf25908cc6b902b8cd4de2253caff24_2613082475035603634.mp4" controls class="pv-player" 
+                                   poster="pv-poster1.jpg"></video>
+                        </div>
+                        <div class="pv-item">
+                            <h3>PV2 - 「雪霁逢椿」</h3>
+                            <video src="https://webstatic.mihoyo.com/upload/static-resource/2022/04/16/2837581b9a15118c65ca29644e7a3dad_6887596173285137071.mp4" controls class="pv-player"
+                                   poster="pv-poster2.jpg"></video>
+                        </div>
+                    </div>
                 </div>
-            </aside>
+                
         </div>
+        
+        
         <footer>
             <p>© 2025 神里屋敷 - 社奉行直属</p>
             <p>「等雪霁之时，共赏明月可好？」</p>
