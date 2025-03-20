@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #10B981;
+        }
+        body {
+            font-family: 'Inter', system-ui;
+            text-align: center;
+            padding: 4rem 2rem;
+            background: #f8fafc;
+        }
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary);
+            margin: 2rem auto;
+            position: relative;
+            animation: scaleUp 0.5s;
+        }
+        .checkmark::after {
+            content: '';
+            position: absolute;
+            left: 22px;
+            top: 38px;
+            width: 25px;
+            height: 12px;
+            border: solid white;
+            border-width: 0 0 3px 3px;
+            transform: rotate(-45deg);
+        }
+        @keyframes scaleUp {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+        .stats {
+            margin: 2rem auto;
+            max-width: 600px;
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="checkmark"></div>
+    <h1>感谢您的参与！</h1>
+    <div class="stats" id="stats"></div>
+
+    <script>
+        // 解析URL参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('userid');
+        const score = urlParams.get('score');
+
+        // 显示当前投票结果
+        document.getElementById('stats').innerHTML = `
+            <p>用户ID: ${userId}</p>
+            <p>您的评分: ${score}/5</p>
+            <p>总参与人数: ${getTotalVotes()}</p>
+            <p>平均得分: ${getAverageScore().toFixed(1)}</p>
+        `;
+
+        function getTotalVotes() {
+            return JSON.parse(localStorage.getItem('votes')).length;
+        }
+
+        function getAverageScore() {
+            const votes = JSON.parse(localStorage.getItem('votes'));
+            return votes.reduce((sum, v) => sum + Number(v.value), 0) / votes.length;
+        }
+    </script>
+</body>
+</html>

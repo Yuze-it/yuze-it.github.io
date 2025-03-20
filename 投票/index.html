@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线投票系统</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --secondary: #10B981;
+            --background: #f8fafc;
+            --text: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--background) 0%, #f1f5f9 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .decorative-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+
+        h1 {
+            color: var(--text);
+            text-align: center;
+            margin: 1.5rem 0;
+            font-weight: 700;
+            font-size: 2rem;
+        }
+
+        .vote-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            transition: transform 0.2s;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .option-item {
+            position: relative;
+            padding: 1.25rem;
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .option-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .option-item.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 2rem auto 0;
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            bottom: -50%;
+            left: -50%;
+            background: linear-gradient(90deg, 
+                transparent 25%, 
+                rgba(255,255,255,0.2) 50%, 
+                transparent 75%);
+            transform: rotateZ(60deg) translate(-5em, 7.5em);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            100% { transform: rotateZ(60deg) translate(5em, -7.5em); }
+        }
+
+        .vote-alert {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem 2rem;
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+        .clear-btn {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 1rem auto 0;
+            padding: 1rem 2rem;
+            background: #EF4444;
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .clear-btn:hover {
+            background: #DC2626;
+        }
+        .customize-form {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+        
+        .customize-form label {
+            display: block;
+            margin: 0.5rem 0 0.25rem;
+            font-weight: 500;
+        }
+        
+        .customize-form input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .customize-form button {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .customize-form button:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="decorative-bar"></div>
+        <h3 align="center"><b>- YUZE-IT -</b></h3>
+        <h1>客户满意度调查</h1>
+        
+        <div class="vote-card">
+            <h2>您会向朋友推荐我们的服务吗？</h2>
+            <div class="options-grid">
+                <label class="option-item">
+                    <input type="radio" name="recommend" value="5">
+                    <span>非常推荐</span>
+                </label>
+                <label class="option-item">
+                    <input type="radio" name="recommend" value="4">
+                    <span>推荐</span>
+                </label>
+                <label class="option-item">
+                    <input type="radio" name="recommend" value="3">
+                    <span>一般</span>
+                </label>
+                <label class="option-item">
+                    <input type="radio" name="recommend" value="2">
+                    <span>不推荐</span>
+                </label>
+                <label class="option-item">
+                    <input type="radio" name="recommend" value="1">
+                    <span>强烈反对</span>
+                </label>
+            </div>
+        </div>
+
+        <button class="submit-btn" onclick="handleVote()">提交投票</button>
+        <!-- 在.container内添加清除按钮 -->
+        <button class="clear-btn" onclick="clearVotes()">清除投票记录</button>
+        <!-- 在.container内添加定制投票内容的表单 -->
+        <div class="customize-form">
+            <h2>定制投票内容</h2>
+            <form onsubmit="customizeVote(event)">
+                <label for="voteTitle">投票标题：</label>
+                <input type="text" id="voteTitle" required>
+                <label for="voteOptions">投票选项（用英文逗号分隔）：</label>
+                <input type="text" id="voteOptions" required>
+                <button type="submit">应用定制</button>
+            </form>
+        </div>
+        <div class="vote-alert" id="alert"></div>
+    </div>
+
+    <script>
+        // 初始化存储
+        if(!localStorage.getItem('votes')) {
+            localStorage.setItem('votes', JSON.stringify([]));
+        }
+
+        // 动态获取用户ID
+        function getUserId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('userid') || generateAnonymousId();
+        }
+
+        // 生成匿名ID
+        function generateAnonymousId() {
+            return 'anon_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // 选项交互
+        document.querySelectorAll('.option-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.option-item').forEach(i => 
+                    i.classList.remove('selected'));
+                item.classList.add('selected');
+                item.querySelector('input').checked = true;
+            });
+        });
+
+        // 处理投票
+        function handleVote() {
+            const selected = document.querySelector('input[name="recommend"]:checked');
+            if (!selected) return showAlert('请先选择一个选项', 'warning');
+
+            const userId = getUserId();
+            const voteData = {
+                userId,
+                value: selected.value,
+                timestamp: new Date().toISOString(),
+                ip: null // 纯前端无法获取真实IP
+            };
+
+            // 检查是否重复投票
+            const votes = JSON.parse(localStorage.getItem('votes'));
+            if (votes.some(v => v.userId === userId)) {
+                return showAlert('您已经投过票了', 'error');
+            }
+
+            // 保存数据
+            votes.push(voteData);
+            localStorage.setItem('votes', JSON.stringify(votes));
+
+            // 跳转结果页
+            window.location.href = `complete.html?userid=${userId}&score=${selected.value}`;
+        }
+
+        // 显示提示
+        function showAlert(message, type = 'info') {
+            const alertBox = document.getElementById('alert');
+            alertBox.textContent = message;
+            alertBox.style.display = 'block';
+            alertBox.style.background = {
+                info: '#e0f2fe',
+                warning: '#fef9c3',
+                error: '#fee2e2'
+            }[type];
+            
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 3000);
+        }
+        // 清除投票记录 
+        function clearVotes() {
+            if (confirm('确定要清除所有投票记录吗？此操作不可恢复！')) {
+                localStorage.setItem('votes',  JSON.stringify([])); 
+                showAlert('投票记录已清除', 'info');
+            }
+        }
+        // 定制投票内容 
+        function customizeVote(event) {
+            event.preventDefault(); 
+            const title = document.getElementById('voteTitle').value; 
+            const options = document.getElementById('voteOptions').value.split(','); 
+        
+            // 更新投票标题 
+            document.querySelector('h1').textContent  = title;
+        
+            // 清空并更新选项 
+            const optionsGrid = document.querySelector('.options-grid'); 
+            optionsGrid.innerHTML  = '';
+        
+            options.forEach((option,  index) => {
+                const optionItem = document.createElement('label'); 
+                optionItem.className  = 'option-item';
+                optionItem.innerHTML  = `
+                    <input type="radio" name="recommend" value="${index + 1}">
+                    <span>${option.trim()}</span> 
+                `;
+                optionsGrid.appendChild(optionItem); 
+            });
+        
+            // 重新绑定选项点击事件 
+            document.querySelectorAll('.option-item').forEach(item  => {
+                item.addEventListener('click',  () => {
+                    document.querySelectorAll('.option-item').forEach(i  => 
+                        i.classList.remove('selected')); 
+                    item.classList.add('selected'); 
+                    item.querySelector('input').checked  = true;
+                });
+            });
+        
+            showAlert('投票内容已更新', 'info');
+        }
+    </script>
+</body>
+</html>
