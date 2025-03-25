@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>智能自习室管理系统 - YUZE-IT</title>
+    <style>
+        :root {
+            --main-color: #e3f2fd;
+            --accent-color: #2196f3;
+            --dark-color: #1976d2;
+            --warning-color: #f44336;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', system-ui;
+            background: var(--main-color);
+            display: flex;
+            flex-direction: column;
+            color: #0d47a1;
+        }
+
+        .header {
+            background: var(--dark-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .noise-panel {
+            flex: 2;
+            min-width: 300px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .sidebar {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .db-meter {
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .db-progress {
+            height: 100%;
+            background: linear-gradient(to right, #4CAF50, #FFC107, var(--warning-color));
+            transition: width 0.3s ease;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .stats-table th, 
+        .stats-table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .annotation-board {
+            border: 2px solid var(--accent-color);
+            border-radius: 10px;
+            height: 300px;
+            background: white;
+            touch-action: none;
+            margin: 15px 0;
+        }
+
+        .timer-box {
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        button {
+            background: var(--dark-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: var(--accent-color);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>智能自习室管理系统</h1>
+        <a href="https://yuze.netlify.app" style="color:white; text-decoration:none;">YUZE-IT 技术支持</a>
+    </div>
+
+    <div class="main-content">
+        <div class="noise-panel">
+            <h2>环境噪音监测 🎚️</h2>
+            <div class="db-meter">
+                <div class="db-progress" style="width: 30%"></div>
+            </div>
+            <p>当前分贝：<span id="currentDb">0</span> dB</p>
+            <div class="stats">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>级别</th>
+                            <th>次数</th>
+                            <th>持续时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsBody">
+                        <tr><td>安静 (<40dB)</td><td>0</td><td>0s</td></tr>
+                        <tr><td>中等 (40-60dB)</td><td>0</td><td>0s</td></tr>
+                        <tr><td>吵闹 (>60dB)</td><td>0</td><td>0s</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="annotation-section">
+                <h3>协作批注板 ✍️</h3>
+                <canvas class="annotation-board" width="400" height="300"></canvas>
+                <div class="toolbar">
+                    <input type="color" id="penColor" value="#0d47a1">
+                    <input type="range" id="penSize" min="1" max="10" value="3">
+                    <button onclick="clearCanvas()">清除</button>
+                </div>
+            </div>
+            
+            <div class="timer-section">
+                <h3>自习计时器 ⏳</h3>
+                <div class="toolbar">
+                    <input type="number" id="minutes" placeholder="分钟" min="1" value="45">
+                    <button onclick="startTimer()">开始</button>
+                    <button onclick="pauseTimer()">暂停</button>
+                </div>
+                <div class="timer-box" id="timerDisplay">00:00</div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // 噪音检测模块
+    let audioContext, analyser, microphone;
+    let noiseStats = {
+        low: { count: 0, duration: 0, start: null },
+        medium: { count: 0, duration: 0, start: null },
+        high: { count: 0, duration: 0, start: null }
+    };
+
+    async function initAudio() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioContext = new AudioContext();
+            analyser = audioContext.createAnalyser();
+            microphone = audioContext.createMediaStreamSource(stream);
+            
+            microphone.connect(analyser);
+            analyser.fftSize = 256;
+            
+            monitorNoiseLevel();
+        } catch (err) {
+            console.error('麦克风访问失败:', err);
+        }
+    }
+
+    function monitorNoiseLevel() {
+        const buffer = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(buffer);
+        
+        const sum = buffer.reduce((a, b) => a + b);
+        const avg = sum / buffer.length;
+        const db = 20 * Math.log10(avg) + 30; // 转换为分贝近似值
+        
+        updateNoiseDisplay(db);
+        updateStats(db);
+        requestAnimationFrame(monitorNoiseLevel);
+    }
+
+    function updateNoiseDisplay(db) {
+        document.getElementById('currentDb').textContent = db.toFixed(1);
+        const progress = Math.min((db / 100) * 100, 100);
+        document.querySelector('.db-progress').style.width = `${progress}%`;
+    }
+
+    function updateStats(db) {
+        const now = Date.now();
+        const level = db < 40 ? 'low' : db < 60 ? 'medium' : 'high';
+        
+        Object.keys(noiseStats).forEach(key => {
+            if (key !== level && noiseStats[key].start) {
+                noiseStats[key].duration += now - noiseStats[key].start;
+                noiseStats[key].start = null;
+            }
+        });
+
+        if (!noiseStats[level].start) {
+            noiseStats[level].count++;
+            noiseStats[level].start = now;
+        }
+
+        // 更新表格数据
+        document.getElementById('statsBody').innerHTML = `
+            <tr><td>安静 (&lt;40dB)</td><td>${noiseStats.low.count}</td><td>${(noiseStats.low.duration/1000).toFixed(1)}s</td></tr>
+            <tr><td>中等 (40-60dB)</td><td>${noiseStats.medium.count}</td><td>${(noiseStats.medium.duration/1000).toFixed(1)}s</td></tr>
+            <tr><td>吵闹 (&gt;60dB)</td><td>${noiseStats.high.count}</td><td>${(noiseStats.high.duration/1000).toFixed(1)}s</td></tr>
+        `;
+    }
+
+    // 批注模块
+    const canvas = document.querySelector('.annotation-board');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    let currentPaths = new Map();
+
+    function getCanvasPosition(event) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: (event.clientX || event.touches[0].clientX) - rect.left,
+            y: (event.clientY || event.touches[0].clientY) - rect.top
+        };
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startDrawing(e.touches[0]);
+    });
+
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        draw(e.touches[0]);
+    });
+
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('touchend', stopDrawing);
+
+    function startDrawing(e) {
+        drawing = true;
+        const pos = getCanvasPosition(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    }
+
+    function draw(e) {
+        if (!drawing) return;
+        const pos = getCanvasPosition(e);
+        
+        ctx.lineTo(pos.x, pos.y);
+        ctx.strokeStyle = document.getElementById('penColor').value;
+        ctx.lineWidth = document.getElementById('penSize').value;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    }
+
+    function stopDrawing() {
+        drawing = false;
+        ctx.beginPath();
+    }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // 计时器模块
+    let timerId;
+    let remainingTime = 0;
+
+    function startTimer() {
+        const minutes = parseInt(document.getElementById('minutes').value) || 45;
+        remainingTime = minutes * 60;
+        
+        clearInterval(timerId);
+        timerId = setInterval(() => {
+            remainingTime--;
+            if (remainingTime <= 0) clearInterval(timerId);
+            updateTimerDisplay();
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        clearInterval(timerId);
+    }
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(remainingTime / 60);
+        const seconds = remainingTime % 60;
+        document.getElementById('timerDisplay').textContent = 
+            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    // 初始化
+    initAudio();
+</script>
+</body>
+</html>
