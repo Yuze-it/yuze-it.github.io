@@ -28,7 +28,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .main-content {
@@ -45,16 +45,16 @@
             background: white;
             border-radius: 15px;
             padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .sidebar {
             flex: 1;
             min-width: 300px;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255, 255, 255, 0.9);
             padding: 20px;
             border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .db-meter {
@@ -77,7 +77,7 @@
             margin-top: 15px;
         }
 
-        .stats-table th, 
+        .stats-table th,
         .stats-table td {
             padding: 12px;
             border-bottom: 1px solid #ddd;
@@ -93,7 +93,7 @@
         }
 
         .timer-box {
-            background: rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.8);
             color: white;
             padding: 10px 20px;
             border-radius: 20px;
@@ -140,9 +140,9 @@
         <div class="noise-panel">
             <h2>环境噪音监测 🎚️</h2>
             <div class="db-meter">
-                <div class="db-progress" style="width: 30%"></div>
+                <div class="db-progress" id="level" style="width: 0%"></div>
             </div>
-            <p>当前分贝：<span id="currentDb">0</span> dB</p>
+            <p>当前分贝：<span id="volume">0</span> dB</p>
             <div class="stats">
                 <table class="stats-table">
                     <thead>
@@ -153,9 +153,21 @@
                         </tr>
                     </thead>
                     <tbody id="statsBody">
-                        <tr><td>安静 (<40dB)</td><td>0</td><td>0s</td></tr>
-                        <tr><td>中等 (40-60dB)</td><td>0</td><td>0s</td></tr>
-                        <tr><td>吵闹 (>60dB)</td><td>0</td><td>0s</td></tr>
+                        <tr>
+                            <td>安静 (&lt;40dB)</td>
+                            <td>0</td>
+                            <td>0s</td>
+                        </tr>
+                        <tr>
+                            <td>中等 (40-60dB)</td>
+                            <td>0</td>
+                            <td>0s</td>
+                        </tr>
+                        <tr>
+                            <td>吵闹 (&gt;60dB)</td>
+                            <td>0</td>
+                            <td>0s</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -171,89 +183,111 @@
                     <button onclick="clearCanvas()">清除</button>
                 </div>
             </div>
-            
+
             <div class="timer-section">
                 <h3>自习计时器 ⏳</h3>
                 <div class="toolbar">
                     <input type="number" id="minutes" placeholder="分钟" min="1" value="45">
                     <button onclick="startTimer()">开始</button>
                     <button onclick="pauseTimer()">暂停</button>
+                    <button onclick="resetTimer()">重置</button>
                 </div>
-                <div class="timer-box" id="timerDisplay">00:00</div>
+                <div class="timer-box" id="timerDisplay">00:00</div>                
             </div>
         </div>
     </div>
 
 <script>
-    // 噪音检测模块
-    let audioContext, analyser, microphone;
     let noiseStats = {
-        low: { count: 0, duration: 0, start: null },
-        medium: { count: 0, duration: 0, start: null },
-        high: { count: 0, duration: 0, start: null }
-    };
+    quiet: { count: 0, time: 0 },
+    moderate: { count: 0, time: 0 },
+    loud: { count: 0, time: 0 },
+};
+let currentNoiseLevel = null;
+let lastUpdateTime = Date.now();
 
-    async function initAudio() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            audioContext = new AudioContext();
-            analyser = audioContext.createAnalyser();
-            microphone = audioContext.createMediaStreamSource(stream);
-            
-            microphone.connect(analyser);
-            analyser.fftSize = 256;
-            
-            monitorNoiseLevel();
-        } catch (err) {
-            console.error('麦克风访问失败:', err);
+async function startMonitoring() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        microphone = audioContext.createMediaStreamSource(stream);
+        microphone.connect(analyser);
+        analyser.fftSize = 1024;
+
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        function measure() {
+            analyser.getByteFrequencyData(dataArray);
+            const sum = dataArray.reduce((a, b) => a + b, 0);
+            const average = sum / bufferLength;
+            const decibels = Math.round((average / 256) * 100);
+
+            document.getElementById('volume').textContent = `${decibels}`;
+            document.getElementById('level').style.width = `${Math.min(decibels, 100)}%`;
+
+            updateNoiseStats(decibels);
+            requestAnimationFrame(measure);
         }
+        measure();
+    } catch (error) {
+        alert("麦克风访问失败: " + error);
     }
+}
 
-    function monitorNoiseLevel() {
-        const buffer = new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteFrequencyData(buffer);
-        
-        const sum = buffer.reduce((a, b) => a + b);
-        const avg = sum / buffer.length;
-        const db = 20 * Math.log10(avg) + 30; // 转换为分贝近似值
-        
-        updateNoiseDisplay(db);
-        updateStats(db);
-        requestAnimationFrame(monitorNoiseLevel);
-    }
+function updateNoiseStats(decibels) {
+    const newNoiseLevel = getNoiseLevel(decibels);
 
-    function updateNoiseDisplay(db) {
-        document.getElementById('currentDb').textContent = db.toFixed(1);
-        const progress = Math.min((db / 100) * 100, 100);
-        document.querySelector('.db-progress').style.width = `${progress}%`;
-    }
-
-    function updateStats(db) {
-        const now = Date.now();
-        const level = db < 40 ? 'low' : db < 60 ? 'medium' : 'high';
-        
-        Object.keys(noiseStats).forEach(key => {
-            if (key !== level && noiseStats[key].start) {
-                noiseStats[key].duration += now - noiseStats[key].start;
-                noiseStats[key].start = null;
-            }
-        });
-
-        if (!noiseStats[level].start) {
-            noiseStats[level].count++;
-            noiseStats[level].start = now;
+    // 如果噪音级别发生变化，切换到新的级别并累加上一个级别的时间
+    if (currentNoiseLevel !== newNoiseLevel) {
+        const currentTime = Date.now();
+        if (currentNoiseLevel) {
+            const elapsedTime = Math.floor((currentTime - lastUpdateTime) / 1000);
+            noiseStats[currentNoiseLevel].time += elapsedTime;
+            noiseStats[currentNoiseLevel].count += 1;
         }
-
-        // 更新表格数据
-        document.getElementById('statsBody').innerHTML = `
-            <tr><td>安静 (&lt;40dB)</td><td>${noiseStats.low.count}</td><td>${(noiseStats.low.duration/1000).toFixed(1)}s</td></tr>
-            <tr><td>中等 (40-60dB)</td><td>${noiseStats.medium.count}</td><td>${(noiseStats.medium.duration/1000).toFixed(1)}s</td></tr>
-            <tr><td>吵闹 (&gt;60dB)</td><td>${noiseStats.high.count}</td><td>${(noiseStats.high.duration/1000).toFixed(1)}s</td></tr>
-        `;
+        currentNoiseLevel = newNoiseLevel;
+        lastUpdateTime = currentTime;
     }
+    
+    // 更新表格显示
+    updateStatsTable();
+}
 
-    // 批注模块
-    const canvas = document.querySelector('.annotation-board');
+function getNoiseLevel(decibels) {
+    if (decibels < 40) {
+        return 'quiet';
+    } else if (decibels <= 60) {
+        return 'moderate';
+    } else {
+        return 'loud';
+    }
+}
+
+function updateStatsTable() {
+    const statsBody = document.getElementById('statsBody');
+    statsBody.innerHTML = `
+        <tr>
+            <td>安静 (&lt;40dB)</td>
+            <td>${noiseStats.quiet.count}</td>
+            <td>${noiseStats.quiet.time}s</td>
+        </tr>
+        <tr>
+            <td>中等 (40-60dB)</td>
+            <td>${noiseStats.moderate.count}</td>
+            <td>${noiseStats.moderate.time}s</td>
+        </tr>
+        <tr>
+            <td>吵闹 (&gt;60dB)</td>
+            <td>${noiseStats.loud.count}</td>
+            <td>${noiseStats.loud.time}s</td>
+        </tr>
+    `;
+}
+
+     // 批注模块
+     const canvas = document.querySelector('.annotation-board');
     const ctx = canvas.getContext('2d');
     let drawing = false;
     let currentPaths = new Map();
@@ -312,34 +346,58 @@
     }
 
     // 计时器模块
-    let timerId;
-    let remainingTime = 0;
+    // 定义计时器状态
+let timerId;
+let remainingTime = 0;
+let isTimerRunning = false;
 
-    function startTimer() {
-        const minutes = parseInt(document.getElementById('minutes').value) || 45;
-        remainingTime = minutes * 60;
-        
-        clearInterval(timerId);
-        timerId = setInterval(() => {
+function startTimer() {
+    // 如果计时器正在运行，不重复启动
+    if (isTimerRunning) return;
+
+    const minutes = parseInt(document.getElementById('minutes').value) || 45;
+    remainingTime = minutes * 60; // 转换为秒
+    isTimerRunning = true;
+
+    // 每秒更新倒计时
+    clearInterval(timerId);
+    timerId = setInterval(() => {
+        if (remainingTime > 0) {
             remainingTime--;
-            if (remainingTime <= 0) clearInterval(timerId);
             updateTimerDisplay();
-        }, 1000);
-    }
+        } else {
+            clearInterval(timerId);
+            isTimerRunning = false;
+            alert("倒计时结束！时间到！");
+        }
+    }, 1000);
 
-    function pauseTimer() {
-        clearInterval(timerId);
-    }
+    updateTimerDisplay();
+}
 
-    function updateTimerDisplay() {
-        const minutes = Math.floor(remainingTime / 60);
-        const seconds = remainingTime % 60;
-        document.getElementById('timerDisplay').textContent = 
-            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }
+function pauseTimer() {
+    clearInterval(timerId);
+    isTimerRunning = false;
+}
+
+function resetTimer() {
+    pauseTimer();
+    remainingTime = 0;
+    document.getElementById('timerDisplay').textContent = "00:00";
+    document.getElementById('minutes').value = "";
+    isTimerRunning = false;
+}
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+    document.getElementById('timerDisplay').textContent =
+        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
 
     // 初始化
-    initAudio();
+    startMonitoring();
 </script>
 </body>
 </html>
