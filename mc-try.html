@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Minecraft Clone</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #block-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        WASD: 移动<br>
+        空格: 跳跃<br>
+        鼠标: 视角<br>
+        左键: 破坏方块<br>
+        右键: 放置方块<br>
+        F: 切换飞行模式<br>
+        1-9: 选择方块类型
+    </div>
+    <div id="block-info">当前方块: 草方块</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+    <script>
+        // 游戏常量
+        const BLOCK_SIZE = 1;
+        const CHUNK_SIZE = 16;
+        const RENDER_DISTANCE = 4;
+        const GRAVITY = 0.002;
+        const JUMP_FORCE = 0.15;
+        
+        // 方块类型
+        const BLOCKS = [
+            { id: 0, name: "空气", transparent: true },
+            { id: 1, name: "草方块", color: 0x4CAF50 },
+            { id: 2, name: "泥土", color: 0x795548 },
+            { id: 3, name: "石头", color: 0x9E9E9E },
+            { id: 4, name: "木头", color: 0x8D6E63 },
+            { id: 5, name: "树叶", color: 0x2E7D32, transparent: true },
+            { id: 6, name: "水", color: 0x2196F3, transparent: true },
+            { id: 7, name: "沙子", color: 0xFFEB3B },
+            { id: 8, name: "玻璃", color: 0xE3F2FD, transparent: true },
+            { id: 9, name: "砖块", color: 0xB71C1C }
+        ];
+        
+        // 游戏状态
+        let world = {};
+        let player = {
+            position: { x: 0, y: 20, z: 0 },
+            velocity: { x: 0, y: 0, z: 0 },
+            rotation: { x: 0, y: 0 },
+            health: 20,
+            hunger: 20,
+            inventory: [],
+            selectedBlock: 1,
+            isFlying: false,
+            isOnGround: false
+        };
+        
+        // 初始化Three.js场景
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        
+        // 添加光源
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+        
+        // 初始化相机
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(player.position.x, player.position.y, player.position.z);
+        
+        // 初始化渲染器
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        
+        // 初始化指针锁定控制
+        const controls = new THREE.PointerLockControls(camera, document.body);
+        
+        // 添加事件监听器
+        document.addEventListener('click', () => {
+            controls.lock();
+        });
+        
+        // 键盘控制
+        const keys = {};
+        document.addEventListener('keydown', (event) => {
+            keys[event.code] = true;
+            
+            // 切换飞行模式
+            if (event.code === 'KeyF') {
+                player.isFlying = !player.isFlying;
+                document.getElementById('info').innerHTML += `<br>飞行模式 ${player.isFlying ? '开启' : '关闭'}`;
+            }
+            
+            // 选择方块
+            if (event.code >= 'Digit1' && event.code <= 'Digit9') {
+                const blockId = parseInt(event.code[5]);
+                if (blockId < BLOCKS.length) {
+                    player.selectedBlock = blockId;
+                    document.getElementById('block-info').textContent = `当前方块: ${BLOCKS[blockId].name}`;
+                }
+            }
+        });
+        
+        document.addEventListener('keyup', (event) => {
+            keys[event.code] = false;
+        });
+        
+        // 生成地形
+        function generateTerrain(chunkX, chunkZ) {
+            const chunkKey = `${chunkX},${chunkZ}`;
+            const blocks = {};
+            
+            // 简单地形生成
+            for (let x = 0; x < CHUNK_SIZE; x++) {
+                for (let z = 0; z < CHUNK_SIZE; z++) {
+                    const worldX = chunkX * CHUNK_SIZE + x;
+                    const worldZ = chunkZ * CHUNK_SIZE + z;
+                    
+                    // 使用噪声生成高度
+                    const height = Math.floor(perlin(worldX / 30, worldZ / 30) * 10 + 10);
+                    
+                    for (let y = 0; y < height; y++) {
+                        if (y < height - 3) {
+                            blocks[`${x},${y},${z}`] = 3; // 石头
+                        } else if (y < height) {
+                            blocks[`${x},${y},${z}`] = 2; // 泥土
+                        } else if (y === height) {
+                            blocks[`${x},${y},${z}`] = 1; // 草方块
+                        }
+                    }
+                    
+                    // 生成水
+                    for (let y = 0; y < 10; y++) {
+                        if (!blocks[`${x},${y},${z}`]) {
+                            blocks[`${x},${y},${z}`] = 6; // 水
+                        }
+                    }
+                }
+            }
+            
+            world[chunkKey] = blocks;
+            return blocks;
+        }
+        
+        // 简化版柏林噪声
+        function perlin(x, z) {
+            // 这是一个简化版的噪声函数，实际应用中应该使用更完整的实现
+            return Math.abs(Math.sin(x * 10 + z * 5) + Math.sin(x * 5 + z * 10) * 0.5);
+        }
+        
+        // 获取方块
+        function getBlock(x, y, z) {
+            if (y < 0 || y >= CHUNK_SIZE) return 0;
+            
+            const chunkX = Math.floor(x / CHUNK_SIZE);
+            const chunkZ = Math.floor(z / CHUNK_SIZE);
+            const localX = x % CHUNK_SIZE;
+            const localZ = z % CHUNK_SIZE;
+            
+            const chunkKey = `${chunkX},${chunkZ}`;
+            if (!world[chunkKey]) return 0;
+            
+            return world[chunkKey][`${localX},${y},${localZ}`] || 0;
+        }
+        
+        // 设置方块
+        function setBlock(x, y, z, blockId) {
+            if (y < 0 || y >= CHUNK_SIZE) return false;
+            
+            const chunkX = Math.floor(x / CHUNK_SIZE);
+            const chunkZ = Math.floor(z / CHUNK_SIZE);
+            const localX = x % CHUNK_SIZE;
+            const localZ = z % CHUNK_SIZE;
+            
+            const chunkKey = `${chunkX},${chunkZ}`;
+            if (!world[chunkKey]) {
+                world[chunkKey] = {};
+            }
+            
+            world[chunkKey][`${localX},${y},${localZ}`] = blockId;
+            return true;
+        }
+        
+        // 渲染区块
+        function renderChunk(chunkX, chunkZ) {
+            const chunkKey = `${chunkX},${chunkZ}`;
+            if (!world[chunkKey]) return;
+            
+            // 创建几何体
+            const geometry = new THREE.BufferGeometry();
+            const material = new THREE.MeshLambertMaterial({ vertexColors: true });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(chunkX * CHUNK_SIZE, 0, chunkZ * CHUNK_SIZE);
+            scene.add(mesh);
+            
+            // 收集顶点数据
+            const positions = [];
+            const colors = [];
+            const indices = [];
+            let index = 0;
+            
+            for (let x = 0; x < CHUNK_SIZE; x++) {
+                for (let y = 0; y < CHUNK_SIZE; y++) {
+                    for (let z = 0; z < CHUNK_SIZE; z++) {
+                        const blockId = world[chunkKey][`${x},${y},${z}`];
+                        if (!blockId || blockId === 0) continue; // 跳过空气
+                        
+                        const block = BLOCKS[blockId];
+                        if (!block) continue;
+                        
+                        // 检查相邻方块是否透明
+                        const neighbors = {
+                            left: getBlock(chunkX * CHUNK_SIZE + x - 1, y, chunkZ * CHUNK_SIZE + z),
+                            right: getBlock(chunkX * CHUNK_SIZE + x + 1, y, chunkZ * CHUNK_SIZE + z),
+                            bottom: getBlock(chunkX * CHUNK_SIZE + x, y - 1, chunkZ * CHUNK_SIZE + z),
+                            top: getBlock(chunkX * CHUNK_SIZE + x, y + 1, chunkZ * CHUNK_SIZE + z),
+                            back: getBlock(chunkX * CHUNK_SIZE + x, y, chunkZ * CHUNK_SIZE + z - 1),
+                            front: getBlock(chunkX * CHUNK_SIZE + x, y, chunkZ * CHUNK_SIZE + z + 1)
+                        };
+                        
+                        // 只渲染可见的面
+                        if (!neighbors.left || BLOCKS[neighbors.left].transparent) {
+                            // 左面
+                            positions.push(
+                                x, y, z + 1,
+                                x, y + 1, z + 1,
+                                x, y + 1, z,
+                                x, y, z
+                            );
+                            const color = BLOCKS[blockId].color;
+                            const r = ((color >> 16) & 0xff) / 255 * 0.8;
+                            const g = ((color >> 8) & 0xff) / 255 * 0.8;
+                            const b = (color & 0xff) / 255 * 0.8;
+                            for (let i = 0; i < 4; i++) colors.push(r, g, b);
+                            indices.push(index, index + 1, index + 2, index, index + 2, index + 3);
+                            index += 4;
+                        }
+                        
+                        if (!neighbors.right || BLOCKS[neighbors.right].transparent) {
+                            // 右面
+                            positions.push(
+                                x + 1, y, z,
+                                x + 1, y + 1, z,
+                                x + 1, y + 1, z + 1,
+                                x + 1, y, z + 1
+                            );
+                            const color = BLOCKS[blockId].color;
+                            const r = ((color >> 16) & 0xff) / 255 * 0.8;
+                            const g = ((color >> 8) & 0xff) / 255 * 0.8;
+                            const b = (color & 0xff) / 255 * 0.8;
+                            for (let i = 0; i < 4; i++) colors.push(r, g, b);
+                            indices.push(index, index + 1, index + 2, index, index + 2, index + 3);
+                            index += 4;
+                        }
+                        
+                        if (!neighbors.bottom || BLOCKS[neighbors.bottom].transparent) {
+                            // 底面
+                            positions.push(
+                                x, y, z,
+                                x, y, z + 1,
+                                x + 1, y, z + 1,
+                                x + 1, y, z
+                            );
+                            const color = BLOCKS[blockId].color;
+                            const r = ((color >> 16) & 0xff) / 255 * 0.6;
+                            const g = ((color >> 8) & 0xff) / 255 * 0.6;
+                            const b = (color & 0xff) / 255 * 0.6;
+                            for (let i = 0; i < 4; i++) colors.push(r, g, b);
+                            indices.push(index, index + 1, index + 2, index, index + 2, index + 3);
+                            index += 4;
+                        }
+                        
+                        if (!neighbors.top || BLOCKS[neighbors.top].transparent) {
+                            // 顶面
+                            positions.push(
+                                x, y + 1, z + 1,
+                                x, y + 1, z,
+                                x + 1, y + 1, z,
+                                x + 1, y + 1, z + 1
+                            );
+                            const color = BLOCKS[blockId].color;
+                            const r = ((color >> 16) & 0xff) / 255;
+                            const g = ((color >> 8) & 0xff) / 255;
+                            const b = (color & 0xff) / 255;
+                            for (let i = 0; i < 4; i++) colors.push(r, g, b);
+                            indices.push(index, index + 1, index + 2, index, index + 2, index + 3);
+                            index += 4;
+                        }
+                        
+                        if (!neighbors.back || BLOCKS[neighbors.back].transparent) {
+                            // 背面
+                            positions.push(
+                                x + 1, y, z,
+                                x + 1, y + 1, z,
+                                x, y + 1, z,
+                                x, y, z
+                            );
+                            const color = BLOCKS[blockId].color;
+                            const r = ((color >> 16) & 0xff) / 255 * 0.7;
+                            const g = ((color >> 8) & 0xff) / 255 * 0.7;
+                            const b = (color & 0xff) / 255 * 0.7;
+                            for (let i = 0; i < 4; i++) colors.push(r, g, b);
+                            indices.push(index, index + 1, index + 2, index, index + 2, index + 3);
+                            index += 4;
+                        }
+                        
+                        if (!neighbors.front || BLOCKS[neighbors.front].transparent) {
+                            // 前面
+                            positions.push(
+                                x, y, z + 1,
+                                x, y + 1, z + 1,
+                                x + 1, y + 1, z + 1,
+                                x + 1, y, z + 1
+                            );
+                            const color = BLOCKS[blockId].color;
+                            const r = ((color >> 16) & 0xff) / 255 * 0.7;
+                            const g = ((color >> 8) & 0xff) / 255 * 0.7;
+                            const b = (color & 0xff) / 255 * 0.7;
+                            for (let i = 0; i < 4; i++) colors.push(r, g, b);
+                            indices.push(index, index + 1, index + 2, index, index + 2, index + 3);
+                            index += 4;
+                        }
+                    }
+                }
+            }
+            
+            // 设置几何体数据
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.setIndex(indices);
+            geometry.computeVertexNormals();
+            
+            return mesh;
+        }
+        
+        // 更新加载的区块
+        function updateChunks() {
+            const playerChunkX = Math.floor(player.position.x / CHUNK_SIZE);
+            const playerChunkZ = Math.floor(player.position.z / CHUNK_SIZE);
+            
+            // 清除旧的区块
+            scene.children.slice().forEach(child => {
+                if (child instanceof THREE.Mesh) {
+                    scene.remove(child);
+                }
+            });
+            
+            // 加载新区块
+            for (let x = playerChunkX - RENDER_DISTANCE; x <= playerChunkX + RENDER_DISTANCE; x++) {
+                for (let z = playerChunkZ - RENDER_DISTANCE; z <= playerChunkZ + RENDER_DISTANCE; z++) {
+                    const chunkKey = `${x},${z}`;
+                    if (!world[chunkKey]) {
+                        generateTerrain(x, z);
+                    }
+                    renderChunk(x, z);
+                }
+            }
+        }
+        
+        // 射线检测
+        function raycast() {
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+            
+            const rayDirection = new THREE.Vector3();
+            raycaster.ray.direction.clone(rayDirection).normalize();
+            
+            let currentX = player.position.x;
+            let currentY = player.position.y;
+            let currentZ = player.position.z;
+            
+            // 检查最多5个单位距离
+            for (let i = 0; i < 50; i++) {
+                currentX += rayDirection.x * 0.1;
+                currentY += rayDirection.y * 0.1;
+                currentZ += rayDirection.z * 0.1;
+                
+                const blockX = Math.floor(currentX);
+                const blockY = Math.floor(currentY);
+                const blockZ = Math.floor(currentZ);
+                
+                const blockId = getBlock(blockX, blockY, blockZ);
+                if (blockId && blockId !== 0) {
+                    return {
+                        position: { x: blockX, y: blockY, z: blockZ },
+                        face: getHitFace(currentX, currentY, currentZ, blockX, blockY, blockZ)
+                    };
+                }
+            }
+            
+            return null;
+        }
+        
+        // 获取击中的面
+        function getHitFace(hitX, hitY, hitZ, blockX, blockY, blockZ) {
+            const localX = hitX - blockX;
+            const localY = hitY - blockY;
+            const localZ = hitZ - blockZ;
+            
+            const minX = Math.abs(localX - 0);
+            const maxX = Math.abs(localX - 1);
+            const minY = Math.abs(localY - 0);
+            const maxY = Math.abs(localY - 1);
+            const minZ = Math.abs(localZ - 0);
+            const maxZ = Math.abs(localZ - 1);
+            
+            const min = Math.min(minX, maxX, minY, maxY, minZ, maxZ);
+            
+            if (min === minX) return 'left';
+            if (min === maxX) return 'right';
+            if (min === minY) return 'bottom';
+            if (min === maxY) return 'top';
+            if (min === minZ) return 'back';
+            return 'front';
+        }
+        
+        // 获取相邻方块位置
+        function getAdjacentBlock(position, face) {
+            switch(face) {
+                case 'left': return { x: position.x - 1, y: position.y, z: position.z };
+                case 'right': return { x: position.x + 1, y: position.y, z: position.z };
+                case 'bottom': return { x: position.x, y: position.y - 1, z: position.z };
+                case 'top': return { x: position.x, y: position.y + 1, z: position.z };
+                case 'back': return { x: position.x, y: position.y, z: position.z - 1 };
+                case 'front': return { x: position.x, y: position.y, z: position.z + 1 };
+            }
+        }
+        
+        // 鼠标点击事件
+        document.addEventListener('mousedown', (event) => {
+            if (!controls.isLocked) return;
+            
+            const hit = raycast();
+            if (!hit) return;
+            
+            if (event.button === 0) { // 左键破坏方块
+                if (setBlock(hit.position.x, hit.position.y, hit.position.z, 0)) {
+                    updateChunks();
+                }
+            } else if (event.button === 2) { // 右键放置方块
+                const adjacentPos = getAdjacentBlock(hit.position, hit.face);
+                if (setBlock(adjacentPos.x, adjacentPos.y, adjacentPos.z, player.selectedBlock)) {
+                    updateChunks();
+                }
+            }
+        });
+        
+        // 初始生成地形
+        updateChunks();
+        
+        // 游戏循环
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // 更新玩家位置
+            if (controls.isLocked) {
+                const direction = new THREE.Vector3();
+                camera.getWorldDirection(direction);
+                
+                // 水平移动
+                const moveSpeed = 0.1;
+                const moveX = (keys['KeyD'] ? 1 : 0) - (keys['KeyA'] ? 1 : 0);
+                const moveZ = (keys['KeyW'] ? 1 : 0) - (keys['KeyS'] ? 1 : 0);
+                
+                // 计算移动方向
+                const forward = new THREE.Vector3(direction.x, 0, direction.z).normalize();
+                const right = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), forward);
+                
+                const moveDirection = new THREE.Vector3()
+                    .addScaledVector(forward, moveZ)
+                    .addScaledVector(right, moveX)
+                    .normalize();
+                
+                if (player.isFlying) {
+                    // 飞行模式
+                    player.position.x += moveDirection.x * moveSpeed;
+                    player.position.z += moveDirection.z * moveSpeed;
+                    
+                    if (keys['Space']) player.position.y += moveSpeed;
+                    if (keys['ShiftLeft']) player.position.y -= moveSpeed;
+                } else {
+                    // 地面移动
+                    player.velocity.x = moveDirection.x * moveSpeed;
+                    player.velocity.z = moveDirection.z * moveSpeed;
+                    
+                    // 跳跃
+                    if (keys['Space'] && player.isOnGround) {
+                        player.velocity.y = JUMP_FORCE;
+                        player.isOnGround = false;
+                    }
+                    
+                    // 应用重力
+                    player.velocity.y -= GRAVITY;
+                    
+                    // 移动玩家
+                    player.position.x += player.velocity.x;
+                    player.position.y += player.velocity.y;
+                    player.position.z += player.velocity.z;
+                    
+                    // 碰撞检测
+                    const playerBlockX = Math.floor(player.position.x);
+                    const playerBlockY = Math.floor(player.position.y);
+                    const playerBlockZ = Math.floor(player.position.z);
+                    
+                    // 检查是否站在方块上
+                    player.isOnGround = false;
+                    const blockBelow = getBlock(playerBlockX, playerBlockY - 1, playerBlockZ);
+                    if (blockBelow && blockBelow !== 0) {
+                        player.position.y = playerBlockY + 0.1;
+                        player.velocity.y = 0;
+                        player.isOnGround = true;
+                    }
+                    
+                    // 检查头顶碰撞
+                    const blockAbove = getBlock(playerBlockX, playerBlockY + 1, playerBlockZ);
+                    if (blockAbove && blockAbove !== 0 && player.velocity.y > 0) {
+                        player.velocity.y = 0;
+                        player.position.y = playerBlockY - 0.1;
+                    }
+                    
+                    // 检查水平碰撞
+                    const blockX = getBlock(playerBlockX + (player.velocity.x > 0 ? 1 : -1), playerBlockY, playerBlockZ);
+                    const blockZ = getBlock(playerBlockX, playerBlockY, playerBlockZ + (player.velocity.z > 0 ? 1 : -1));
+                    
+                    if (blockX && blockX !== 0) {
+                        player.velocity.x = 0;
+                        player.position.x = playerBlockX + (player.velocity.x > 0 ? -0.1 : 1.1);
+                    }
+                    
+                    if (blockZ && blockZ !== 0) {
+                        player.velocity.z = 0;
+                        player.position.z = playerBlockZ + (player.velocity.z > 0 ? -0.1 : 1.1);
+                    }
+                }
+                
+                // 更新相机位置
+                camera.position.set(player.position.x, player.position.y, player.position.z);
+                
+                // 检查是否需要更新区块
+                const currentChunkX = Math.floor(player.position.x / CHUNK_SIZE);
+                const currentChunkZ = Math.floor(player.position.z / CHUNK_SIZE);
+                
+                if (currentChunkX !== Math.floor(camera.position.x / CHUNK_SIZE) || 
+                    currentChunkZ !== Math.floor(camera.position.z / CHUNK_SIZE)) {
+                    updateChunks();
+                }
+            }
+            
+            // 渲染场景
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // 窗口大小调整
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

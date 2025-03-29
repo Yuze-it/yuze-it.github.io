@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣味打字练习器</title>
+    <style>
+        :root {
+            --primary-color: #5e72e4;
+            --success-color: #2dce89;
+            --warning-color: #fb6340;
+            --danger-color: #f5365c;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .mode-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            background-color: white;
+            color: var(--primary-color);
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .mode-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .typing-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .text-display {
+            font-size: 24px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            min-height: 120px;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            position: relative;
+        }
+        
+        .text-display span {
+            position: relative;
+        }
+        
+        .text-display span.current {
+            background-color: #e9ecef;
+            border-radius: 3px;
+        }
+        
+        .text-display span.correct {
+            color: var(--success-color);
+        }
+        
+        .text-display span.incorrect {
+            color: var(--danger-color);
+            text-decoration: underline;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        #typing-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 18px;
+            outline: none;
+            transition: border 0.3s ease;
+        }
+        
+        #typing-input:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .keyboard {
+            background-color: #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        
+        .key {
+            width: 40px;
+            height: 40px;
+            margin: 0 3px;
+            background-color: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.1s ease;
+            position: relative;
+        }
+        
+        .key.active {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(2px);
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .key.wide {
+            width: 80px;
+        }
+        
+        .key.extra-wide {
+            width: 120px;
+        }
+        
+        .key.space {
+            width: 300px;
+        }
+        
+        .pet-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .pet {
+            font-size: 40px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .pet-message {
+            background-color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            max-width: 80%;
+        }
+        
+        .pet-message:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: white transparent transparent;
+        }
+        
+        .start-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .start-btn:hover {
+            background-color: #4a5bd1;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .competition-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .key {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+            
+            .key.wide {
+                width: 60px;
+            }
+            
+            .key.extra-wide {
+                width: 90px;
+            }
+            
+            .key.space {
+                width: 200px;
+            }
+            
+            .text-display {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>趣味打字练习器</h1>
+        <p>提升你的打字速度和准确性</p>
+    </header>
+    
+    <div class="mode-selector">
+        <button class="mode-btn active" data-mode="pinyin">拼音打字</button>
+        <button class="mode-btn" data-mode="english">英文打字</button>
+        <button class="mode-btn" data-mode="competition">打字比赛</button>
+    </div>
+    
+    <div class="typing-container">
+        <div class="competition-info hidden">
+            <h3>打字比赛规则</h3>
+            <p>在60秒内尽可能多地正确输入显示的单词/汉字。每个正确字符得1分，错误输入不计分。</p>
+            <p>准备好了吗？点击开始按钮！</p>
+        </div>
+        
+        <div class="text-display" id="text-display">
+            请选择模式并点击开始按钮
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="typing-input" placeholder="开始输入..." disabled>
+            <button class="start-btn" id="start-btn">开始</button>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="wpm">0</div>
+                <div class="stat-label">WPM</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="accuracy">0%</div>
+                <div class="stat-label">准确率</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="time">60</div>
+                <div class="stat-label">剩余时间</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">得分</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="keyboard">
+        <div class="keyboard-row">
+            <div class="key" data-key="`">~</div>
+            <div class="key" data-key="1">1</div>
+            <div class="key" data-key="2">2</div>
+            <div class="key" data-key="3">3</div>
+            <div class="key" data-key="4">4</div>
+            <div class="key" data-key="5">5</div>
+            <div class="key" data-key="6">6</div>
+            <div class="key" data-key="7">7</div>
+            <div class="key" data-key="8">8</div>
+            <div class="key" data-key="9">9</div>
+            <div class="key" data-key="0">0</div>
+            <div class="key" data-key="-">-</div>
+            <div class="key" data-key="=">=</div>
+            <div class="key wide" data-key="backspace">←</div>
+        </div>
+        <div class="keyboard-row">
+            <div class="key wide" data-key="tab">Tab</div>
+            <div class="key" data-key="q">Q</div>
+            <div class="key" data-key="w">W</div>
+            <div class="key" data-key="e">E</div>
+            <div class="key" data-key="r">R</div>
+            <div class="key" data-key="t">T</div>
+            <div class="key" data-key="y">Y</div>
+            <div class="key" data-key="u">U</div>
+            <div class="key" data-key="i">I</div>
+            <div class="key" data-key="o">O</div>
+            <div class="key" data-key="p">P</div>
+            <div class="key" data-key="[">[</div>
+            <div class="key" data-key="]">]</div>
+            <div class="key" data-key="\">\</div>
+        </div>
+        <div class="keyboard-row">
+            <div class="key extra-wide" data-key="capslock">Caps</div>
+            <div class="key" data-key="a">A</div>
+            <div class="key" data-key="s">S</div>
+            <div class="key" data-key="d">D</div>
+            <div class="key" data-key="f">F</div>
+            <div class="key" data-key="g">G</div>
+            <div class="key" data-key="h">H</div>
+            <div class="key" data-key="j">J</div>
+            <div class="key" data-key="k">K</div>
+            <div class="key" data-key="l">L</div>
+            <div class="key" data-key=";">;</div>
+            <div class="key" data-key="'">'</div>
+            <div class="key extra-wide" data-key="enter">Enter</div>
+        </div>
+        <div class="keyboard-row">
+            <div class="key wide" data-key="shift">Shift</div>
+            <div class="key" data-key="z">Z</div>
+            <div class="key" data-key="x">X</div>
+            <div class="key" data-key="c">C</div>
+            <div class="key" data-key="v">V</div>
+            <div class="key" data-key="b">B</div>
+            <div class="key" data-key="n">N</div>
+            <div class="key" data-key="m">M</div>
+            <div class="key" data-key=",">,</div>
+            <div class="key" data-key=".">.</div>
+            <div class="key" data-key="/">/</div>
+            <div class="key wide" data-key="shift">Shift</div>
+        </div>
+        <div class="keyboard-row">
+            <div class="key" data-key="ctrl">Ctrl</div>
+            <div class="key" data-key="win">Win</div>
+            <div class="key" data-key="alt">Alt</div>
+            <div class="key space" data-key=" ">空格</div>
+            <div class="key" data-key="alt">Alt</div>
+            <div class="key" data-key="fn">Fn</div>
+            <div class="key" data-key="ctrl">Ctrl</div>
+        </div>
+    </div>
+    
+    <div class="pet-container">
+        <div class="pet" id="pet">(>^_^)></div>
+        <div class="pet-message" id="pet-message">准备好开始打字练习了吗？</div>
+    </div>
+    
+    <script>
+        // 数据
+        const pinyinTexts = [
+            "学习打字可以提高工作效率，让我们从基础开始练习。",
+            "中国的传统文化源远流长，包括书法、绘画、音乐等多种艺术形式。",
+            "随着科技的发展，互联网已经成为人们生活中不可或缺的一部分。",
+            "保护环境是每个人的责任，我们应该从身边的小事做起。",
+            "健康的生活方式包括合理饮食、适量运动和充足睡眠。"
+        ];
+        
+        const englishTexts = [
+            "The quick brown fox jumps over the lazy dog. This sentence contains all the letters in the English alphabet.",
+            "Programming is the process of creating a set of instructions that tell a computer how to perform a task.",
+            "Learning to type quickly and accurately is an essential skill in today's digital world.",
+            "Practice makes perfect. The more you type, the better you will become at it.",
+            "Time is the most valuable resource we have, so we should use it wisely and productively."
+        ];
+        
+        const pinyinWords = ["学习", "电脑", "键盘", "速度", "准确", "练习", "进步", "技术", "互联网", "编程"];
+        const englishWords = ["type", "speed", "keyboard", "practice", "accuracy", "skill", "improve", "computer", "digital", "learning"];
+        
+        // 变量
+        let currentMode = "pinyin";
+        let isTyping = false;
+        let startTime;
+        let timer;
+        let currentText = "";
+        let currentPosition = 0;
+        let correctChars = 0;
+        let totalChars = 0;
+        let mistakes = 0;
+        let competitionScore = 0;
+        
+        // DOM元素
+        const textDisplay = document.getElementById("text-display");
+        const typingInput = document.getElementById("typing-input");
+        const startBtn = document.getElementById("start-btn");
+        const modeBtns = document.querySelectorAll(".mode-btn");
+        const competitionInfo = document.querySelector(".competition-info");
+        const wpmDisplay = document.getElementById("wpm");
+        const accuracyDisplay = document.getElementById("accuracy");
+        const timeDisplay = document.getElementById("time");
+        const scoreDisplay = document.getElementById("score");
+        const pet = document.getElementById("pet");
+        const petMessage = document.getElementById("pet-message");
+        const keys = document.querySelectorAll(".key");
+        
+        // 事件监听
+        modeBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                modeBtns.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                currentMode = btn.dataset.mode;
+                resetTest();
+                
+                if (currentMode === "competition") {
+                    competitionInfo.classList.remove("hidden");
+                    petMessage.textContent = "比赛模式！准备好挑战自己了吗？";
+                    pet.textContent = "ᕙ(⇀‸↼‶)ᕗ";
+                } else {
+                    competitionInfo.classList.add("hidden");
+                    petMessage.textContent = currentMode === "pinyin" ? 
+                        "让我们开始练习拼音打字吧！" : "Ready to practice English typing?";
+                    pet.textContent = currentMode === "pinyin" ? "(◕‿◕✿)" : "(•̀ᴗ•́)و";
+                }
+            });
+        });
+        
+        startBtn.addEventListener("click", () => {
+            if (isTyping) {
+                resetTest();
+            } else {
+                startTest();
+            }
+        });
+        
+        typingInput.addEventListener("input", checkTyping);
+        typingInput.addEventListener("keydown", handleKeyDown);
+        typingInput.addEventListener("keyup", handleKeyUp);
+        
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") {
+                return;
+            }
+            
+            const keyElement = document.querySelector(`.key[data-key="${e.key.toLowerCase()}"]`);
+            if (keyElement) {
+                keyElement.classList.add("active");
+                
+                // 空格键特殊处理
+                if (e.key === " ") {
+                    document.querySelector('.key.space').classList.add("active");
+                }
+            }
+        });
+        
+        document.addEventListener("keyup", (e) => {
+            const keyElement = document.querySelector(`.key[data-key="${e.key.toLowerCase()}"]`);
+            if (keyElement) {
+                keyElement.classList.remove("active");
+                
+                if (e.key === " ") {
+                    document.querySelector('.key.space').classList.remove("active");
+                }
+            }
+        });
+        
+        // 函数
+        function startTest() {
+            isTyping = true;
+            startBtn.textContent = "重置";
+            typingInput.disabled = false;
+            typingInput.focus();
+            startTime = new Date();
+            currentPosition = 0;
+            correctChars = 0;
+            totalChars = 0;
+            mistakes = 0;
+            competitionScore = 0;
+            
+            if (currentMode === "competition") {
+                timeDisplay.textContent = "60";
+                scoreDisplay.textContent = "0";
+                startCompetitionTimer();
+                generateCompetitionText();
+                pet.textContent = "(ﾉ≧∀≦)ﾉ";
+                petMessage.textContent = "加油！时间正在流逝！";
+            } else {
+                generateText();
+                pet.textContent = "(•̀o•́)ง";
+                petMessage.textContent = "专注输入，不要分心！";
+            }
+            
+            updateTextDisplay();
+        }
+        
+        function resetTest() {
+            isTyping = false;
+            startBtn.textContent = "开始";
+            typingInput.disabled = true;
+            typingInput.value = "";
+            clearInterval(timer);
+            
+            if (currentMode === "competition") {
+                timeDisplay.textContent = "60";
+                scoreDisplay.textContent = "0";
+                textDisplay.innerHTML = "请点击开始按钮开始比赛";
+            } else {
+                textDisplay.innerHTML = "请选择模式并点击开始按钮";
+                wpmDisplay.textContent = "0";
+                accuracyDisplay.textContent = "0%";
+            }
+            
+            pet.textContent = currentMode === "pinyin" ? "(◕‿◕✿)" : currentMode === "english" ? "(•̀ᴗ•́)و" : "ᕙ(⇀‸↼‶)ᕗ";
+            petMessage.textContent = currentMode === "competition" ? 
+                "比赛模式！准备好挑战自己了吗？" : 
+                currentMode === "pinyin" ? "让我们开始练习拼音打字吧！" : "Ready to practice English typing?";
+        }
+        
+        function generateText() {
+            const texts = currentMode === "pinyin" ? pinyinTexts : englishTexts;
+            currentText = texts[Math.floor(Math.random() * texts.length)];
+            totalChars = currentText.length;
+        }
+        
+        function generateCompetitionText() {
+            const words = currentMode === "pinyin" ? pinyinWords : englishWords;
+            const randomWord = words[Math.floor(Math.random() * words.length)];
+            currentText = randomWord;
+            totalChars = currentText.length;
+        }
+        
+        function updateTextDisplay() {
+            let html = "";
+            
+            for (let i = 0; i < currentText.length; i++) {
+                let char = currentText[i];
+                let spanClass = "";
+                
+                if (i < currentPosition) {
+                    spanClass = char === typingInput.value[i] ? "correct" : "incorrect";
+                } else if (i === currentPosition) {
+                    spanClass = "current";
+                }
+                
+                html += `<span class="${spanClass}">${char}</span>`;
+            }
+            
+            textDisplay.innerHTML = html;
+        }
+        
+        function checkTyping() {
+            const inputValue = typingInput.value;
+            const currentChar = currentText[currentPosition];
+            
+            if (inputValue[currentPosition] === currentChar) {
+                correctChars++;
+                if (currentMode === "competition" && currentPosition === currentText.length - 1) {
+                    competitionScore += currentText.length;
+                    scoreDisplay.textContent = competitionScore;
+                    typingInput.value = "";
+                    currentPosition = 0;
+                    generateCompetitionText();
+                } else {
+                    currentPosition++;
+                }
+            } else {
+                mistakes++;
+                
+                // 颜文字反应错误
+                pet.textContent = "(╯°□°）╯︵ ┻━┻";
+                setTimeout(() => {
+                    pet.textContent = isTyping ? "(•̀o•́)ง" : 
+                        currentMode === "pinyin" ? "(◕‿◕✿)" : "(•̀ᴗ•́)و";
+                }, 500);
+            }
+            
+            updateTextDisplay();
+            updateStats();
+            
+            if (currentMode !== "competition" && currentPosition === currentText.length) {
+                finishTest();
+            }
+        }
+        
+        function updateStats() {
+            if (currentMode === "competition") return;
+            
+            const currentTime = new Date();
+            const timeElapsed = (currentTime - startTime) / 60000; // 分钟
+            const wpm = Math.round((correctChars / 5) / timeElapsed);
+            const accuracy = Math.round((correctChars / (correctChars + mistakes)) * 100);
+            
+            wpmDisplay.textContent = isNaN(wpm) ? "0" : wpm;
+            accuracyDisplay.textContent = isNaN(accuracy) ? "0%" : accuracy + "%";
+        }
+        
+        function finishTest() {
+            isTyping = false;
+            typingInput.disabled = true;
+            clearInterval(timer);
+            
+            const accuracy = Math.round((correctChars / totalChars) * 100);
+            pet.textContent = accuracy > 90 ? "ヽ(•̀ω•́ )ゝ✧" : accuracy > 70 ? "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧" : "(｡•́︿•̀｡)";
+            petMessage.textContent = accuracy > 90 ? 
+                "太棒了！你的准确率很高！" : 
+                accuracy > 70 ? "不错！继续练习会更好！" : "别灰心，多加练习会进步的！";
+        }
+        
+        function startCompetitionTimer() {
+            let timeLeft = 60;
+            timer = setInterval(() => {
+                timeLeft--;
+                timeDisplay.textContent = timeLeft;
+                
+                if (timeLeft <= 10) {
+                    pet.textContent = "(ﾟДﾟ;≡;ﾟДﾟ)";
+                    petMessage.textContent = "还剩" + timeLeft + "秒！加油！";
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    isTyping = false;
+                    typingInput.disabled = true;
+                    textDisplay.innerHTML = "比赛结束！你的得分: " + competitionScore;
+                    
+                    if (competitionScore > 200) {
+                        pet.textContent = "＼(≧▽≦)／";
+                        petMessage.textContent = "太厉害了！你是打字高手！";
+                    } else if (competitionScore > 100) {
+                        pet.textContent = "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧";
+                        petMessage.textContent = "不错的表现！继续努力！";
+                    } else {
+                        pet.textContent = "(｡•́︿•̀｡)";
+                        petMessage.textContent = "再接再厉，下次会更好！";
+                    }
+                }
+            }, 1000);
+        }
+        
+        function handleKeyDown(e) {
+            if (e.key === "Backspace" || e.key === "Delete") {
+                const backspaceKey = document.querySelector('.key[data-key="backspace"]');
+                if (backspaceKey) backspaceKey.classList.add("active");
+            } else if (e.key === "CapsLock") {
+                const capslockKey = document.querySelector('.key[data-key="capslock"]');
+                if (capslockKey) capslockKey.classList.add("active");
+            } else if (e.key === "Enter") {
+                const enterKey = document.querySelector('.key[data-key="enter"]');
+                if (enterKey) enterKey.classList.add("active");
+            } else if (e.key === "Shift") {
+                const shiftKeys = document.querySelectorAll('.key[data-key="shift"]');
+                shiftKeys.forEach(key => key.classList.add("active"));
+            } else if (e.key === "Control") {
+                const ctrlKeys = document.querySelectorAll('.key[data-key="ctrl"]');
+                ctrlKeys.forEach(key => key.classList.add("active"));
+            } else if (e.key === "Alt") {
+                const altKeys = document.querySelectorAll('.key[data-key="alt"]');
+                altKeys.forEach(key => key.classList.add("active"));
+            } else if (e.key === "Meta") {
+                const winKey = document.querySelector('.key[data-key="win"]');
+                if (winKey) winKey.classList.add("active");
+            }
+        }
+        
+        function handleKeyUp(e) {
+            if (e.key === "Backspace" || e.key === "Delete") {
+                const backspaceKey = document.querySelector('.key[data-key="backspace"]');
+                if (backspaceKey) backspaceKey.classList.remove("active");
+            } else if (e.key === "CapsLock") {
+                const capslockKey = document.querySelector('.key[data-key="capslock"]');
+                if (capslockKey) capslockKey.classList.remove("active");
+            } else if (e.key === "Enter") {
+                const enterKey = document.querySelector('.key[data-key="enter"]');
+                if (enterKey) enterKey.classList.remove("active");
+            } else if (e.key === "Shift") {
+                const shiftKeys = document.querySelectorAll('.key[data-key="shift"]');
+                shiftKeys.forEach(key => key.classList.remove("active"));
+            } else if (e.key === "Control") {
+                const ctrlKeys = document.querySelectorAll('.key[data-key="ctrl"]');
+                ctrlKeys.forEach(key => key.classList.remove("active"));
+            } else if (e.key === "Alt") {
+                const altKeys = document.querySelectorAll('.key[data-key="alt"]');
+                altKeys.forEach(key => key.classList.remove("active"));
+            } else if (e.key === "Meta") {
+                const winKey = document.querySelector('.key[data-key="win"]');
+                if (winKey) winKey.classList.remove("active");
+            }
+        }
+    </script>
+</body>
+</html>
