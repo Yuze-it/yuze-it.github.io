@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>页面不存在 | YUZE-IT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            secondary: '#F97316',
+            accent: '#10B981',
+            dark: '#0F172A',
+            light: '#F8FAFC'
+          },
+          fontFamily: {
+            sans: ['"HarmonyOS Sans SC"', 'sans-serif'],
+            heading: ['Space Grotesk', 'sans-serif'],
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'pulse-slow': 'pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'HarmonyOS Sans SC', sans-serif;
+      background-color: #f8fafc;
+    }
+    .dark body {
+      background-color: #0f172a;
+    }
+    .heading-font {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    /* 游戏容器 */
+    .game-container {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(to bottom, #e0f2fe 0%, #bae6fd 100%);
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .dark .game-container {
+      background: linear-gradient(to bottom, #1e3a8a 0%, #1e40af 100%);
+    }
+    
+    /* 玩家角色 */
+    .player {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: #3B82F6;
+      border-radius: 50% 50% 5px 5px;
+      bottom: 20px;
+      left: 50px;
+      z-index: 10;
+      transition: all 0.1s;
+    }
+    .player::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 10px;
+      background-color: #1D4ED8;
+      border-radius: 50%;
+      bottom: -5px;
+      left: 15px;
+    }
+    .player::before {
+      content: 'Y';
+      position: absolute;
+      color: white;
+      font-weight: bold;
+      top: 12px;
+      left: 18px;
+      font-size: 18px;
+    }
+    
+    /* 障碍物 */
+    .obstacle {
+      position: absolute;
+      width: 30px;
+      height: 40px;
+      background-color: #F97316;
+      bottom: 20px;
+      right: -30px;
+      border-radius: 10px 10px 0 0;
+      box-shadow: inset 0 -10px 0 0 #EA580C;
+      transition: height 0.2s;
+    }
+    .squashed {
+      height: 20px !important;
+      transition: height 0.1s;
+    }
+    
+    /* 云朵 */
+    .cloud {
+      position: absolute;
+      background-color: white;
+      border-radius: 50%;
+      opacity: 0.9;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    .dark .cloud {
+      background-color: #e2e8f0;
+    }
+    
+    /* 地面 */
+    .ground {
+      position: absolute;
+      width: 100%;
+      height: 20px;
+      background: linear-gradient(to right, #10B981 0%, #059669 100%);
+      bottom: 0;
+      z-index: 5;
+    }
+    .dark .ground {
+      background: linear-gradient(to right, #047857 0%, #065f46 100%);
+    }
+    
+    /* 跳跃动画 */
+    @keyframes jump {
+      0% { bottom: 20px; transform: scale(1); }
+      30% { transform: scale(0.9, 1.1); }
+      50% { bottom: 120px; transform: scale(1.1, 0.9); }
+      70% { transform: scale(0.95, 1.05); }
+      100% { bottom: 20px; transform: scale(1); }
+    }
+    .jump {
+      animation: jump 0.8s ease-out;
+    }
+    
+    /* 障碍物移动动画 */
+    @keyframes obstacle-move {
+      0% { right: -30px; }
+      100% { right: 100%; }
+    }
+    .move {
+      animation: obstacle-move 3s infinite linear;
+    }
+    
+    /* 404文字效果 */
+    @keyframes glitch {
+      0% { text-shadow: 0.05em 0 0 #00fffc, -0.05em -0.025em 0 #fc00ff; }
+      14% { text-shadow: 0.05em 0 0 #00fffc, -0.05em -0.025em 0 #fc00ff; }
+      15% { text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.025em 0 #fc00ff; }
+      49% { text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.025em 0 #fc00ff; }
+      50% { text-shadow: 0.025em 0.05em 0 #00fffc, 0.05em 0 0 #fc00ff; }
+      99% { text-shadow: 0.025em 0.05em 0 #00fffc, 0.05em 0 0 #fc00ff; }
+      100% { text-shadow: -0.025em 0 0 #00fffc, -0.025em -0.025em 0 #fc00ff; }
+    }
+    .glitch {
+      animation: glitch 2s infinite;
+    }
+    
+    /* 按钮样式 */
+    .action-btn {
+      transition: all 0.3s ease;
+      transform: translateY(0);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .action-btn:active {
+      transform: translateY(1px);
+    }
+    
+    /* 游戏控制按钮 */
+    .game-btn {
+      background: linear-gradient(to right, #3B82F6 0%, #2563EB 100%);
+      color: white;
+      font-weight: bold;
+    }
+    .game-btn:hover {
+      background: linear-gradient(to right, #2563EB 0%, #1D4ED8 100%);
+    }
+    
+    /* 分数显示 */
+    .score-display {
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 9999px;
+      padding: 0.25rem 1rem;
+      font-weight: bold;
+      color: #1E40AF;
+    }
+    .dark .score-display {
+      background-color: rgba(30, 41, 59, 0.8);
+      color: #BFDBFE;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-300">
+  <div class="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+    <div class="text-center mb-8 max-w-2xl mx-auto">
+      <h1 class="heading-font text-8xl font-bold mb-4 glitch">
+        <span class="bg-gradient-to-r from-primary to-blue-700 bg-clip-text text-transparent">4</span>
+        <span class="bg-gradient-to-r from-secondary to-orange-600 bg-clip-text text-transparent">0</span>
+        <span class="bg-gradient-to-r from-accent to-green-600 bg-clip-text text-transparent">4</span>
+      </h1>
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">哎呀！页面飞走了~</h2>
+      <p class="text-gray-600 dark:text-gray-300 mb-8 text-lg">
+        你访问的页面可能被外星人劫持了，或者它根本就不存在。
+        <br class="hidden md:block">
+        不如玩个小游戏放松一下？
+      </p>
+    </div>
+    
+    <!-- 小游戏区域 -->
+    <div class="w-full max-w-md mb-8">
+      <div class="game-container mb-4 relative">
+        <div class="ground"></div>
+        <!-- 云朵 -->
+        <div class="cloud w-20 h-12 top-16 left-1/4"></div>
+        <div class="cloud w-28 h-16 top-32 left-2/3"></div>
+        <div class="cloud w-24 h-14 top-8 left-3/4"></div>
+        <!-- 游戏元素 -->
+        <div class="player" id="player"></div>
+        <div class="obstacle" id="obstacle"></div>
+        <!-- 游戏提示 -->
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center bg-white dark:bg-gray-800 bg-opacity-90 dark:bg-opacity-90 p-4 rounded-lg shadow-lg" id="game-start-prompt">
+          <p class="font-bold mb-2">按空格键跳跃</p>
+          <p class="text-sm text-gray-600 dark:text-gray-300">跳不过去就压扁它！</p>
+        </div>
+      </div>
+      <div class="flex justify-between items-center mb-6 px-2">
+        <div class="score-display flex items-center">
+          <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <span id="score">0</span>
+        </div>
+        <button id="start-btn" class="game-btn action-btn px-6 py-2 rounded-full">
+          开始游戏
+        </button>
+      </div>
+    </div>
+    
+    <div class="text-center">
+      <p class="text-gray-500 dark:text-gray-400 mb-6">试试这些有用的链接：</p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="/" class="action-btn px-6 py-3 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg shadow transition flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          返回首页
+        </a>
+        <a href="/projects" class="action-btn px-6 py-3 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg shadow transition flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          </svg>
+          查看项目
+        </a>
+        <a href="/blog" class="action-btn px-6 py-3 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg shadow transition flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+          </svg>
+          技术博客
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 游戏元素
+    const player = document.getElementById('player');
+    const obstacle = document.getElementById('obstacle');
+    const startBtn = document.getElementById('start-btn');
+    const scoreElement = document.getElementById('score');
+    const gameStartPrompt = document.getElementById('game-start-prompt');
+    
+    // 游戏状态
+    let isJumping = false;
+    let isGameRunning = false;
+    let isGameOver = false;
+    let score = 0;
+    let gameInterval;
+    let obstacleInterval;
+    let animationFrameId;
+    let lastObstaclePassed = false;
+    
+    // 初始化游戏
+    function initGame() {
+      // 重置游戏状态
+      isGameRunning = false;
+      isGameOver = false;
+      isJumping = false;
+      score = 0;
+      lastObstaclePassed = false;
+      scoreElement.textContent = score;
+      
+      // 重置角色位置
+      player.style.bottom = '20px';
+      player.classList.remove('jump');
+      
+      // 重置障碍物位置和状态
+      obstacle.style.right = '-30px';
+      obstacle.style.height = '40px';
+      obstacle.classList.remove('move');
+      obstacle.classList.remove('squashed');
+      
+      // 显示开始提示
+      gameStartPrompt.classList.remove('hidden');
+      
+      // 更新按钮状态
+      startBtn.textContent = '开始游戏';
+      startBtn.disabled = false;
+      
+      // 取消动画帧
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    }
+    
+    // 开始游戏
+    function startGame() {
+      if (isGameRunning) return;
+      
+      isGameRunning = true;
+      isGameOver = false;
+      score = 0;
+      lastObstaclePassed = false;
+      scoreElement.textContent = score;
+      
+      // 隐藏开始提示
+      gameStartPrompt.classList.add('hidden');
+      
+      // 开始移动障碍物
+      obstacle.style.right = '-30px';
+      obstacle.style.height = '40px';
+      obstacle.classList.remove('squashed');
+      obstacle.classList.add('move');
+      
+      // 更新按钮状态
+      startBtn.textContent = '游戏中...';
+      startBtn.disabled = true;
+      
+      // 清除之前的间隔
+      if (gameInterval) clearInterval(gameInterval);
+      if (obstacleInterval) clearInterval(obstacleInterval);
+      
+      // 更新分数
+      gameInterval = setInterval(() => {
+        if (isGameRunning && !isGameOver) {
+          score++;
+          scoreElement.textContent = score;
+        }
+      }, 100);
+      
+      // 游戏主循环
+      function gameLoop() {
+        if (!isGameRunning || isGameOver) return;
+        
+        const playerRect = player.getBoundingClientRect();
+        const obstacleRect = obstacle.getBoundingClientRect();
+        
+        // 检查障碍物是否已经通过
+        if (obstacleRect.right < playerRect.left && !lastObstaclePassed) {
+          lastObstaclePassed = true;
+          // 障碍物通过后重置状态
+          setTimeout(() => {
+            obstacle.style.right = '-30px';
+            obstacle.style.height = '40px';
+            obstacle.classList.remove('squashed');
+            lastObstaclePassed = false;
+          }, 100);
+        }
+        
+        // 精确的碰撞检测
+        const isColliding = !(
+          playerRect.right < obstacleRect.left || 
+          playerRect.left > obstacleRect.right || 
+          playerRect.bottom < obstacleRect.top || 
+          playerRect.top > obstacleRect.bottom
+        );
+        
+        if (isColliding) {
+          // 如果正在下落（跳跃后半段），则压扁障碍物
+          const jumpProgress = getJumpProgress();
+          if (jumpProgress > 0.5) {
+            obstacle.classList.add('squashed');
+            obstacle.style.height = '20px';
+          } else {
+            gameOver();
+          }
+        }
+        
+        animationFrameId = requestAnimationFrame(gameLoop);
+      }
+      
+      gameLoop();
+    }
+    
+    // 获取跳跃进度 (0-1)
+    function getJumpProgress() {
+      const jumpAnimation = player.getAnimations().find(a => a.animationName === 'jump');
+      if (!jumpAnimation) return 0;
+      return jumpAnimation.currentTime / jumpAnimation.effect.getTiming().duration;
+    }
+    
+    // 跳跃
+    function jump() {
+      if (!isJumping && isGameRunning && !isGameOver) {
+        isJumping = true;
+        player.classList.add('jump');
+        
+        // 在动画结束后重置跳跃状态
+        setTimeout(() => {
+          isJumping = false;
+        }, 800); // 与动画时间匹配
+      }
+    }
+    
+    // 游戏结束
+    function gameOver() {
+      isGameOver = true;
+      isGameRunning = false;
+      
+      // 停止障碍物移动
+      obstacle.classList.remove('move');
+      
+      // 显示游戏结束提示
+      setTimeout(() => {
+        alert(`游戏结束！\n你的得分: ${score}\n\n404页面都能玩得这么开心，你真是个有趣的开发者！`);
+        initGame();
+      }, 100);
+    }
+    
+    // 事件监听
+    startBtn.addEventListener('click', startGame);
+    
+    // 键盘控制
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault(); // 防止空格键滚动页面
+        if (!isGameRunning && startBtn.textContent === '开始游戏') {
+          startGame();
+        } else {
+          jump();
+        }
+      }
+    });
+    
+    // 点击/触摸控制
+    document.addEventListener('click', (e) => {
+      // 如果不是点击在按钮上，则触发跳跃
+      if (!e.target.closest('button, a') && isGameRunning && !isGameOver) {
+        jump();
+      }
+    });
+    
+    // 触摸设备支持
+    document.addEventListener('touchstart', (e) => {
+      if (isGameRunning && !isGameOver) {
+        jump();
+      }
+    });
+    
+    // 初始化游戏
+    initGame();
+    
+    // 暗黑模式检测
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+</body>
+</html>

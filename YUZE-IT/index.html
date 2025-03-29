@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YUZE-IT | 初中生开发者</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            secondary: '#F97316',
+            accent: '#10B981',
+          },
+          fontFamily: {
+            sans: ['"HarmonyOS Sans SC"', 'sans-serif'],
+            heading: ['Space Grotesk', 'sans-serif'],
+            mono: ['"Fira Code"', 'monospace'],
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'pulse-slow': 'pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'HarmonyOS Sans SC', sans-serif;
+      background-color: #f8fafc;
+    }
+    .dark body {
+      background-color: #0f172a;
+    }
+    .heading-font {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .code-font {
+      font-family: 'Fira Code', monospace;
+    }
+    
+    /* 代码雨动画 */
+    .code-rain {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.15;
+    }
+    
+    /* 项目卡片效果 */
+    .project-card {
+      transition: all 0.3s ease;
+      perspective: 1000px;
+    }
+    .project-card-inner {
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .project-card:hover .project-card-inner {
+      transform: rotateY(10deg);
+    }
+    
+    /* 终端样式 */
+    .terminal {
+      background-color: #1e293b;
+      color: #86efac;
+      font-family: 'Fira Code', monospace;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .terminal-cursor {
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      from, to { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    
+    /* 加载动画 */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    /* 按钮悬停效果 */
+    .btn-hover {
+      transition: all 0.3s ease;
+      transform: translateY(0);
+    }
+    .btn-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+    }
+    
+    /* 表单输入效果 */
+    .form-input {
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+    .form-input:focus {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+    
+    /* 3D浮动效果 */
+    .floating {
+      animation: float 6s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-300">
+  <!-- 导航栏 -->
+  <header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <div id="logo" class="w-10 h-10 bg-gradient-to-br from-primary to-blue-700 rounded-lg flex items-center justify-center text-white font-bold text-xl cursor-pointer hover:rotate-12 transition-transform">
+          YZ
+        </div>
+        <h1 class="heading-font text-xl font-bold bg-gradient-to-r from-primary to-blue-700 bg-clip-text text-transparent">YUZE-IT</h1>
+      </div>
+      <nav class="hidden md:flex space-x-6">
+        <a href="#home" class="hover:text-primary transition font-medium">首页</a>
+        <a href="#projects" class="hover:text-primary transition font-medium">我的项目</a>
+        <a href="#coding-game" class="hover:text-primary transition font-medium">编程挑战</a>
+        <a href="#about" class="hover:text-primary transition font-medium">关于我</a>
+        <a href="#join" class="hover:text-primary transition font-medium">加入我们</a>
+      </nav>
+      <div class="flex items-center space-x-4">
+        <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+          <svg id="sun-icon" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <svg id="moon-icon" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+        <button class="md:hidden" id="mobile-menu-button">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 移动端菜单 -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-gray-800 px-4 py-2 shadow-lg">
+      <a href="#home" class="block py-3 hover:text-primary transition border-b border-gray-100 dark:border-gray-700">首页</a>
+      <a href="#projects" class="block py-3 hover:text-primary transition border-b border-gray-100 dark:border-gray-700">我的项目</a>
+      <a href="#coding-game" class="block py-3 hover:text-primary transition border-b border-gray-100 dark:border-gray-700">编程挑战</a>
+      <a href="#about" class="block py-3 hover:text-primary transition border-b border-gray-100 dark:border-gray-700">关于我</a>
+      <a href="#join" class="block py-3 hover:text-primary transition">加入我们</a>
+    </div>
+  </header>
+
+  <!-- 首页Hero -->
+  <section id="home" class="relative h-screen flex items-center justify-center overflow-hidden">
+    <canvas id="codeRain" class="code-rain"></canvas>
+    <div class="container mx-auto px-4 z-10 text-center">
+      <h2 class="heading-font text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
+        <span class="bg-gradient-to-r from-primary to-blue-700 bg-clip-text text-transparent">创造</span> · 
+        <span class="bg-gradient-to-r from-secondary to-orange-600 bg-clip-text text-transparent">学习</span> · 
+        <span class="bg-gradient-to-r from-accent to-green-600 bg-clip-text text-transparent">成长</span>
+      </h2>
+      <p class="text-xl md:text-2xl max-w-3xl mx-auto mb-8 animate-fade-in delay-100">
+        我是Yuze，一名热爱编程的初中生开发者，这是我的个人项目展示平台
+      </p>
+      <div class="animate-fade-in delay-200 flex flex-col sm:flex-row justify-center gap-4">
+        <a href="#projects" class="btn-hover inline-block bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-8 rounded-lg transition shadow-lg">
+          查看项目
+        </a>
+        <a href="#coding-game" class="btn-hover inline-block border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold py-3 px-8 rounded-lg transition shadow-lg">
+          编程挑战
+        </a>
+      </div>
+      <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 项目展示 -->
+  <section id="projects" class="py-20 bg-gradient-to-b from-gray-100 to-white dark:from-gray-800 dark:to-gray-900">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="heading-font text-3xl md:text-4xl font-bold mb-4">我的项目</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          这是我独立开发的一些项目，每个项目都代表了我学习编程的不同阶段
+        </p>
+        <div class="w-20 h-1 bg-primary mx-auto mt-6 rounded-full"></div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- AI项目 -->
+        <div class="project-card group">
+          <div class="h-full bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+            <div class="project-card-inner">
+              <div class="h-48 bg-gradient-to-r from-blue-500 to-indigo-600 relative overflow-hidden">
+                <div class="absolute inset-0 bg-black/10 flex items-center justify-center">
+                  <span class="text-white text-2xl font-bold">AI项目</span>
+                </div>
+                <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+                  <span class="text-white text-sm">探索人工智能的基础知识</span>
+                </div>
+              </div>
+              <div class="p-6">
+                <div class="flex justify-between items-start mb-3">
+                  <h3 class="text-xl font-bold">AI学习与探索</h3>
+                  <span class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full">AI</span>
+                </div>
+                <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                  探索人工智能的基础知识，包括机器学习模型和简单应用
+                </p>
+                <a href="https://yuze.netlify.app/ai" target="_blank" class="btn-hover inline-flex items-center justify-center w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition shadow-sm">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  访问项目
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 记事本 -->
+        <div class="project-card group">
+          <div class="h-full bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+            <div class="project-card-inner">
+              <div class="h-48 bg-gradient-to-r from-green-500 to-teal-600 relative overflow-hidden">
+                <div class="absolute inset-0 bg-black/10 flex items-center justify-center">
+                  <span class="text-white text-2xl font-bold">记事本</span>
+                </div>
+                <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+                  <span class="text-white text-sm">简单的在线记事本应用</span>
+                </div>
+              </div>
+              <div class="p-6">
+                <div class="flex justify-between items-start mb-3">
+                  <h3 class="text-xl font-bold">在线记事本</h3>
+                  <span class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full">工具</span>
+                </div>
+                <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                  一个简单的在线记事本应用，可以保存和编辑文本内容
+                </p>
+                <a href="https://yuze.netlify.app/word" target="_blank" class="btn-hover inline-flex items-center justify-center w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition shadow-sm">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  访问项目
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 音乐 -->
+        <div class="project-card group">
+          <div class="h-full bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+            <div class="project-card-inner">
+              <div class="h-48 bg-gradient-to-r from-purple-500 to-pink-600 relative overflow-hidden">
+                <div class="absolute inset-0 bg-black/10 flex items-center justify-center">
+                  <span class="text-white text-2xl font-bold">音乐</span>
+                </div>
+                <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+                  <span class="text-white text-sm">简单的音乐播放器</span>
+                </div>
+              </div>
+              <div class="p-6">
+                <div class="flex justify-between items-start mb-3">
+                  <h3 class="text-xl font-bold">音乐播放器</h3>
+                  <span class="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full">娱乐</span>
+                </div>
+                <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                  一个简单的音乐播放器，可以播放喜欢的音乐
+                </p>
+                <a href="https://yuze.netlify.app/music" target="_blank" class="btn-hover inline-flex items-center justify-center w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition shadow-sm">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  访问项目
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 博客 -->
+        <div class="project-card group">
+          <div class="h-full bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+            <div class="project-card-inner">
+              <div class="h-48 bg-gradient-to-r from-orange-500 to-red-600 relative overflow-hidden">
+                <div class="absolute inset-0 bg-black/10 flex items-center justify-center">
+                  <span class="text-white text-2xl font-bold">博客</span>
+                </div>
+                <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+                  <span class="text-white text-sm">个人技术博客</span>
+                </div>
+              </div>
+              <div class="p-6">
+                <div class="flex justify-between items-start mb-3">
+                  <h3 class="text-xl font-bold">个人技术博客</h3>
+                  <span class="text-xs px-2 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded-full">博客</span>
+                </div>
+                <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                  记录我的编程学习历程和技术分享
+                </p>
+                <a href="https://yuze.netlify.app/blog" target="_blank" class="btn-hover inline-flex items-center justify-center w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition shadow-sm">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  访问项目
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- HTML学习 -->
+        <div class="project-card group">
+          <div class="h-full bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+            <div class="project-card-inner">
+              <div class="h-48 bg-gradient-to-r from-yellow-500 to-amber-600 relative overflow-hidden">
+                <div class="absolute inset-0 bg-black/10 flex items-center justify-center">
+                  <span class="text-white text-2xl font-bold">HTML学习</span>
+                </div>
+                <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+                  <span class="text-white text-sm">HTML学习资源</span>
+                </div>
+              </div>
+              <div class="p-6">
+                <div class="flex justify-between items-start mb-3">
+                  <h3 class="text-xl font-bold">HTML学习资源</h3>
+                  <span class="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full">学习</span>
+                </div>
+                <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                  收集整理的HTML学习资源和教程
+                </p>
+                <a href="https://yuze.netlify.app/html-learn" target="_blank" class="btn-hover inline-flex items-center justify-center w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition shadow-sm">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  访问项目
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- HTML编辑器 -->
+        <div class="project-card group">
+          <div class="h-full bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+            <div class="project-card-inner">
+              <div class="h-48 bg-gradient-to-r from-indigo-500 to-blue-600 relative overflow-hidden">
+                <div class="absolute inset-0 bg-black/10 flex items-center justify-center">
+                  <span class="text-white text-2xl font-bold">HTML编辑器</span>
+                </div>
+                <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+                  <span class="text-white text-sm">在线HTML编辑器</span>
+                </div>
+              </div>
+              <div class="p-6">
+                <div class="flex justify-between items-start mb-3">
+                  <h3 class="text-xl font-bold">在线HTML编辑器</h3>
+                  <span class="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full">工具</span>
+                </div>
+                <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                  一个简单的在线HTML编辑器，实时预览效果
+                </p>
+                <a href="https://yuze.netlify.app/html-editor" target="_blank" class="btn-hover inline-flex items-center justify-center w-full bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition shadow-sm">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  访问项目
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- C++编程小游戏 -->
+  <section id="coding-game" class="py-20 bg-gray-50 dark:bg-gray-800">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="heading-font text-3xl md:text-4xl font-bold mb-4">C++编程挑战</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          测试你的C++基础知识，看看你能得多少分！
+        </p>
+        <div class="w-20 h-1 bg-secondary mx-auto mt-6 rounded-full"></div>
+      </div>
+      
+      <div class="max-w-3xl mx-auto bg-white dark:bg-gray-700 rounded-xl shadow-lg overflow-hidden">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-600">
+          <h3 class="text-xl font-bold mb-2">C++基础挑战</h3>
+          <p class="text-gray-600 dark:text-gray-300 text-sm">
+            完成以下5个C++基础问题，每个问题20分，满分100分
+          </p>
+        </div>
+        
+        <div class="p-6 space-y-8" id="quiz-container">
+          <!-- 问题1 -->
+          <div class="quiz-question">
+            <p class="font-medium mb-3">1. 下面哪个是C++中正确的变量声明方式？</p>
+            <div class="space-y-3">
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q1" value="A" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">int x = 5;</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q1" value="B" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">variable x = 5;</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q1" value="C" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">let x = 5;</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q1" value="D" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">x := 5;</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- 问题2 -->
+          <div class="quiz-question">
+            <p class="font-medium mb-3">2. C++中用于输出的语句是什么？</p>
+            <div class="space-y-3">
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q2" value="A" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">console.log("Hello");</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q2" value="B" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">print("Hello");</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q2" value="C" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">cout << "Hello";</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q2" value="D" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">System.out.println("Hello");</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- 问题3 -->
+          <div class="quiz-question">
+            <p class="font-medium mb-3">3. 下面哪个循环会在条件为真时一直执行？</p>
+            <div class="space-y-3">
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q3" value="A" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">for loop</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q3" value="B" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">while loop</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q3" value="C" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">do-while loop</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q3" value="D" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">B和C都正确</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- 问题4 -->
+          <div class="quiz-question">
+            <p class="font-medium mb-3">4. C++中如何声明一个函数？</p>
+            <div class="space-y-3">
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q4" value="A" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">function myFunc() { }</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q4" value="B" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">def myFunc():</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q4" value="C" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">void myFunc() { }</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q4" value="D" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">func myFunc() { }</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- 问题5 -->
+          <div class="quiz-question">
+            <p class="font-medium mb-3">5. 下面哪个是C++中的注释符号？</p>
+            <div class="space-y-3">
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q5" value="A" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font"># 注释</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q5" value="B" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">// 注释</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q5" value="C" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">/* 注释 */</span>
+              </label>
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input type="radio" name="q5" value="D" class="form-radio h-4 w-4 text-primary">
+                <span class="code-font">B和C都正确</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="pt-4">
+            <button id="submit-quiz" class="btn-hover w-full bg-secondary hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-md transition shadow-sm">
+              提交答案
+            </button>
+          </div>
+        </div>
+        
+        <div class="hidden p-6 text-center" id="quiz-result">
+          <h3 class="text-2xl font-bold mb-4">你的得分: <span id="score">0</span>/100</h3>
+          <p class="text-gray-600 dark:text-gray-300 mb-6" id="result-message"></p>
+          <button id="retry-quiz" class="btn-hover inline-block bg-primary hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md transition shadow-sm">
+            再试一次
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 关于我 -->
+  <section id="about" class="py-20 bg-white dark:bg-gray-900">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="heading-font text-3xl md:text-4xl font-bold mb-4">关于我</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          一名热爱编程的初中生开发者
+        </p>
+        <div class="w-20 h-1 bg-accent mx-auto mt-6 rounded-full"></div>
+      </div>
+      
+      <div class="max-w-4xl mx-auto">
+        <div class="flex flex-col md:flex-row items-center gap-8">
+          <div class="md:w-1/3 flex justify-center">
+            <div class="w-64 h-64 rounded-full bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center text-white text-6xl font-bold shadow-xl floating">
+              YZ
+            </div>
+          </div>
+          
+          <div class="md:w-2/3">
+            <h3 class="text-2xl font-bold mb-4">你好，我是Yuze！</h3>
+            <div class="prose dark:prose-invert max-w-none">
+              <p>我是一名初中生，从小学开始就对编程产生了浓厚的兴趣。最初是通过Scratch接触编程，后来逐渐学习了C++、HTML/CSS/JavaScript等语言。</p>
+              
+              <p class="mt-4">2023年，我学习了C++基础，并开始尝试开发一些小项目。2024年，我开始自主学习Web开发，并创建了第一个个人网站。</p>
+              
+              <p class="mt-4">目前我正在学习：</p>
+              <ul class="list-disc pl-5 mt-2">
+                <li>更深入的JavaScript和前端框架</li>
+                <li>数据结构与算法基础</li>
+                <li>简单的后端开发</li>
+                <li>AI基础知识</li>
+              </ul>
+              
+              <p class="mt-4">这个网站上的所有项目都是我（和AI）独立完成的，虽然可能不够完美，但每个项目都记录了我的成长。</p>
+            </div>
+            
+            <div class="mt-8">
+              <h4 class="font-bold mb-4">技术栈</h4>
+              <div class="flex flex-wrap gap-3">
+                <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">HTML/CSS</span>
+                <span class="px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-sm">JavaScript</span>
+                <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">Python</span>
+                <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm">C++</span>
+                <span class="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-sm">Netlify</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 时间线 -->
+        <div class="mt-16 max-w-3xl mx-auto">
+          <h3 class="text-2xl font-bold text-center mb-8">我的编程历程</h3>
+          <div class="relative">
+            <!-- 时间轴线 -->
+            <div class="absolute left-1/2 w-1 h-full bg-gray-200 dark:bg-gray-700 transform -translate-x-1/2"></div>
+            
+            <!-- 时间轴项目1 -->
+            <div class="mb-8 flex justify-between items-center w-full right-timeline">
+              <div class="order-1 w-5/12"></div>
+              <div class="z-20 flex items-center order-1 bg-primary shadow-xl w-8 h-8 rounded-full">
+                <h1 class="mx-auto font-semibold text-lg text-white">1</h1>
+              </div>
+              <div class="order-1 bg-white dark:bg-gray-800 rounded-lg shadow-xl w-5/12 px-6 py-4">
+                <h3 class="mb-3 font-bold text-gray-800 dark:text-white">编程启蒙</h3>
+                <p class="text-sm leading-snug tracking-wide text-gray-600 dark:text-gray-300">
+                  2022年，通过Scratch接触编程，创建了第一个小游戏
+                </p>
+              </div>
+            </div>
+            
+            <!-- 时间轴项目2 -->
+            <div class="mb-8 flex justify-between items-center w-full left-timeline">
+              <div class="order-1 bg-white dark:bg-gray-800 rounded-lg shadow-xl w-5/12 px-6 py-4">
+                <h3 class="mb-3 font-bold text-gray-800 dark:text-white">学习Python</h3>
+                <p class="text-sm leading-snug tracking-wide text-gray-600 dark:text-gray-300">
+                  2023年，开始学习c++基础，制作了简单的计算器和文字游戏
+                </p>
+              </div>
+              <div class="z-20 flex items-center order-1 bg-secondary shadow-xl w-8 h-8 rounded-full">
+                <h1 class="mx-auto font-semibold text-lg text-white">2</h1>
+              </div>
+              <div class="order-1 w-5/12"></div>
+            </div>
+            
+            <!-- 时间轴项目3 -->
+            <div class="mb-8 flex justify-between items-center w-full right-timeline">
+              <div class="order-1 w-5/12"></div>
+              <div class="z-20 flex items-center order-1 bg-primary shadow-xl w-8 h-8 rounded-full">
+                <h1 class="mx-auto font-semibold text-lg text-white">3</h1>
+              </div>
+              <div class="order-1 bg-white dark:bg-gray-800 rounded-lg shadow-xl w-5/12 px-6 py-4">
+                <h3 class="mb-3 font-bold text-gray-800 dark:text-white">Web开发入门</h3>
+                <p class="text-sm leading-snug tracking-wide text-gray-600 dark:text-gray-300">
+                  2024年中，学习HTML/CSS/JavaScript，创建了第一个个人网站
+                </p>
+              </div>
+            </div>
+            
+            <!-- 时间轴项目4 -->
+            <div class="mb-8 flex justify-between items-center w-full left-timeline">
+              <div class="order-1 bg-white dark:bg-gray-800 rounded-lg shadow-xl w-5/12 px-6 py-4">
+                <h3 class="mb-3 font-bold text-gray-800 dark:text-white">项目实践</h3>
+                <p class="text-sm leading-snug tracking-wide text-gray-600 dark:text-gray-300">
+                  2025年，开始构建完整的Web应用，部署到Netlify
+                </p>
+              </div>
+              <div class="z-20 flex items-center order-1 bg-secondary shadow-xl w-8 h-8 rounded-full">
+                <h1 class="mx-auto font-semibold text-lg text-white">4</h1>
+              </div>
+              <div class="order-1 w-5/12"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 加入我们 -->
+  <section id="join" class="py-20 bg-gray-50 dark:bg-gray-800">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="heading-font text-3xl md:text-4xl font-bold mb-4">加入YUZE-IT</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          虽然现在只有我一个人，但欢迎志同道合的朋友一起学习成长！
+        </p>
+        <div class="w-20 h-1 bg-primary mx-auto mt-6 rounded-full"></div>
+      </div>
+      
+      <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg overflow-hidden">
+          <div class="p-8">
+            <h3 class="text-2xl font-bold mb-6">为什么加入？</h3>
+            <ul class="space-y-6">
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-4 mt-1">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="font-bold">共同学习</h4>
+                  <p class="text-gray-600 dark:text-gray-300 text-sm mt-1">与同龄人一起学习编程，互相帮助解决问题</p>
+                </div>
+              </li>
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-4 mt-1">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="font-bold">项目实践</h4>
+                  <p class="text-gray-600 dark:text-gray-300 text-sm mt-1">参与真实项目开发，积累实践经验</p>
+                </div>
+              </li>
+              <li class="flex items-start">
+                <div class="flex-shrink-0 h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-4 mt-1">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="font-bold">技能提升</h4>
+                  <p class="text-gray-600 dark:text-gray-300 text-sm mt-1">定期技术分享，共同提升编程能力</p>
+                </div>
+              </li>
+            </ul>
+            
+            <div class="mt-8">
+              <h4 class="font-bold mb-4">我们寻找：</h4>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">前端开发</span>
+                <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">后端开发</span>
+                <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm">UI设计</span>
+                <span class="px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-sm">内容创作</span>
+                <span class="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-sm">AI探索</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg overflow-hidden">
+          <div class="p-8">
+            <h3 class="text-2xl font-bold mb-6">申请表单</h3>
+            <form name="join-form" netlify class="space-y-6">
+              <input type="hidden" name="form-name" value="join-form">
+              
+              <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">姓名</label>
+                <input type="text" id="name" name="name" required
+                  class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800">
+                <p class="mt-1 text-xs text-red-500 hidden" id="name-error">请输入有效的姓名</p>
+              </div>
+              
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">邮箱</label>
+                <input type="email" id="email" name="email" required
+                  class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800">
+                <p class="mt-1 text-xs text-red-500 hidden" id="email-error">请输入有效的邮箱地址</p>
+              </div>
+              
+              <div>
+                <label for="grade" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">年级</label>
+                <select id="grade" name="grade"
+                  class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800">
+                  <option value="">选择你的年级</option>
+                  <option value="primary">小学</option>
+                  <option value="middle">初中</option>
+                  <option value="high">高中</option>
+                  <option value="other">其他</option>
+                </select>
+              </div>
+              
+              <div>
+                <label for="interest" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">兴趣方向</label>
+                <select id="interest" name="interest"
+                  class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800">
+                  <option value="">选择你感兴趣的方向</option>
+                  <option value="frontend">前端开发</option>
+                  <option value="backend">后端开发</option>
+                  <option value="design">UI设计</option>
+                  <option value="ai">AI探索</option>
+                  <option value="other">其他</option>
+                </select>
+              </div>
+              
+              <div>
+                <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">自我介绍</label>
+                <textarea id="message" name="message" rows="4"
+                  class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800" placeholder="简单介绍一下你自己和你的编程经验"></textarea>
+              </div>
+              
+              <div class="pt-2">
+                <button type="submit" class="btn-hover w-full bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-md transition shadow-lg">
+                  提交申请
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  <!-- 页脚 -->
+  <footer class="bg-gray-800 text-gray-300 py-12">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <h3 class="text-white text-lg font-bold mb-4 flex items-center">
+            <span class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-lg mr-2">YZ</span>
+            YUZE-IT
+          </h3>
+          <p class="mb-4">
+            一个初中生开发者的编程学习与实践平台
+          </p>
+          <div class="flex space-x-4">
+            <a href="https://github.com/yuze-it" class="text-gray-400 hover:text-white transition">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+              </svg>
+            </a>
+            <a href="/404" class="text-gray-400 hover:text-white transition">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+              </svg>
+            </a>
+            <a href="/404" class="text-gray-400 hover:text-white transition">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-2 16h-2v-6h2v6zm-1-6.891c-.607 0-1.1-.496-1.1-1.109 0-.612.492-1.109 1.1-1.109s1.1.497 1.1 1.109c0 .613-.493 1.109-1.1 1.109zm8 6.891h-1.998v-2.861c0-1.881-2.002-1.722-2.002 0v2.861h-2v-6h2v1.093c.872-1.616 4-1.736 4 1.548v3.359z" />
+              </svg>
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-white text-lg font-bold mb-4">快速链接</h3>
+          <ul class="space-y-2">
+            <li><a href="#home" class="hover:text-white transition">首页</a></li>
+            <li><a href="#projects" class="hover:text-white transition">我的项目</a></li>
+            <li><a href="#coding-game" class="hover:text-white transition">编程挑战</a></li>
+            <li><a href="#about" class="hover:text-white transition">关于我</a></li>
+            <li><a href="#join" class="hover:text-white transition">加入我们</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="text-white text-lg font-bold mb-4">联系方式</h3>
+          <ul class="space-y-3">
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>yuze-it@outlook.com</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+              </svg>
+              <span>Discord社区</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>中国 · 学生开发者</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-700 mt-12 pt-8 text-center text-sm">
+        <p>© 2025 YUZE-IT 由一位初中生开发者创建和维护</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 脚本 -->
+  <script>
+    // 暗黑模式切换
+    const themeToggle = document.getElementById('theme-toggle');
+    const sunIcon = document.getElementById('sun-icon');
+    const moonIcon = document.getElementById('moon-icon');
+    
+    // 检查本地存储或系统偏好
+    if (localStorage.getItem('darkMode') === 'true' || 
+        (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+      sunIcon.classList.remove('hidden');
+      moonIcon.classList.add('hidden');
+    }
+    
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+      
+      sunIcon.classList.toggle('hidden');
+      moonIcon.classList.toggle('hidden');
+    });
+    
+    // 移动端菜单切换
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    mobileMenuButton.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+    
+    // 代码雨效果
+    function initCodeRain(canvas) {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      
+      const ctx = canvas.getContext('2d');
+      const chars = "01{}[]()<>/*+-=;:,.?!@#$%^&ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+      const fontSize = 14;
+      const columns = canvas.width / fontSize;
+      const drops = [];
+      
+      for (let i = 0; i < columns; i++) {
+        drops[i] = Math.random() * -100;
+      }
+      
+      function draw() {
+        ctx.fillStyle = "rgba(15, 23, 42, 0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "#3B82F6";
+        ctx.font = `bold ${fontSize}px monospace`;
+        
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars.charAt(Math.floor(Math.random() * chars.length));
+          const x = i * fontSize;
+          const y = drops[i] * fontSize;
+          
+          ctx.fillText(text, x, y);
+          
+          if (y > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+      }
+      
+      setInterval(draw, 33);
+    }
+    
+    // 初始化代码雨
+    const codeRainCanvas = document.getElementById('codeRain');
+    if (codeRainCanvas) {
+      initCodeRain(codeRainCanvas);
+    }
+    
+    // C++编程小游戏
+    const quizContainer = document.getElementById('quiz-container');
+    const quizResult = document.getElementById('quiz-result');
+    const submitQuiz = document.getElementById('submit-quiz');
+    const retryQuiz = document.getElementById('retry-quiz');
+    const scoreElement = document.getElementById('score');
+    const resultMessage = document.getElementById('result-message');
+    
+    const correctAnswers = {
+      q1: "A",
+      q2: "C",
+      q3: "D",
+      q4: "C",
+      q5: "D"
+    };
+    
+    if (submitQuiz) {
+      submitQuiz.addEventListener('click', () => {
+        let score = 0;
+        
+        // 检查每个问题的答案
+        for (let i = 1; i <= 5; i++) {
+          const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+          if (selectedOption && selectedOption.value === correctAnswers[`q${i}`]) {
+            score += 20;
+          }
+        }
+        
+        // 显示结果
+        scoreElement.textContent = score;
+        
+        // 根据分数设置不同的消息
+        if (score >= 80) {
+          resultMessage.textContent = "太棒了！你的C++基础知识非常扎实！";
+        } else if (score >= 60) {
+          resultMessage.textContent = "不错！你对C++有一定了解，但还有提升空间。";
+        } else if (score >= 40) {
+          resultMessage.textContent = "继续努力！建议多学习C++基础知识。";
+        } else {
+          resultMessage.textContent = "刚刚开始学习C++吧？坚持学习会有进步的！";
+        }
+        
+        // 显示结果，隐藏问题
+        quizContainer.classList.add('hidden');
+        quizResult.classList.remove('hidden');
+      });
+    }
+    
+    if (retryQuiz) {
+      retryQuiz.addEventListener('click', () => {
+        // 重置选择
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+          radio.checked = false;
+        });
+        
+        // 显示问题，隐藏结果
+        quizContainer.classList.remove('hidden');
+        quizResult.classList.add('hidden');
+      });
+    }
+    
+    // 表单验证
+    const joinForm = document.getElementById('join-form');
+    if (joinForm) {
+      joinForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        let isValid = true;
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const nameError = document.getElementById('name-error');
+        const emailError = document.getElementById('email-error');
+        
+        // 重置错误状态
+        nameError.classList.add('hidden');
+        emailError.classList.add('hidden');
+        
+        // 验证姓名
+        if (nameInput.value.trim().length < 2) {
+          nameError.classList.remove('hidden');
+          isValid = false;
+        }
+        
+        // 验证邮箱
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailInput.value)) {
+          emailError.classList.remove('hidden');
+          isValid = false;
+        }
+        
+        if (isValid) {
+          // 这里可以添加表单提交逻辑，如AJAX请求
+          alert('申请已提交！感谢你的参与，我会尽快与你联系。');
+          joinForm.reset();
+        }
+      });
+    }
+    
+    // 彩蛋 - 连续点击logo
+    const logo = document.getElementById('logo');
+    if (logo) {
+      let clickCount = 0;
+      let lastClickTime = 0;
+      
+      logo.addEventListener('click', () => {
+        const now = Date.now();
+        if (now - lastClickTime > 1000) {
+          clickCount = 0;
+        }
+        
+        clickCount++;
+        lastClickTime = now;
+        
+        if (clickCount >= 5) {
+          alert('🎉 你发现了彩蛋！\n"编程是未来的语言，而我正在学习说话。"\n\n欢迎加入我的编程学习之旅！');
+          clickCount = 0;
+          
+          // 添加一些视觉效果
+          logo.classList.add('animate-pulse');
+          setTimeout(() => {
+            logo.classList.remove('animate-pulse');
+          }, 1000);
+        }
+      });
+    }
+    
+    // 平滑滚动
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // 如果是移动端菜单链接，先隐藏菜单
+        if (this.getAttribute('href') !== '#home' && window.innerWidth < 768) {
+          mobileMenu.classList.add('hidden');
+        }
+        
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        if (targetElement) {
+          targetElement.scrollIntoView({
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+    
+    // 页面加载动画
+    document.addEventListener('DOMContentLoaded', () => {
+      const elements = document.querySelectorAll('.animate-fade-in');
+      elements.forEach((el, index) => {
+        el.style.animationDelay = `${index * 0.1}s`;
+      });
+    });
+  </script>
+</body>
+</html>
