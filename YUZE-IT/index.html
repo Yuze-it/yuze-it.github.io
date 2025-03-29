@@ -733,66 +733,71 @@
           </div>
         </div>
         
-        <div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg overflow-hidden">
-          <div class="p-8">
-            <h3 class="text-2xl font-bold mb-6">申请表单</h3>
-            <form name="join-form" netlify class="space-y-6">
-              <input type="hidden" name="form-name" value="join-form">
-              
-              <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">姓名</label>
-                <input type="text" id="name" name="name" required
-                  class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800">
-                <p class="mt-1 text-xs text-red-500 hidden" id="name-error">请输入有效的姓名</p>
-              </div>
-              
-              <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">邮箱</label>
-                <input type="email" id="email" name="email" required
-                  class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800">
-                <p class="mt-1 text-xs text-red-500 hidden" id="email-error">请输入有效的邮箱地址</p>
-              </div>
-              
-              <div>
-                <label for="grade" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">年级</label>
-                <select id="grade" name="grade"
-                  class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800">
-                  <option value="">选择你的年级</option>
-                  <option value="primary">小学</option>
-                  <option value="middle">初中</option>
-                  <option value="high">高中</option>
-                  <option value="other">其他</option>
-                </select>
-              </div>
-              
-              <div>
-                <label for="interest" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">兴趣方向</label>
-                <select id="interest" name="interest"
-                  class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800">
-                  <option value="">选择你感兴趣的方向</option>
-                  <option value="frontend">前端开发</option>
-                  <option value="backend">后端开发</option>
-                  <option value="design">UI设计</option>
-                  <option value="ai">AI探索</option>
-                  <option value="other">其他</option>
-                </select>
-              </div>
-              
-              <div>
-                <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">自我介绍</label>
-                <textarea id="message" name="message" rows="4"
-                  class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800" placeholder="简单介绍一下你自己和你的编程经验"></textarea>
-              </div>
-              
-              <div class="pt-2">
-                <button type="submit" class="btn-hover w-full bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-md transition shadow-lg">
-                  提交申请
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+      <!-- 加入我们表单 -->
+<div class="bg-white dark:bg-gray-700 rounded-xl shadow-lg overflow-hidden">
+  <div class="p-8">
+    <h3 class="text-2xl font-bold mb-6">申请表单</h3>
+    <form name="join-form" method="POST" data-netlify="true">
+      <!-- Netlify 要求的隐藏字段 -->
+      <input type="hidden" name="form-name" value="join-form">
+      
+      <!-- 姓名字段 -->
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">姓名</label>
+        <input type="text" id="name" name="name" required
+          class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800">
       </div>
+      
+      <!-- 邮箱字段 -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">邮箱</label>
+        <input type="email" id="email" name="email" required
+          class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800">
+      </div>
+      
+      <!-- 年级选择 -->
+      <div>
+        <label for="grade" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">年级</label>
+        <select id="grade" name="grade"
+          class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800">
+          <option value="">选择你的年级</option>
+          <option value="primary">小学</option>
+          <option value="middle">初中</option>
+          <option value="high">高中</option>
+          <option value="other">其他</option>
+        </select>
+      </div>
+      
+      <!-- 兴趣方向 -->
+      <div>
+        <label for="interest" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">兴趣方向</label>
+        <select id="interest" name="interest"
+          class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800">
+          <option value="">选择你感兴趣的方向</option>
+          <option value="frontend">前端开发</option>
+          <option value="backend">后端开发</option>
+          <option value="design">UI设计</option>
+          <option value="ai">AI探索</option>
+          <option value="other">其他</option>
+        </select>
+      </div>
+      
+      <!-- 自我介绍 -->
+      <div>
+        <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">自我介绍</label>
+        <textarea id="message" name="message" rows="4"
+          class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary focus:border-primary bg-white dark:bg-gray-800"></textarea>
+      </div>
+      
+      <!-- 提交按钮 -->
+      <div class="pt-2">
+          <button type="submit" class="btn-hover w-full bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-md transition shadow-lg">
+              提交申请
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
     </section>
 
   <!-- 页脚 -->
