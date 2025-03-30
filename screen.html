@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Terminal v3.1</title>
+    <style>
+        :root {
+            /* 默认主题 - 绿色矩阵 */
+            --primary-color: #0f0;
+            --secondary-color: #0a0;
+            --accent-color: #0f0;
+            --bg-color: #000;
+            --text-color: #0f0;
+            --panel-bg: rgba(0, 20, 0, 0.7);
+            --border-color: #0a0;
+            --glow: 0 0 10px rgba(0, 255, 0, 0.8);
+            --success-color: #0f0;
+            --warning-color: #ff0;
+            --error-color: #f00;
+            --info-color: #09f;
+            --scrollbar-thumb: rgba(0, 255, 0, 0.5);
+            --scrollbar-track: rgba(0, 20, 0, 0.3);
+        }
+
+        /* 蓝色夜间主题 */
+        .theme-night {
+            --primary-color: #09f;
+            --secondary-color: #06a;
+            --accent-color: #0cf;
+            --bg-color: #000033;
+            --text-color: #09f;
+            --panel-bg: rgba(0, 0, 40, 0.7);
+            --border-color: #06a;
+            --glow: 0 0 10px rgba(0, 150, 255, 0.8);
+            --success-color: #0f9;
+            --warning-color: #ff9;
+            --error-color: #f66;
+            --info-color: #6cf;
+            --scrollbar-thumb: rgba(0, 150, 255, 0.5);
+            --scrollbar-track: rgba(0, 0, 40, 0.3);
+        }
+
+        /* 紫色赛博主题 */
+        .theme-cyber {
+            --primary-color: #f0f;
+            --secondary-color: #90f;
+            --accent-color: #f0f;
+            --bg-color: #110022;
+            --text-color: #f0f;
+            --panel-bg: rgba(20, 0, 40, 0.7);
+            --border-color: #90f;
+            --glow: 0 0 10px rgba(255, 0, 255, 0.8);
+            --success-color: #f0f;
+            --warning-color: #f9f;
+            --error-color: #f66;
+            --info-color: #90f;
+            --scrollbar-thumb: rgba(255, 0, 255, 0.5);
+            --scrollbar-track: rgba(20, 0, 40, 0.3);
+        }
+
+        /* 红色警报主题 */
+        .theme-alert {
+            --primary-color: #f00;
+            --secondary-color: #900;
+            --accent-color: #f00;
+            --bg-color: #200;
+            --text-color: #f00;
+            --panel-bg: rgba(40, 0, 0, 0.7);
+            --border-color: #900;
+            --glow: 0 0 10px rgba(255, 0, 0, 0.8);
+            --success-color: #f00;
+            --warning-color: #f90;
+            --error-color: #f00;
+            --info-color: #f66;
+            --scrollbar-thumb: rgba(255, 0, 0, 0.5);
+            --scrollbar-track: rgba(40, 0, 0, 0.3);
+        }
+
+        /* 橙色琥珀主题 */
+        .theme-amber {
+            --primary-color: #fa0;
+            --secondary-color: #a60;
+            --accent-color: #fa0;
+            --bg-color: #221100;
+            --text-color: #fa0;
+            --panel-bg: rgba(40, 20, 0, 0.7);
+            --border-color: #a60;
+            --glow: 0 0 10px rgba(255, 170, 0, 0.8);
+            --success-color: #fa0;
+            --warning-color: #fc0;
+            --error-color: #f60;
+            --info-color: #f96;
+            --scrollbar-thumb: rgba(255, 170, 0, 0.5);
+            --scrollbar-track: rgba(40, 20, 0, 0.3);
+        }
+
+        /* 青色终端主题 */
+        .theme-cyan {
+            --primary-color: #0ff;
+            --secondary-color: #0aa;
+            --accent-color: #0ff;
+            --bg-color: #002222;
+            --text-color: #0ff;
+            --panel-bg: rgba(0, 40, 40, 0.7);
+            --border-color: #0aa;
+            --glow: 0 0 10px rgba(0, 255, 255, 0.8);
+            --success-color: #0ff;
+            --warning-color: #ff9;
+            --error-color: #f66;
+            --info-color: #6ff;
+            --scrollbar-thumb: rgba(0, 255, 255, 0.5);
+            --scrollbar-track: rgba(0, 40, 40, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-overflow-scrolling: touch; /* 启用iOS惯性滚动 */
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.5s ease;
+            overscroll-behavior: contain; /* 防止滚动传播 */
+        }
+
+        .header {
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--panel-bg);
+            box-shadow: var(--glow);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-shadow: var(--glow);
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .theme-btn.active {
+            transform: scale(1.2);
+            box-shadow: 0 0 5px var(--primary-color);
+        }
+
+        .theme-matrix {
+            background: linear-gradient(135deg, #000, #0a0);
+        }
+
+        .theme-night {
+            background: linear-gradient(135deg, #000, #06a);
+        }
+
+        .theme-cyber {
+            background: linear-gradient(135deg, #110022, #90f);
+        }
+
+        .theme-alert {
+            background: linear-gradient(135deg, #200, #f00);
+        }
+
+        .theme-amber {
+            background: linear-gradient(135deg, #221100, #fa0);
+        }
+
+        .theme-cyan {
+            background: linear-gradient(135deg, #002222, #0ff);
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            padding: 15px;
+            gap: 15px;
+            overflow: hidden;
+            min-height: 0; /* 修复Flexbox滚动问题 */
+        }
+
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 0; /* 修复Flexbox滚动问题 */
+        }
+
+        .right-panel {
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 0; /* 修复Flexbox滚动问题 */
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 12px;
+            box-shadow: var(--glow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0; /* 修复Flexbox滚动问题 */
+        }
+
+        .panel-header {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            text-shadow: var(--glow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0; /* 修复Flexbox滚动问题 */
+        }
+
+        .terminal {
+            flex: 1;
+            position: relative;
+            font-family: 'Courier New', monospace;
+            min-height: 0; /* 修复Flexbox滚动问题 */
+        }
+
+        .terminal-content {
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 8px;
+            flex: 1;
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        }
+
+        .terminal-line {
+            margin-bottom: 4px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .terminal-line.success {
+            color: var(--success-color);
+        }
+
+        .terminal-line.warning {
+            color: var(--warning-color);
+        }
+
+        .terminal-line.error {
+            color: var(--error-color);
+        }
+
+        .terminal-line.info {
+            color: var(--info-color);
+        }
+
+        .terminal-input {
+            display: flex;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .terminal-prompt {
+            color: var(--primary-color);
+            margin-right: 8px;
+        }
+
+        #terminal-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            outline: none;
+            caret-color: var(--primary-color);
+        }
+
+        .clock {
+            text-align: center;
+            color: var(--primary-color);
+            text-shadow: var(--glow);
+        }
+
+        .time {
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .date {
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .calendar {
+            flex: 1;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-header {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+
+        .calendar-day {
+            text-align: center;
+            padding: 4px;
+            border-radius: 3px;
+            transition: all 0.2s;
+            font-size: 12px;
+        }
+
+        .calendar-day:hover {
+            background-color: var(--secondary-color);
+            color: var(--bg-color);
+        }
+
+        .calendar-day.today {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            font-weight: bold;
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.5;
+        }
+
+        .game-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #matrix-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        button {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        button:hover {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+        }
+
+        .ai-chat {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .ai-chat.active {
+            display: flex;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 8px;
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        }
+
+        .chat-message {
+            margin-bottom: 8px;
+            line-height: 1.4;
+            word-break: break-word;
+            font-size: 14px;
+        }
+
+        .chat-message.user {
+            color: var(--primary-color);
+        }
+
+        .chat-message.ai {
+            color: var(--text-color);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .chat-input {
+            display: flex;
+            flex: 1;
+        }
+
+        #chat-input {
+            flex: 1;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-family: 'Courier New', monospace);
+            padding: 4px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing {
+            position: relative;
+        }
+
+        .typing::after {
+            content: '|';
+            animation: blink 1s infinite;
+            color: var(--primary-color);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .status-bar {
+            padding: 4px 15px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--panel-bg);
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+            box-shadow: 0 0 3px var(--success-color);
+        }
+
+        .status-indicator.warning {
+            background-color: var(--warning-color);
+            box-shadow: 0 0 3px var(--warning-color);
+        }
+
+        .status-indicator.error {
+            background-color: var(--error-color);
+            box-shadow: 0 0 3px var(--error-color);
+        }
+
+        /* 滚动条样式 - WebKit */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        /* 翻译面板样式 */
+        .translate-panel {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .translate-panel.active {
+            display: flex;
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .language-btn {
+            padding: 2px 6px;
+            font-size: 11px;
+        }
+
+        .translation-result {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            margin-bottom: 8px;
+            overflow-y: auto;
+            background-color: rgba(0, 0, 0, 0.3);
+            font-size: 14px;
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        }
+
+        /* 工具提示 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: var(--panel-bg);
+            color: var(--text-color);
+            text-align: center;
+            border-radius: 4px;
+            padding: 4px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--glow);
+            font-size: 11px;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* 响应式布局 */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            .right-panel {
+                width: 100%;
+                flex-direction: row;
+            }
+            .right-panel > .panel {
+                flex: 1;
+                min-width: 0;
+            }
+            .time {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .right-panel {
+                flex-direction: column;
+            }
+            .header {
+                padding: 8px 12px;
+            }
+            .container {
+                padding: 10px;
+                gap: 10px;
+            }
+            .panel {
+                padding: 10px;
+            }
+            .theme-selector {
+                gap: 6px;
+            }
+            .theme-btn {
+                width: 16px;
+                height: 16px;
+            }
+            .time {
+                font-size: 24px;
+            }
+            .calendar-day {
+                padding: 2px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .status-bar {
+                font-size: 10px;
+                padding: 3px 10px;
+            }
+            .game-controls {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .game-controls button {
+                flex: 1;
+                min-width: calc(50% - 4px);
+            }
+        }
+    </style>
+</head>
+<body class="theme-matrix">
+    <div class="header">
+        <div class="logo">NEON TERMINAL v3.1</div>
+        <div class="theme-selector">
+            <div class="theme-btn theme-matrix active tooltip" onclick="changeTheme('matrix')">
+                <span class="tooltiptext">Matrix Theme</span>
+            </div>
+            <div class="theme-btn theme-night tooltip" onclick="changeTheme('night')">
+                <span class="tooltiptext">Night Theme</span>
+            </div>
+            <div class="theme-btn theme-cyber tooltip" onclick="changeTheme('cyber')">
+                <span class="tooltiptext">Cyber Theme</span>
+            </div>
+            <div class="theme-btn theme-alert tooltip" onclick="changeTheme('alert')">
+                <span class="tooltiptext">Alert Theme</span>
+            </div>
+            <div class="theme-btn theme-amber tooltip" onclick="changeTheme('amber')">
+                <span class="tooltiptext">Amber Theme</span>
+            </div>
+            <div class="theme-btn theme-cyan tooltip" onclick="changeTheme('cyan')">
+                <span class="tooltiptext">Cyan Theme</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="left-panel">
+            <div class="panel terminal">
+                <div class="panel-header">
+                    <span>SYSTEM TERMINAL</span>
+                    <span id="system-status">CONNECTED</span>
+                </div>
+                <div class="panel-content">
+                    <div class="terminal-content" id="terminal-content">
+                        <div class="terminal-line">SYSTEM INITIALIZED...</div>
+                        <div class="terminal-line">WELCOME TO NEON TERMINAL v3.1</div>
+                        <div class="terminal-line">TYPE 'help' FOR AVAILABLE COMMANDS</div>
+                        <div class="terminal-line">-------------------------------------</div>
+                    </div>
+                    <div class="terminal-input">
+                        <span class="terminal-prompt">></span>
+                        <input type="text" id="terminal-input" autofocus>
+                    </div>
+                </div>
+            </div>
+            <div class="panel game-container">
+                <div class="panel-header">MATRIX SIMULATION</div>
+                <div class="panel-content">
+                    <canvas id="matrix-canvas"></canvas>
+                    <div class="game-controls">
+                        <button id="start-matrix">START</button>
+                        <button id="stop-matrix">STOP</button>
+                        <button id="change-speed">SPEED</button>
+                        <button id="fullscreen">FULLSCREEN</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="panel clock">
+                <div class="panel-header">SYSTEM TIME</div>
+                <div class="panel-content">
+                    <div class="time" id="time">00:00:00</div>
+                    <div class="date" id="date">January 1, 2023</div>
+                </div>
+            </div>
+            <div class="panel calendar">
+                <div class="panel-header">CALENDAR</div>
+                <div class="panel-content">
+                    <div id="calendar-header" class="calendar-header"></div>
+                    <div id="calendar-grid" class="calendar-grid"></div>
+                </div>
+            </div>
+            <div class="panel ai-chat" id="ai-chat">
+                <div class="panel-header">AI CHAT MODE</div>
+                <div class="panel-content">
+                    <div class="chat-messages" id="chat-messages"></div>
+                    <div class="chat-input-container">
+                        <div class="chat-input">
+                            <input type="text" id="chat-input" placeholder="Type message...">
+                        </div>
+                        <div class="chat-actions">
+                            <button id="send-chat">SEND</button>
+                            <button id="exit-chat">EXIT</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel translate-panel" id="translate-panel">
+                <div class="panel-header">TRANSLATION MODE</div>
+                <div class="panel-content">
+                    <div class="language-selector">
+                        <button data-lang="en">EN</button>
+                        <button data-lang="zh">中文</button>
+                        <button data-lang="ja">日本語</button>
+                        <button data-lang="ko">한국어</button>
+                        <button data-lang="fr">FR</button>
+                        <button data-lang="es">ES</button>
+                    </div>
+                    <div class="translation-result" id="translation-result"></div>
+                    <div class="chat-input-container">
+                        <div class="chat-input">
+                            <input type="text" id="translate-input" placeholder="Text to translate...">
+                        </div>
+                        <div class="chat-actions">
+                            <button id="translate-btn">TRANS</button>
+                            <button id="exit-translate">EXIT</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-item">
+            <div class="status-indicator"></div>
+            <span id="connection-status">SYSTEM ONLINE</span>
+        </div>
+        <div class="status-item">
+            <span id="cpu-status">CPU: 12%</span>
+        </div>
+        <div class="status-item">
+            <span id="memory-status">MEM: 34%</span>
+        </div>
+        <div class="status-item">
+            <span id="network-status">NET: 1.2MB/s</span>
+        </div>
+        <div class="status-item">
+            <span id="theme-status">THEME: MATRIX</span>
+        </div>
+    </div>
+
+    <script>
+        // 系统变量
+        let currentTheme = 'matrix';
+        let matrixRunning = false;
+        let matrixSpeed = 50;
+        let matrixAnimationId = null;
+        let currentMode = 'terminal'; // terminal, chat, translate
+        const apiKey = "sk-N46UhIXp3ra7OqrixuUSJqrZS3HPPQ6hu73RohOwyHnlaFSu"; // 替换为你的API密钥
+        let currentTranslateLang = 'en';
+        let systemUptime = 0;
+
+        // DOM元素
+        const terminalContent = document.getElementById('terminal-content');
+        const terminalInput = document.getElementById('terminal-input');
+        const timeDisplay = document.getElementById('time');
+        const dateDisplay = document.getElementById('date');
+        const calendarHeader = document.getElementById('calendar-header');
+        const calendarGrid = document.getElementById('calendar-grid');
+        const matrixCanvas = document.getElementById('matrix-canvas');
+        const startMatrixBtn = document.getElementById('start-matrix');
+        const stopMatrixBtn = document.getElementById('stop-matrix');
+        const changeSpeedBtn = document.getElementById('change-speed');
+        const fullscreenBtn = document.getElementById('fullscreen');
+        const aiChatPanel = document.getElementById('ai-chat');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendChatBtn = document.getElementById('send-chat');
+        const exitChatBtn = document.getElementById('exit-chat');
+        const translatePanel = document.getElementById('translate-panel');
+        const translateInput = document.getElementById('translate-input');
+        const translateBtn = document.getElementById('translate-btn');
+        const exitTranslateBtn = document.getElementById('exit-translate');
+        const translationResult = document.getElementById('translation-result');
+        const systemStatus = document.getElementById('system-status');
+        const connectionStatus = document.getElementById('connection-status');
+        const cpuStatus = document.getElementById('cpu-status');
+        const memoryStatus = document.getElementById('memory-status');
+        const networkStatus = document.getElementById('network-status');
+        const themeStatus = document.getElementById('theme-status');
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            updateClock();
+            setInterval(updateClock, 1000);
+            updateCalendar();
+            initMatrix();
+            checkTimeForTheme();
+            setInterval(checkTimeForTheme, 60000); // 每分钟检查一次时间
+            updateSystemStats();
+            setInterval(updateSystemStats, 3000); // 每3秒更新系统状态
+
+            // 终端输入事件
+            terminalInput.addEventListener('keydown', handleTerminalInput);
+            
+            // 矩阵控制按钮
+            startMatrixBtn.addEventListener('click', startMatrix);
+            stopMatrixBtn.addEventListener('click', stopMatrix);
+            changeSpeedBtn.addEventListener('click', changeMatrixSpeed);
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+            
+            // 聊天控制按钮
+            sendChatBtn.addEventListener('click', sendChatMessage);
+            exitChatBtn.addEventListener('click', exitChatMode);
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') sendChatMessage();
+            });
+
+            // 翻译控制按钮
+            translateBtn.addEventListener('click', translateText);
+            exitTranslateBtn.addEventListener('click', exitTranslateMode);
+            translateInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') translateText();
+            });
+
+            // 语言选择按钮
+            document.querySelectorAll('.language-selector button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentTranslateLang = btn.dataset.lang;
+                    addTerminalLine(`Translation language set to: ${btn.textContent}`, 'info');
+                });
+            });
+
+            // 初始欢迎消息
+            setTimeout(() => {
+                addTerminalLine("System ready. All subsystems operational.", 'success');
+            }, 1000);
+
+            // 初始系统状态
+            systemUptime = Math.floor(Date.now() / 1000);
+        });
+
+        // 更新时钟
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            timeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateDisplay.textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // 更新日历
+        function updateCalendar() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const today = now.getDate();
+            
+            // 设置日历标题
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                                "July", "August", "September", "October", "November", "December"];
+            calendarHeader.textContent = `${monthNames[month]} ${year}`;
+            
+            // 获取当月第一天是星期几
+            const firstDay = new Date(year, month, 1).getDay();
+            // 获取当月天数
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            // 获取上个月的天数
+            const daysInLastMonth = new Date(year, month, 0).getDate();
+            
+            // 清空日历
+            calendarGrid.innerHTML = '';
+            
+            // 添加上个月的日期
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day other-month';
+                dayElement.textContent = daysInLastMonth - i;
+                calendarGrid.appendChild(dayElement);
+            }
+            
+            // 添加当月的日期
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = i;
+                if (i === today) {
+                    dayElement.classList.add('today');
+                }
+                calendarGrid.appendChild(dayElement);
+            }
+            
+            // 计算剩余格子并添加下个月的日期
+            const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+            const nextMonthDays = totalCells - (firstDay + daysInMonth);
+            for (let i = 1; i <= nextMonthDays; i++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day other-month';
+                dayElement.textContent = i;
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+
+        // 初始化矩阵效果
+        function initMatrix() {
+            matrixCanvas.width = matrixCanvas.offsetWidth;
+            matrixCanvas.height = matrixCanvas.offsetHeight;
+            
+            const ctx = matrixCanvas.getContext('2d');
+            const width = matrixCanvas.width;
+            const height = matrixCanvas.height;
+            
+            // 设置字体大小和列宽
+            const fontSize = 16;
+            const columns = Math.floor(width / fontSize);
+            
+            // 创建雨滴数组
+            const drops = [];
+            for (let i = 0; i < columns; i++) {
+                drops[i] = Math.floor(Math.random() * height / fontSize) * fontSize;
+            }
+            
+            // 绘制函数
+            function draw() {
+                // 半透明背景
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, width, height);
+                
+                // 设置字体和颜色
+                ctx.font = `${fontSize}px monospace`;
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
+                
+                // 绘制字符
+                for (let i = 0; i < drops.length; i++) {
+                    const text = String.fromCharCode(Math.random() * 128);
+                    const x = i * fontSize;
+                    const y = drops[i] * 1.05;
+                    
+                    ctx.fillText(text, x, y);
+                    
+                    // 重置雨滴到底部
+                    if (y > height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    
+                    // 移动雨滴
+                    drops[i]++;
+                }
+                
+                if (matrixRunning) {
+                    matrixAnimationId = requestAnimationFrame(draw);
+                }
+            }
+            
+            // 保存绘制函数以便控制
+            matrixDraw = draw;
+        }
+
+        // 开始矩阵效果
+        function startMatrix() {
+            if (!matrixRunning) {
+                matrixRunning = true;
+                matrixDraw();
+                addTerminalLine("Matrix simulation started.", 'success');
+            }
+        }
+
+        // 停止矩阵效果
+        function stopMatrix() {
+            if (matrixRunning) {
+                matrixRunning = false;
+                cancelAnimationFrame(matrixAnimationId);
+                
+                // 清除画布
+                const ctx = matrixCanvas.getContext('2d');
+                ctx.clearRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+                
+                addTerminalLine("Matrix simulation stopped.", 'info');
+            }
+        }
+
+        // 改变矩阵速度
+        function changeMatrixSpeed() {
+            matrixSpeed = matrixSpeed === 50 ? 30 : matrixSpeed === 30 ? 10 : 50;
+            addTerminalLine(`Matrix speed changed to ${matrixSpeed === 50 ? 'NORMAL' : matrixSpeed === 30 ? 'FAST' : 'ULTRA'}`, 'info');
+        }
+
+        // 切换全屏
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    addTerminalLine(`Error attempting to enable fullscreen: ${err.message}`, 'error');
+                });
+                addTerminalLine("Entered fullscreen mode.", 'success');
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    addTerminalLine("Exited fullscreen mode.", 'info');
+                }
+            }
+        }
+
+        // 添加终端行
+        function addTerminalLine(text, type = '') {
+            const line = document.createElement('div');
+            line.className = `terminal-line ${type}`;
+            line.textContent = text;
+            terminalContent.appendChild(line);
+            terminalContent.scrollTop = terminalContent.scrollHeight;
+        }
+
+        // 处理终端输入
+        function handleTerminalInput(e) {
+            if (e.key === 'Enter') {
+                const input = terminalInput.value.trim();
+                terminalInput.value = '';
+                
+                if (input) {
+                    // 显示用户输入
+                    addTerminalLine(`> ${input}`);
+                    
+                    // 处理命令
+                    processCommand(input.toLowerCase());
+                }
+            }
+        }
+
+        // 处理命令
+        function processCommand(cmd) {
+            switch (cmd) {
+                case 'help':
+                    showHelp();
+                    break;
+                case 'clear':
+                    terminalContent.innerHTML = '';
+                    break;
+                case 'time':
+                    addTerminalLine(`Current system time: ${new Date().toLocaleString()}`, 'info');
+                    break;
+                case 'date':
+                    addTerminalLine(`Current system date: ${new Date().toLocaleDateString()}`, 'info');
+                    break;
+                case 'matrix start':
+                    startMatrix();
+                    break;
+                case 'matrix stop':
+                    stopMatrix();
+                    break;
+                case 'matrix speed':
+                    changeMatrixSpeed();
+                    break;
+                case 'fullscreen':
+                    toggleFullscreen();
+                    break;
+                case 'theme matrix':
+                    changeTheme('matrix');
+                    break;
+                case 'theme night':
+                    changeTheme('night');
+                    break;
+                case 'theme cyber':
+                    changeTheme('cyber');
+                    break;
+                case 'theme alert':
+                    changeTheme('alert');
+                    break;
+                case 'theme amber':
+                    changeTheme('amber');
+                    break;
+                case 'theme cyan':
+                    changeTheme('cyan');
+                    break;
+                case 'chat':
+                    enterChatMode();
+                    break;
+                case 'translate':
+                    enterTranslateMode();
+                    break;
+                case 'exit':
+                    exitCurrentMode();
+                    break;
+                case 'reboot':
+                    simulateReboot();
+                    break;
+                case 'status':
+                    showSystemStatus();
+                    break;
+                case 'secret':
+                    showEasterEgg();
+                    break;
+                default:
+                    if (cmd.startsWith('say ')) {
+                        const message = cmd.substring(4);
+                        addTerminalLine(`SYSTEM: "${message}"`, 'info');
+                    } else if (cmd.startsWith('translate ')) {
+                        const text = cmd.substring(10);
+                        translateText(text);
+                    } else {
+                        addTerminalLine(`Command not found: ${cmd}. Type 'help' for available commands.`, 'error');
+                    }
+            }
+        }
+
+        // 显示帮助
+        function showHelp() {
+            const commands = [
+                { command: 'help', description: 'Show this help message' },
+                { command: 'clear', description: 'Clear the terminal screen' },
+                { command: 'time', description: 'Show current time' },
+                { command: 'date', description: 'Show current date' },
+                { command: 'matrix start', description: 'Start matrix simulation' },
+                { command: 'matrix stop', description: 'Stop matrix simulation' },
+                { command: 'matrix speed', description: 'Change matrix speed' },
+                { command: 'fullscreen', description: 'Toggle fullscreen mode' },
+                { command: 'theme [name]', description: 'Change theme (matrix, night, cyber, alert, amber, cyan)' },
+                { command: 'chat', description: 'Enter AI chat mode' },
+                { command: 'translate', description: 'Enter translation mode' },
+                { command: 'exit', description: 'Exit current mode' },
+                { command: 'reboot', description: 'Simulate system reboot' },
+                { command: 'status', description: 'Show system status' },
+                { command: 'say [message]', description: 'Echo a message' },
+                { command: 'translate [text]', description: 'Translate text to current language' },
+                { command: 'secret', description: 'Show secret message' }
+            ];
+            
+            addTerminalLine('AVAILABLE COMMANDS:', 'info');
+            addTerminalLine('-------------------', 'info');
+            commands.forEach(cmd => {
+                addTerminalLine(`${cmd.command.padEnd(20)} ${cmd.description}`, 'info');
+            });
+        }
+
+        // 改变主题
+        function changeTheme(theme) {
+            document.body.className = `theme-${theme}`;
+            currentTheme = theme;
+            
+            // 更新主题按钮状态
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.theme-${theme}`).classList.add('active');
+            
+            // 更新状态栏
+            themeStatus.textContent = `THEME: ${theme.toUpperCase()}`;
+            
+            addTerminalLine(`Theme changed to ${theme.toUpperCase()} mode.`, 'success');
+        }
+
+        // 检查时间切换主题
+        function checkTimeForTheme() {
+            const hours = new Date().getHours();
+            if (hours >= 18 || hours < 6) {
+                if (currentTheme === 'matrix') {
+                    changeTheme('night');
+                }
+            } else {
+                if (currentTheme === 'night') {
+                    changeTheme('matrix');
+                }
+            }
+        }
+
+        // 进入聊天模式
+        function enterChatMode() {
+            if (currentMode === 'chat') return;
+            
+            exitCurrentMode();
+            currentMode = 'chat';
+            aiChatPanel.classList.add('active');
+            terminalInput.placeholder = "Type 'exit' to leave chat mode";
+            addTerminalLine("Entered AI chat mode. Type 'exit' to return to terminal.", 'success');
+            
+            // 添加欢迎消息
+            addChatMessage('ai', "AI: Hello! I'm your AI assistant. How can I help you today?");
+            
+            // 聚焦聊天输入
+            setTimeout(() => {
+                chatInput.focus();
+            }, 100);
+        }
+
+        // 进入翻译模式
+        function enterTranslateMode() {
+            if (currentMode === 'translate') return;
+            
+            exitCurrentMode();
+            currentMode = 'translate';
+            translatePanel.classList.add('active');
+            terminalInput.placeholder = "Type 'exit' to leave translation mode";
+            addTerminalLine("Entered translation mode. Type 'exit' to return to terminal.", 'success');
+            addTerminalLine(`Current translation language: ${getLanguageName(currentTranslateLang)}`, 'info');
+            
+            // 聚焦翻译输入
+            setTimeout(() => {
+                translateInput.focus();
+            }, 100);
+        }
+
+        // 退出当前模式
+        function exitCurrentMode() {
+            if (currentMode === 'chat') {
+                exitChatMode();
+            } else if (currentMode === 'translate') {
+                exitTranslateMode();
+            }
+        }
+
+        // 退出聊天模式
+        function exitChatMode() {
+            if (currentMode === 'chat') {
+                currentMode = 'terminal';
+                aiChatPanel.classList.remove('active');
+                terminalInput.placeholder = "";
+                addTerminalLine("Exited AI chat mode.", 'info');
+                terminalInput.focus();
+            }
+        }
+
+        // 退出翻译模式
+        function exitTranslateMode() {
+            if (currentMode === 'translate') {
+                currentMode = 'terminal';
+                translatePanel.classList.remove('active');
+                terminalInput.placeholder = "";
+                addTerminalLine("Exited translation mode.", 'info');
+                terminalInput.focus();
+            }
+        }
+
+        // 添加聊天消息
+        function addChatMessage(sender, message) {
+            const msgElement = document.createElement('div');
+            msgElement.className = `chat-message ${sender}`;
+            msgElement.textContent = message;
+            chatMessages.appendChild(msgElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 发送聊天消息
+        async function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+            
+            // 显示用户消息
+            addChatMessage('user', `You: ${message}`);
+            chatInput.value = '';
+            
+            // 显示AI正在输入
+            const typingElement = document.createElement('div');
+            typingElement.className = 'chat-message ai typing';
+            typingElement.textContent = "AI: ";
+            chatMessages.appendChild(typingElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            try {
+                // 调用API
+                const response = await fetch("https://api.moonshot.cn/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "moonshot-v1-8k",
+                        messages: [{
+                            "role": "system",
+                            "content": "You are a helpful AI assistant in a futuristic terminal interface. Keep responses concise but helpful."
+                        }, {
+                            "role": "user", 
+                            "content": message
+                        }],
+                        temperature: 0.7
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const aiResponse = data.choices[0].message.content;
+                
+                // 移除"正在输入"指示器并显示AI响应
+                chatMessages.removeChild(typingElement);
+                addChatMessage('ai', `AI: ${aiResponse}`);
+            } catch (error) {
+                console.error("Error calling AI API:", error);
+                chatMessages.removeChild(typingElement);
+                addChatMessage('ai', `AI: Sorry, I encountered an error: ${error.message}`);
+            }
+        }
+
+        // 翻译文本
+        async function translateText(text = null) {
+            const textToTranslate = text || translateInput.value.trim();
+            if (!textToTranslate) return;
+            
+            if (!text) {
+                translateInput.value = '';
+            }
+            
+            // 显示原始文本
+            translationResult.textContent = `Original: ${textToTranslate}\n\nTranslating to ${getLanguageName(currentTranslateLang)}...`;
+            
+            try {
+                // 调用翻译API
+                const response = await fetch("https://api.moonshot.cn/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "moonshot-v1-8k",
+                        messages: [{
+                            "role": "system",
+                            "content": `You are a professional translator. Translate the following text to ${getLanguageName(currentTranslateLang)}. Only provide the translation, no additional explanation.`
+                        }, {
+                            "role": "user", 
+                            "content": textToTranslate
+                        }],
+                        temperature: 0.3
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const translatedText = data.choices[0].message.content;
+                
+                // 显示翻译结果
+                translationResult.textContent = `Original: ${textToTranslate}\n\nTranslation (${getLanguageName(currentTranslateLang)}): ${translatedText}`;
+                
+                if (!text) {
+                    addTerminalLine(`Translated to ${getLanguageName(currentTranslateLang)}: ${translatedText}`, 'success');
+                }
+            } catch (error) {
+                console.error("Error calling translation API:", error);
+                translationResult.textContent = `Error: ${error.message}`;
+                
+                if (!text) {
+                    addTerminalLine(`Translation error: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // 获取语言名称
+        function getLanguageName(code) {
+            const languages = {
+                'en': 'English',
+                'zh': 'Chinese',
+                'ja': 'Japanese',
+                'ko': 'Korean',
+                'fr': 'French',
+                'es': 'Spanish'
+            };
+            return languages[code] || code;
+        }
+
+        // 模拟系统重启
+        function simulateReboot() {
+            addTerminalLine("Initiating system reboot sequence...", 'warning');
+            systemStatus.textContent = "REBOOTING";
+            systemStatus.style.color = "orange";
+            connectionStatus.textContent = "SYSTEM OFFLINE";
+            document.querySelector('.status-indicator').className = 'status-indicator error';
+            
+            setTimeout(() => {
+                terminalContent.innerHTML = '';
+                addTerminalLine("SYSTEM REBOOTING...", 'warning');
+                addTerminalLine("Loading kernel modules...", 'info');
+                
+                setTimeout(() => {
+                    addTerminalLine("Initializing hardware...", 'info');
+                    
+                    setTimeout(() => {
+                        addTerminalLine("Starting services...", 'info');
+                        
+                        setTimeout(() => {
+                            addTerminalLine("System reboot complete.", 'success');
+                            addTerminalLine("All systems operational.", 'success');
+                            systemStatus.textContent = "CONNECTED";
+                            systemStatus.style.color = getComputedStyle(document.documentElement).getPropertyValue('--success-color');
+                            connectionStatus.textContent = "SYSTEM ONLINE";
+                            document.querySelector('.status-indicator').className = 'status-indicator';
+                            systemUptime = Math.floor(Date.now() / 1000);
+                        }, 1000);
+                    }, 800);
+                }, 600);
+            }, 400);
+        }
+
+        // 显示系统状态
+        function showSystemStatus() {
+            const now = new Date();
+            const uptime = Math.floor(now.getTime() / 1000) - systemUptime;
+            const hours = Math.floor(uptime / 3600);
+            const minutes = Math.floor((uptime % 3600) / 60);
+            const seconds = uptime % 60;
+            
+            addTerminalLine("SYSTEM STATUS:", 'info');
+            addTerminalLine("----------------", 'info');
+            addTerminalLine(`Uptime: ${hours}h ${minutes}m ${seconds}s`, 'info');
+            addTerminalLine(`Theme: ${currentTheme.toUpperCase()} mode`, 'info');
+            addTerminalLine(`Matrix: ${matrixRunning ? "Running" : "Stopped"}`, 'info');
+            addTerminalLine(`Current mode: ${currentMode.toUpperCase()}`, 'info');
+            addTerminalLine(`Terminal version: 3.1`, 'info');
+        }
+
+        // 更新系统状态
+        function updateSystemStats() {
+            // 模拟变化的系统状态
+            const now = new Date();
+            const seconds = now.getSeconds();
+            
+            // CPU使用率 (模拟变化)
+            const cpuUsage = 10 + Math.abs(20 * Math.sin(seconds / 5));
+            cpuStatus.textContent = `CPU: ${Math.round(cpuUsage)}%`;
+            
+            // 内存使用率 (模拟变化)
+            const memUsage = 30 + Math.abs(10 * Math.cos(seconds / 7));
+            memoryStatus.textContent = `MEM: ${Math.round(memUsage)}%`;
+            
+            // 网络速度 (模拟变化)
+            const netSpeed = (1 + Math.abs(0.5 * Math.sin(seconds / 3))).toFixed(1);
+            networkStatus.textContent = `NET: ${netSpeed}MB/s`;
+        }
+
+        // 彩蛋
+        function showEasterEgg() {
+            addTerminalLine("Decrypting secret message...", 'info');
+            
+            setTimeout(() => {
+                addTerminalLine("Accessing secure channel...", 'info');
+                
+                setTimeout(() => {
+                    addTerminalLine("Message decrypted:", 'success');
+                    addTerminalLine("");
+                    addTerminalLine("  You found the secret message!", 'success');
+                    addTerminalLine("  The cake is a lie.", 'success');
+                    addTerminalLine("  But you already knew that, didn't you?", 'success');
+                    addTerminalLine("");
+                    addTerminalLine("  - System Admin", 'success');
+                }, 800);
+            }, 600);
+        }
+    </script>
+</body>
+</html>
