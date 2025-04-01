@@ -117,6 +117,7 @@
             margin-top: 20px;
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         button {
             padding: 10px 20px;
@@ -147,12 +148,78 @@
         }
         .type-filter {
             margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
         }
         .stats {
             margin-top: 20px;
             padding: 10px;
             background-color: #eaf7ff;
             border-radius: 5px;
+        }
+        .preview-area {
+            margin-top: 20px;
+        }
+        .preview-question {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.05);
+        }
+        .math-formula {
+            font-family: "Times New Roman", Times, serif;
+            font-style: italic;
+        }
+        .math-formula-block {
+            display: block;
+            margin: 10px 0;
+            text-align: center;
+            font-family: "Times New Roman", Times, serif;
+            font-style: italic;
+        }
+        .start-practice-btn {
+            margin-top: 20px;
+            background-color: #2ecc71;
+        }
+        .start-practice-btn:hover {
+            background-color: #27ae60;
+        }
+        .back-to-list {
+            margin-top: 20px;
+            background-color: #95a5a6;
+        }
+        .back-to-list:hover {
+            background-color: #7f8c8d;
+        }
+        .question-image {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .question-content {
+            margin-bottom: 15px;
+        }
+        .answer-content {
+            line-height: 1.8;
+        }
+        .system-message {
+            padding: 10px;
+            background-color: #e3f2fd;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        @media (max-width: 768px) {
+            .question-bank {
+                grid-template-columns: 1fr;
+            }
+            .type-filter {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -169,43 +236,64 @@
             <div id="question-bank" class="tab-content active">
                 <h2>数学题库</h2>
                 <div class="type-filter">
-                    <label for="grade-select">年级：</label>
-                    <select id="grade-select">
-                        <option value="all">全部</option>
-                        <option value="7">七年级</option>
-                        <option value="8">八年级</option>
-                        <option value="9">九年级</option>
-                    </select>
+                    <div>
+                        <label for="grade-select">年级：</label>
+                        <select id="grade-select">
+                            <option value="all">全部</option>
+                            <option value="7">七年级</option>
+                            <option value="8">八年级</option>
+                            <option value="9">九年级</option>
+                        </select>
+                    </div>
                     
-                    <label for="semester-select">学期：</label>
-                    <select id="semester-select">
-                        <option value="all">全部</option>
-                        <option value="1">上学期</option>
-                        <option value="2">下学期</option>
-                    </select>
+                    <div>
+                        <label for="semester-select">学期：</label>
+                        <select id="semester-select">
+                            <option value="all">全部</option>
+                            <option value="1">上学期</option>
+                            <option value="2">下学期</option>
+                        </select>
+                    </div>
                     
-                    <label for="type-select">题型：</label>
-                    <select id="type-select">
-                        <option value="all">全部</option>
-                        <option value="algebra">代数</option>
-                        <option value="geometry">几何</option>
-                        <option value="word">应用题</option>
-                        <option value="proof">证明题</option>
-                    </select>
+                    <div>
+                        <label for="type-select">题型：</label>
+                        <select id="type-select">
+                            <option value="all">全部</option>
+                            <option value="algebra">代数</option>
+                            <option value="geometry">几何</option>
+                            <option value="word">应用题</option>
+                            <option value="proof">证明题</option>
+                        </select>
+                    </div>
                     
-                    <label for="difficulty-select">难度：</label>
-                    <select id="difficulty-select">
-                        <option value="all">全部</option>
-                        <option value="easy">简单</option>
-                        <option value="medium">中等</option>
-                        <option value="hard">困难</option>
-                    </select>
+                    <div>
+                        <label for="difficulty-select">难度：</label>
+                        <select id="difficulty-select">
+                            <option value="all">全部</option>
+                            <option value="easy">简单</option>
+                            <option value="medium">中等</option>
+                            <option value="hard">困难</option>
+                        </select>
+                    </div>
                     
                     <button onclick="filterQuestions()">筛选</button>
+                    <button onclick="resetFilters()">重置</button>
                 </div>
                 
                 <div class="question-bank" id="filtered-questions">
                     <!-- 题目将通过JavaScript动态加载 -->
+                </div>
+                
+                <div id="preview-area" class="preview-area hidden">
+                    <div class="preview-question">
+                        <h3 id="preview-title">题目标题</h3>
+                        <div id="preview-content" class="question-content">
+                            <!-- 题目预览内容将通过JavaScript动态加载 -->
+                        </div>
+                        <p>难度: <span id="preview-difficulty"></span></p>
+                        <button class="start-practice-btn" onclick="startPracticeFromPreview()">开始做题</button>
+                        <button class="back-to-list" onclick="backToList()">返回题目列表</button>
+                    </div>
                 </div>
             </div>
             
@@ -213,10 +301,16 @@
                 <h2>做题练习</h2>
                 <div id="practice-intro" class="practice-intro">
                     <p>请从题库中选择题目开始练习，或随机选择题目：</p>
-                    <button onclick="startRandomPractice()">随机练习</button>
+                    <div class="buttons">
+                        <button onclick="startRandomPractice()">随机练习</button>
+                        <button onclick="startRandomPractice('easy')">随机简单题</button>
+                        <button onclick="startRandomPractice('medium')">随机中等题</button>
+                        <button onclick="startRandomPractice('hard')">随机难题</button>
+                    </div>
                     <div class="stats">
                         <p>今日已练习: <span id="today-count">0</span> 题</p>
                         <p>累计练习: <span id="total-count">0</span> 题</p>
+                        <p>平均用时: <span id="avg-time">0</span> 秒</p>
                     </div>
                 </div>
                 
@@ -226,7 +320,7 @@
                     </div>
                     <div class="question-display">
                         <h3 id="question-title">题目标题</h3>
-                        <div id="question-content">
+                        <div id="question-content" class="question-content">
                             <!-- 题目内容将通过JavaScript动态加载 -->
                         </div>
                         <p>难度: <span id="question-difficulty"></span></p>
@@ -237,15 +331,21 @@
                         <textarea id="answer-input" placeholder="请在此输入你的解答..."></textarea>
                         <div class="buttons">
                             <button id="submit-btn" onclick="submitAnswer()">提交答案</button>
-                            <button id="draft-btn" onclick="saveAsDraft()">草稿纸</button>
+                            <button id="draft-btn" onclick="saveAsDraft()">保存草稿</button>
                             <button id="answer-btn" onclick="showAnswer()" disabled>查看答案</button>
                             <button id="next-btn" onclick="nextQuestion()" disabled>下一题</button>
+                            <button id="giveup-btn" onclick="giveUp()">放弃本题</button>
                         </div>
                     </div>
                     
                     <div id="answer-section" class="answer-section">
                         <h3>参考答案</h3>
-                        <div id="answer-content"></div>
+                        <div id="answer-content" class="answer-content"></div>
+                        <div class="buttons">
+                            <button onclick="rateAnswer(1)">完全理解</button>
+                            <button onclick="rateAnswer(2)">基本理解</button>
+                            <button onclick="rateAnswer(3)">不太理解</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -260,18 +360,18 @@
                     {
                         "id": "7-1-1",
                         "title": "有理数的加减混合运算",
-                        "content": "计算: $-3.2 + 5.8 - (-4.1) + (-7.6)$",
+                        "content": "计算: <span class='math-formula'>$-3.2 + 5.8 - (-4.1) + (-7.6)$</span>",
                         "type": "algebra",
                         "difficulty": "easy",
-                        "answer": "解：原式 $= -3.2 + 5.8 + 4.1 - 7.6 = (-3.2 - 7.6) + (5.8 + 4.1) = -10.8 + 9.9 = -0.9$"
+                        "answer": "解：原式 <span class='math-formula'>$= -3.2 + 5.8 + 4.1 - 7.6 = (-3.2 - 7.6) + (5.8 + 4.1) = -10.8 + 9.9 = -0.9$</span>"
                     },
                     {
                         "id": "7-1-2",
                         "title": "绝对值与数轴",
-                        "content": "已知 $|a| = 3$, $|b| = 5$, 且 $a > b$, 求 $a + b$ 的值。",
+                        "content": "已知 <span class='math-formula'>$|a| = 3$</span>, <span class='math-formula'>$|b| = 5$</span>, 且 <span class='math-formula'>$a > b$</span>, 求 <span class='math-formula'>$a + b$</span> 的值。",
                         "type": "algebra",
                         "difficulty": "easy",
-                        "answer": "解：由 $|a|=3$ 得 $a=3$ 或 $a=-3$；由 $|b|=5$ 得 $b=5$ 或 $b=-5$。\n由于 $a > b$，只有两种情况成立：\n1. $a=3$, $b=-5$，此时 $a+b=-2$\n2. $a=-3$, $b=-5$，此时 $a+b=-8$\n所以 $a+b$ 的值为 $-2$ 或 $-8$。"
+                        "answer": "解：由 <span class='math-formula'>$|a|=3$</span> 得 <span class='math-formula'>$a=3$</span> 或 <span class='math-formula'>$a=-3$</span>；由 <span class='math-formula'>$|b|=5$</span> 得 <span class='math-formula'>$b=5$</span> 或 <span class='math-formula'>$b=-5$</span>。<br>由于 <span class='math-formula'>$a > b$</span>，只有两种情况成立：<br>1. <span class='math-formula'>$a=3$</span>, <span class='math-formula'>$b=-5$</span>，此时 <span class='math-formula'>$a+b=-2$</span><br>2. <span class='math-formula'>$a=-3$</span>, <span class='math-formula'>$b=-5$</span>，此时 <span class='math-formula'>$a+b=-8$</span><br>所以 <span class='math-formula'>$a+b$</span> 的值为 <span class='math-formula'>$-2$</span> 或 <span class='math-formula'>$-8$</span>。"
                     },
                     {
                         "id": "7-1-3",
@@ -279,31 +379,31 @@
                         "content": "某商品按标价的8折出售，仍可获利20%，若该商品的进价为200元，求标价。",
                         "type": "word",
                         "difficulty": "medium",
-                        "answer": "解：设标价为 $x$ 元。\n售价为 $0.8x$ 元，利润为 $0.8x - 200$ 元。\n根据题意：$\\frac{0.8x - 200}{200} = 20\\%$\n解得：$0.8x - 200 = 40$ ⇒ $0.8x = 240$ ⇒ $x = 300$\n所以标价为300元。"
+                        "answer": "解：设标价为 <span class='math-formula'>$x$</span> 元。<br>售价为 <span class='math-formula'>$0.8x$</span> 元，利润为 <span class='math-formula'>$0.8x - 200$</span> 元。<br>根据题意：<span class='math-formula'>$\\frac{0.8x - 200}{200} = 20\\%$</span><br>解得：<span class='math-formula'>$0.8x - 200 = 40$</span> ⇒ <span class='math-formula'>$0.8x = 240$</span> ⇒ <span class='math-formula'>$x = 300$</span><br>所以标价为300元。"
                     },
                     {
                         "id": "7-1-4",
                         "title": "几何初步-角度计算",
-                        "content": "如图，直线AB与CD相交于点O，OE平分∠AOC，∠AOE=35°，求∠BOD的度数。\n（请自行画图）",
+                        "content": "如图，直线AB与CD相交于点O，OE平分∠AOC，∠AOE=35°，求∠BOD的度数。<br><img src='https://via.placeholder.com/300x100?text=几何图示' class='question-image'>",
                         "type": "geometry",
                         "difficulty": "easy",
-                        "answer": "解：\n1. 因为OE平分∠AOC，所以∠AOC=2×∠AOE=70°\n2. ∠AOC与∠BOD是对顶角，所以∠BOD=∠AOC=70°\n因此，∠BOD的度数为70°。"
+                        "answer": "解：<br>1. 因为OE平分∠AOC，所以∠AOC=2×∠AOE=70°<br>2. ∠AOC与∠BOD是对顶角，所以∠BOD=∠AOC=70°<br>因此，∠BOD的度数为70°。"
                     },
                     {
                         "id": "7-1-5",
                         "title": "有理数乘方运算",
-                        "content": "计算: $(-2)^3 \\times \\left(\\frac{1}{2}\\right)^2 - (-1)^{2023}$",
+                        "content": "计算: <span class='math-formula'>$(-2)^3 \\times \\left(\\frac{1}{2}\\right)^2 - (-1)^{2023}$</span>",
                         "type": "algebra",
                         "difficulty": "easy",
-                        "answer": "解：原式 $= (-8) \\times \\frac{1}{4} - (-1) = -2 + 1 = -1$"
+                        "answer": "解：原式 <span class='math-formula'>$= (-8) \\times \\frac{1}{4} - (-1) = -2 + 1 = -1$</span>"
                     },
                     {
                         "id": "7-1-6",
                         "title": "代数式求值",
-                        "content": "已知 $a - b = 3$, $ab = 4$, 求 $a^2 + b^2$ 的值。",
+                        "content": "已知 <span class='math-formula'>$a - b = 3$</span>, <span class='math-formula'>$ab = 4$</span>, 求 <span class='math-formula'>$a^2 + b^2$</span> 的值。",
                         "type": "algebra",
                         "difficulty": "medium",
-                        "answer": "解：$a^2 + b^2 = (a - b)^2 + 2ab = 3^2 + 2 \\times 4 = 9 + 8 = 17$"
+                        "answer": "解：<span class='math-formula'>$a^2 + b^2 = (a - b)^2 + 2ab = 3^2 + 2 \\times 4 = 9 + 8 = 17$</span>"
                     },
                     {
                         "id": "7-1-7",
@@ -311,23 +411,23 @@
                         "content": "在一个平面内，10条直线最多可以将平面分成多少个部分？",
                         "type": "geometry",
                         "difficulty": "hard",
-                        "answer": "解：n条直线最多将平面分成 $\\frac{n(n+1)}{2} + 1$ 个部分。\n当 $n=10$ 时，$\\frac{10 \\times 11}{2} + 1 = 55 + 1 = 56$\n所以10条直线最多可以将平面分成56个部分。"
+                        "answer": "解：n条直线最多将平面分成 <span class='math-formula'>$\\frac{n(n+1)}{2} + 1$</span> 个部分。<br>当 <span class='math-formula'>$n=10$</span> 时，<span class='math-formula'>$\\frac{10 \\times 11}{2} + 1 = 55 + 1 = 56$</span><br>所以10条直线最多可以将平面分成56个部分。"
                     },
                     {
                         "id": "7-1-8",
                         "title": "一元一次方程",
-                        "content": "解方程: $\\frac{x - 1}{2} - \\frac{2x + 1}{3} = 1$",
+                        "content": "解方程: <span class='math-formula'>$\\frac{x - 1}{2} - \\frac{2x + 1}{3} = 1$</span>",
                         "type": "algebra",
                         "difficulty": "medium",
-                        "answer": "解：两边同乘6得：\n$3(x - 1) - 2(2x + 1) = 6$\n展开：$3x - 3 - 4x - 2 = 6$\n合并：$-x - 5 = 6$\n解得：$-x = 11$ ⇒ $x = -11$"
+                        "answer": "解：两边同乘6得：<br><span class='math-formula'>$3(x - 1) - 2(2x + 1) = 6$</span><br>展开：<span class='math-formula'>$3x - 3 - 4x - 2 = 6$</span><br>合并：<span class='math-formula'>$-x - 5 = 6$</span><br>解得：<span class='math-formula'>$-x = 11$</span> ⇒ <span class='math-formula'>$x = -11$</span>"
                     },
                     {
                         "id": "7-1-9",
                         "title": "几何证明题",
-                        "content": "如图，AB∥CD，∠1=∠2，求证：∠E=∠F。\n（请自行画图：AB∥CD，EF与AB、CD相交，∠1和∠2是同位角）",
+                        "content": "如图，AB∥CD，∠1=∠2，求证：∠E=∠F。<br><img src='https://via.placeholder.com/300x100?text=平行线证明图示' class='question-image'>",
                         "type": "proof",
                         "difficulty": "medium",
-                        "answer": "证明：\n∵ AB∥CD（已知）\n∴ ∠1=∠F（两直线平行，同位角相等）\n又∵ ∠1=∠2（已知）\n∴ ∠2=∠F（等量代换）\n又∵ ∠2和∠E是对顶角\n∴ ∠2=∠E（对顶角相等）\n∴ ∠E=∠F（等量代换）"
+                        "answer": "证明：<br>∵ AB∥CD（已知）<br>∴ ∠1=∠F（两直线平行，同位角相等）<br>又∵ ∠1=∠2（已知）<br>∴ ∠2=∠F（等量代换）<br>又∵ ∠2和∠E是对顶角<br>∴ ∠2=∠E（对顶角相等）<br>∴ ∠E=∠F（等量代换）"
                     },
                     {
                         "id": "7-1-10",
@@ -335,18 +435,59 @@
                         "content": "甲、乙两人从相距36千米的两地同时出发相向而行，甲的速度是6千米/时，乙的速度是4千米/时。几小时后两人相遇？",
                         "type": "word",
                         "difficulty": "easy",
-                        "answer": "解：设 $x$ 小时后两人相遇。\n根据题意：$6x + 4x = 36$\n解得：$10x = 36$ ⇒ $x = 3.6$\n所以3.6小时后两人相遇。"
+                        "answer": "解：设 <span class='math-formula'>$x$</span> 小时后两人相遇。<br>根据题意：<span class='math-formula'>$6x + 4x = 36$</span><br>解得：<span class='math-formula'>$10x = 36$</span> ⇒ <span class='math-formula'>$x = 3.6$</span><br>所以3.6小时后两人相遇。"
+                    },
+                    // 更多七年级上学期题目...
+                    {
+                        "id": "7-1-11",
+                        "title": "有理数混合运算",
+                        "content": "计算: <span class='math-formula'>$\\left(-\\frac{2}{3}\\right) \\times \\left(\\frac{9}{4}\\right) \\div \\left(-\\frac{3}{2}\\right) + \\frac{1}{2}$</span>",
+                        "type": "algebra",
+                        "difficulty": "medium",
+                        "answer": "解：原式 <span class='math-formula'>$= \\left(-\\frac{2}{3} \\times \\frac{9}{4} \\times -\\frac{2}{3}\\right) + \\frac{1}{2} = \\left(\\frac{36}{36}\\right) + \\frac{1}{2} = 1 + \\frac{1}{2} = 1.5$</span>"
+                    },
+                    {
+                        "id": "7-1-12",
+                        "title": "数轴上的距离",
+                        "content": "在数轴上，点A表示的数是-3，点B表示的数是5，点C是AB的中点，求点C表示的数。",
+                        "type": "algebra",
+                        "difficulty": "easy",
+                        "answer": "解：中点C的坐标为 <span class='math-formula'>$\\frac{-3 + 5}{2} = 1$</span><br>所以点C表示的数是1。"
+                    },
+                    {
+                        "id": "7-1-13",
+                        "title": "绝对值方程",
+                        "content": "解方程: <span class='math-formula'>$|2x - 1| = 5$</span>",
+                        "type": "algebra",
+                        "difficulty": "medium",
+                        "answer": "解：由绝对值的定义得：<br>1. <span class='math-formula'>$2x - 1 = 5$</span> ⇒ <span class='math-formula'>$x = 3$</span><br>2. <span class='math-formula'>$2x - 1 = -5$</span> ⇒ <span class='math-formula'>$x = -2$</span><br>所以方程的解为 <span class='math-formula'>$x = 3$</span> 或 <span class='math-formula'>$x = -2$</span>。"
+                    },
+                    {
+                        "id": "7-1-14",
+                        "title": "几何图形面积",
+                        "content": "一个长方形的长是宽的2倍，周长是36厘米，求这个长方形的面积。",
+                        "type": "geometry",
+                        "difficulty": "easy",
+                        "answer": "解：设宽为 <span class='math-formula'>$x$</span> 厘米，则长为 <span class='math-formula'>$2x$</span> 厘米。<br>根据周长公式：<span class='math-formula'>$2(x + 2x) = 36$</span> ⇒ <span class='math-formula'>$6x = 36$</span> ⇒ <span class='math-formula'>$x = 6$</span><br>所以宽为6厘米，长为12厘米。<br>面积 = <span class='math-formula'>$6 \\times 12 = 72$</span> 平方厘米。"
+                    },
+                    {
+                        "id": "7-1-15",
+                        "title": "代数式化简",
+                        "content": "化简: <span class='math-formula'>$3a - \\{2b - [a - (3a - b)]\\}$</span>",
+                        "type": "algebra",
+                        "difficulty": "medium",
+                        "answer": "解：原式 <span class='math-formula'>$= 3a - \\{2b - [a - 3a + b]\\} = 3a - \\{2b - [-2a + b]\\} = 3a - \\{2b + 2a - b\\} = 3a - \\{2a + b\\} = 3a - 2a - b = a - b$</span>"
                     }
-                    // 更多题目...
+                    // 继续添加更多题目...
                 ],
                 "2": [
                     {
                         "id": "7-2-1",
                         "title": "二元一次方程组",
-                        "content": "解方程组：\n$\begin{cases} 2x + y = 5 \\ x - y = 1 \end{cases}$",
+                        "content": "解方程组：<br><span class='math-formula-block'>$\\begin{cases} 2x + y = 5 \\\\ x - y = 1 \\end{cases}$</span>",
                         "type": "algebra",
                         "difficulty": "easy",
-                        "answer": "解：将两方程相加得：$3x = 6$ ⇒ $x = 2$\n将 $x=2$ 代入第二个方程：$2 - y = 1$ ⇒ $y = 1$\n所以方程组的解为 $\begin{cases} x = 2 \\ y = 1 \end{cases}$"
+                        "answer": "解：将两方程相加得：<span class='math-formula'>$3x = 6$</span> ⇒ <span class='math-formula'>$x = 2$</span><br>将 <span class='math-formula'>$x=2$</span> 代入第二个方程：<span class='math-formula'>$2 - y = 1$</span> ⇒ <span class='math-formula'>$y = 1$</span><br>所以方程组的解为 <span class='math-formula-block'>$\\begin{cases} x = 2 \\\\ y = 1 \\end{cases}$</span>"
                     },
                     {
                         "id": "7-2-2",
@@ -354,15 +495,15 @@
                         "content": "某次数学测验共有20道题，答对一题得5分，答错或不答扣2分。小明得分不低于60分，他至少答对多少题？",
                         "type": "word",
                         "difficulty": "medium",
-                        "answer": "解：设答对 $x$ 题，则答错或不答 $(20 - x)$ 题。\n根据题意：$5x - 2(20 - x) \\geq 60$\n解得：$5x - 40 + 2x \\geq 60$ ⇒ $7x \\geq 100$ ⇒ $x \\geq \\frac{100}{7} \\approx 14.29$\n因为 $x$ 为整数，所以至少答对15题。"
+                        "answer": "解：设答对 <span class='math-formula'>$x$</span> 题，则答错或不答 <span class='math-formula'>$(20 - x)$</span> 题。<br>根据题意：<span class='math-formula'>$5x - 2(20 - x) \\geq 60$</span><br>解得：<span class='math-formula'>$5x - 40 + 2x \\geq 60$</span> ⇒ <span class='math-formula'>$7x \\geq 100$</span> ⇒ <span class='math-formula'>$x \\geq \\frac{100}{7} \\approx 14.29$</span><br>因为 <span class='math-formula'>$x$</span> 为整数，所以至少答对15题。"
                     },
                     {
                         "id": "7-2-3",
                         "title": "平面直角坐标系",
-                        "content": "已知点 $A(3,4)$，点 $B$ 在 $x$ 轴上，且 $AB=5$，求点 $B$ 的坐标。",
+                        "content": "已知点 <span class='math-formula'>$A(3,4)$</span>，点 <span class='math-formula'>$B$</span> 在 <span class='math-formula'>$x$</span> 轴上，且 <span class='math-formula'>$AB=5$</span>，求点 <span class='math-formula'>$B$</span> 的坐标。",
                         "type": "geometry",
                         "difficulty": "medium",
-                        "answer": "解：设点 $B$ 的坐标为 $(x,0)$。\n根据距离公式：$\\sqrt{(x-3)^2 + (0-4)^2} = 5$\n两边平方得：$(x-3)^2 + 16 = 25$\n解得：$(x-3)^2 = 9$ ⇒ $x-3 = \\pm3$\n所以 $x=6$ 或 $x=0$\n因此点 $B$ 的坐标为 $(6,0)$ 或 $(0,0)$。"
+                        "answer": "解：设点 <span class='math-formula'>$B$</span> 的坐标为 <span class='math-formula'>$(x,0)$</span>。<br>根据距离公式：<span class='math-formula'>$\\sqrt{(x-3)^2 + (0-4)^2} = 5$</span><br>两边平方得：<span class='math-formula'>$(x-3)^2 + 16 = 25$</span><br>解得：<span class='math-formula'>$(x-3)^2 = 9$</span> ⇒ <span class='math-formula'>$x-3 = \\pm3$</span><br>所以 <span class='math-formula'>$x=6$</span> 或 <span class='math-formula'>$x=0$</span><br>因此点 <span class='math-formula'>$B$</span> 的坐标为 <span class='math-formula'>$(6,0)$</span> 或 <span class='math-formula'>$(0,0)$</span>。"
                     },
                     {
                         "id": "7-2-4",
@@ -370,47 +511,48 @@
                         "content": "在△ABC中，∠A=50°，∠B=70°，求∠C的外角度数。",
                         "type": "geometry",
                         "difficulty": "easy",
-                        "answer": "解：首先求∠C：$180° - 50° - 70° = 60°$\n∠C的外角 = $180° - ∠C = 180° - 60° = 120°$\n所以∠C的外角为120°。"
+                        "answer": "解：首先求∠C：<span class='math-formula'>$180° - 50° - 70° = 60°$</span><br>∠C的外角 = <span class='math-formula'>$180° - ∠C = 180° - 60° = 120°$</span><br>所以∠C的外角为120°。"
                     },
                     {
                         "id": "7-2-5",
                         "title": "代数式化简",
-                        "content": "化简：$3(2x - y) - 2(x - 3y)$",
+                        "content": "化简：<span class='math-formula'>$3(2x - y) - 2(x - 3y)$</span>",
                         "type": "algebra",
                         "difficulty": "easy",
-                        "answer": "解：原式 $= 6x - 3y - 2x + 6y = (6x - 2x) + (-3y + 6y) = 4x + 3y$"
+                        "answer": "解：原式 <span class='math-formula'>$= 6x - 3y - 2x + 6y = (6x - 2x) + (-3y + 6y) = 4x + 3y$</span>"
                     },
+                    // 更多七年级下学期题目...
                     {
                         "id": "7-2-6",
-                        "title": "几何证明题",
-                        "content": "如图，在△ABC中，AD是BC边上的高，AE是∠BAC的平分线，∠B=50°，∠C=70°，求∠DAE的度数。\n（请自行画图）",
-                        "type": "proof",
-                        "difficulty": "hard",
-                        "answer": "解：\n1. 先求∠BAC：$180° - 50° - 70° = 60°$\n2. AE平分∠BAC，所以∠BAE=∠CAE=30°\n3. AD是高，所以∠ADC=90°\n4. 在△ADC中，∠DAC=180°-90°-70°=20°\n5. ∠DAE=∠CAE-∠DAC=30°-20°=10°\n所以∠DAE的度数为10°。"
+                        "title": "多项式乘法",
+                        "content": "计算: <span class='math-formula'>$(2x + 3)(3x - 4)$</span>",
+                        "type": "algebra",
+                        "difficulty": "easy",
+                        "answer": "解：原式 <span class='math-formula'>$= 2x \\cdot 3x + 2x \\cdot (-4) + 3 \\cdot 3x + 3 \\cdot (-4) = 6x^2 - 8x + 9x - 12 = 6x^2 + x - 12$</span>"
                     },
                     {
                         "id": "7-2-7",
+                        "title": "几何证明题",
+                        "content": "如图，在△ABC中，AD是BC边上的高，AE是∠BAC的平分线，∠B=50°，∠C=70°，求∠DAE的度数。<br><img src='https://via.placeholder.com/300x100?text=三角形角度图示' class='question-image'>",
+                        "type": "proof",
+                        "difficulty": "hard",
+                        "answer": "解：<br>1. 先求∠BAC：<span class='math-formula'>$180° - 50° - 70° = 60°$</span><br>2. AE平分∠BAC，所以∠BAE=∠CAE=30°<br>3. AD是高，所以∠ADC=90°<br>4. 在△ADC中，∠DAC=180°-90°-70°=20°<br>5. ∠DAE=∠CAE-∠DAC=30°-20°=10°<br>所以∠DAE的度数为10°。"
+                    },
+                    {
+                        "id": "7-2-8",
                         "title": "应用题-利润问题",
                         "content": "某商店同时卖出两件商品，每件售价均为60元，其中一件盈利25%，另一件亏损25%，问这次买卖是盈利还是亏损？具体金额是多少？",
                         "type": "word",
                         "difficulty": "hard",
-                        "answer": "解：\n1. 盈利商品的成本：$60 ÷ (1 + 25\\%) = 48$ 元，盈利 $60 - 48 = 12$ 元\n2. 亏损商品的成本：$60 ÷ (1 - 25\\%) = 80$ 元，亏损 $80 - 60 = 20$ 元\n3. 总盈亏：$12 - 20 = -8$ 元\n所以这次买卖亏损8元。"
-                    },
-                    {
-                        "id": "7-2-8",
-                        "title": "多项式运算",
-                        "content": "计算：$(2x^2 - 3x + 1)(x - 2)$",
-                        "type": "algebra",
-                        "difficulty": "medium",
-                        "answer": "解：原式 $= 2x^2 \\cdot x + 2x^2 \\cdot (-2) - 3x \\cdot x - 3x \\cdot (-2) + 1 \\cdot x + 1 \\cdot (-2)$\n$= 2x^3 - 4x^2 - 3x^2 + 6x + x - 2$\n$= 2x^3 - 7x^2 + 7x - 2$"
+                        "answer": "解：<br>1. 盈利商品的成本：<span class='math-formula'>$60 ÷ (1 + 25\\%) = 48$</span> 元，盈利 <span class='math-formula'>$60 - 48 = 12$</span> 元<br>2. 亏损商品的成本：<span class='math-formula'>$60 ÷ (1 - 25\\%) = 80$</span> 元，亏损 <span class='math-formula'>$80 - 60 = 20$</span> 元<br>3. 总盈亏：<span class='math-formula'>$12 - 20 = -8$</span> 元<br>所以这次买卖亏损8元。"
                     },
                     {
                         "id": "7-2-9",
-                        "title": "几何作图题",
-                        "content": "用尺规作图法作一个角等于已知角（写出步骤）。",
-                        "type": "geometry",
+                        "title": "多项式运算",
+                        "content": "计算：<span class='math-formula'>$(2x^2 - 3x + 1)(x - 2)$</span>",
+                        "type": "algebra",
                         "difficulty": "medium",
-                        "answer": "作图步骤：\n1. 以已知角的顶点为圆心，任意长为半径画弧，交角的两边于A、B两点\n2. 画一条直线，在新直线上任取一点O'作为新角的顶点\n3. 以O'为圆心，同样半径画弧，交直线于A'点\n4. 以A'为圆心，AB长为半径画弧，交前弧于B'点\n5. 连接O'B'，则∠A'O'B'即为所求的等于已知角的角"
+                        "answer": "解：原式 <span class='math-formula'>$= 2x^2 \\cdot x + 2x^2 \\cdot (-2) - 3x \\cdot x - 3x \\cdot (-2) + 1 \\cdot x + 1 \\cdot (-2)$</span><br><span class='math-formula'>$= 2x^3 - 4x^2 - 3x^2 + 6x + x - 2$</span><br><span class='math-formula'>$= 2x^3 - 7x^2 + 7x - 2$</span>"
                     },
                     {
                         "id": "7-2-10",
@@ -418,9 +560,9 @@
                         "content": "一个不透明的袋子里有3个红球、4个白球和5个蓝球，从中随机摸出一个球，求摸到红球或蓝球的概率。",
                         "type": "word",
                         "difficulty": "easy",
-                        "answer": "解：总球数 = 3 + 4 + 5 = 12\n红球或蓝球数 = 3 + 5 = 8\n概率 = $\\frac{8}{12} = \\frac{2}{3}$"
+                        "answer": "解：总球数 = 3 + 4 + 5 = 12<br>红球或蓝球数 = 3 + 5 = 8<br>概率 = <span class='math-formula'>$\\frac{8}{12} = \\frac{2}{3}$</span>"
                     }
-                    // 更多题目...
+                    // 继续添加更多题目...
                 ]
             },
             "8": {
@@ -428,18 +570,18 @@
                     {
                         "id": "8-1-1",
                         "title": "全等三角形证明",
-                        "content": "如图，AB=AC，AD=AE，求证：△ABE≌△ACD。\n（请自行画图：等腰三角形ABC，D、E分别在AB、AC上）",
+                        "content": "如图，AB=AC，AD=AE，求证：△ABE≌△ACD。<br><img src='https://via.placeholder.com/300x100?text=全等三角形图示' class='question-image'>",
                         "type": "proof",
                         "difficulty": "medium",
-                        "answer": "证明：\n在△ABE和△ACD中：\n1. AB=AC（已知）\n2. AD=AE（已知）\n3. ∠A=∠A（公共角）\n∴ △ABE≌△ACD（SAS）"
+                        "answer": "证明：<br>在△ABE和△ACD中：<br>1. AB=AC（已知）<br>2. AD=AE（已知）<br>3. ∠A=∠A（公共角）<br>∴ △ABE≌△ACD（SAS）"
                     },
                     {
                         "id": "8-1-2",
                         "title": "因式分解",
-                        "content": "因式分解：$x^3 - 2x^2 - 5x + 6$",
+                        "content": "因式分解：<span class='math-formula'>$x^3 - 2x^2 - 5x + 6$</span>",
                         "type": "algebra",
                         "difficulty": "hard",
-                        "answer": "解：用试根法，发现x=1是根\n用多项式除法或综合除法分解：\n原式 = $(x - 1)(x^2 - x - 6) = (x - 1)(x - 3)(x + 2)$"
+                        "answer": "解：用试根法，发现x=1是根<br>用多项式除法或综合除法分解：<br>原式 = <span class='math-formula'>$(x - 1)(x^2 - x - 6) = (x - 1)(x - 3)(x + 2)$</span>"
                     },
                     {
                         "id": "8-1-3",
@@ -447,31 +589,32 @@
                         "content": "在直角三角形ABC中，∠C=90°，AC=6，BC=8，求AB边上的高CD的长度。",
                         "type": "geometry",
                         "difficulty": "medium",
-                        "answer": "解：\n1. 先求AB：$AB = \\sqrt{AC^2 + BC^2} = \\sqrt{36 + 64} = 10$\n2. 面积法：$\\frac{1}{2}AC \\times BC = \\frac{1}{2}AB \\times CD$\n即 $6 \\times 8 = 10 \\times CD$ ⇒ $CD = 4.8$\n所以AB边上的高CD的长度为4.8。"
+                        "answer": "解：<br>1. 先求AB：<span class='math-formula'>$AB = \\sqrt{AC^2 + BC^2} = \\sqrt{36 + 64} = 10$</span><br>2. 面积法：<span class='math-formula'>$\\frac{1}{2}AC \\times BC = \\frac{1}{2}AB \\times CD$</span><br>即 <span class='math-formula'>$6 \\times 8 = 10 \\times CD$</span> ⇒ <span class='math-formula'>$CD = 4.8$</span><br>所以AB边上的高CD的长度为4.8。"
                     },
                     {
                         "id": "8-1-4",
                         "title": "分式方程",
-                        "content": "解方程：$\\frac{x}{x - 2} - \\frac{3}{x + 2} = \\frac{8}{x^2 - 4}$",
+                        "content": "解方程：<span class='math-formula'>$\\frac{x}{x - 2} - \\frac{3}{x + 2} = \\frac{8}{x^2 - 4}$</span>",
                         "type": "algebra",
                         "difficulty": "hard",
-                        "answer": "解：\n1. 原方程可化为：$\\frac{x}{x - 2} - \\frac{3}{x + 2} = \\frac{8}{(x - 2)(x + 2)}$\n2. 两边同乘 $(x - 2)(x + 2)$ 得：$x(x + 2) - 3(x - 2) = 8$\n3. 展开：$x^2 + 2x - 3x + 6 = 8$\n4. 合并：$x^2 - x - 2 = 0$\n5. 解得：$x = 2$ 或 $x = -1$\n6. 检验：x=2使分母为零，舍去\n所以方程的解为 $x = -1$。"
+                        "answer": "解：<br>1. 原方程可化为：<span class='math-formula'>$\\frac{x}{x - 2} - \\frac{3}{x + 2} = \\frac{8}{(x - 2)(x + 2)}$</span><br>2. 两边同乘 <span class='math-formula'>$(x - 2)(x + 2)$</span> 得：<span class='math-formula'>$x(x + 2) - 3(x - 2) = 8$</span><br>3. 展开：<span class='math-formula'>$x^2 + 2x - 3x + 6 = 8$</span><br>4. 合并：<span class='math-formula'>$x^2 - x - 2 = 0$</span><br>5. 解得：<span class='math-formula'>$x = 2$</span> 或 <span class='math-formula'>$x = -1$</span><br>6. 检验：x=2使分母为零，舍去<br>所以方程的解为 <span class='math-formula'>$x = -1$</span>。"
                     },
                     {
                         "id": "8-1-5",
                         "title": "轴对称图形",
-                        "content": "下列图形中，既是轴对称图形又是中心对称图形的是（ ）\nA. 等边三角形 B. 平行四边形 C. 矩形 D. 等腰梯形",
+                        "content": "下列图形中，既是轴对称图形又是中心对称图形的是（ ）<br>A. 等边三角形 B. 平行四边形 C. 矩形 D. 等腰梯形",
                         "type": "geometry",
                         "difficulty": "easy",
-                        "answer": "解：\nA. 等边三角形是轴对称图形，但不是中心对称图形\nB. 平行四边形是中心对称图形，但不一定是轴对称图形\nC. 矩形既是轴对称图形又是中心对称图形\nD. 等腰梯形是轴对称图形，但不是中心对称图形\n所以正确答案是C。"
+                        "answer": "解：<br>A. 等边三角形是轴对称图形，但不是中心对称图形<br>B. 平行四边形是中心对称图形，但不一定是轴对称图形<br>C. 矩形既是轴对称图形又是中心对称图形<br>D. 等腰梯形是轴对称图形，但不是中心对称图形<br>所以正确答案是C。"
                     },
+                    // 更多八年级上学期题目...
                     {
                         "id": "8-1-6",
                         "title": "代数证明题",
-                        "content": "证明：对于任意实数 $a, b$，有 $a^2 + b^2 \\geq 2ab$。",
+                        "content": "证明：对于任意实数 <span class='math-formula'>$a, b$</span>，有 <span class='math-formula'>$a^2 + b^2 \\geq 2ab$</span>。",
                         "type": "proof",
                         "difficulty": "medium",
-                        "answer": "证明：\n∵ $(a - b)^2 \\geq 0$\n展开得：$a^2 - 2ab + b^2 \\geq 0$\n移项得：$a^2 + b^2 \\geq 2ab$\n当且仅当 $a = b$ 时等号成立。"
+                        "answer": "证明：<br>∵ <span class='math-formula'>$(a - b)^2 \\geq 0$</span><br>展开得：<span class='math-formula'>$a^2 - 2ab + b^2 \\geq 0$</span><br>移项得：<span class='math-formula'>$a^2 + b^2 \\geq 2ab$</span><br>当且仅当 <span class='math-formula'>$a = b$</span> 时等号成立。"
                     },
                     {
                         "id": "8-1-7",
@@ -479,15 +622,15 @@
                         "content": "甲、乙两队合作20天可完成一项工程。如果甲队单独做比乙队单独做少用9天，求两队单独完成各需多少天？",
                         "type": "word",
                         "difficulty": "hard",
-                        "answer": "解：设甲队单独做需 $x$ 天，则乙队需 $x + 9$ 天。\n根据题意：$\\frac{1}{x} + \\frac{1}{x + 9} = \\frac{1}{20}$\n两边同乘 $20x(x + 9)$ 得：$20(x + 9) + 20x = x(x + 9)$\n整理得：$x^2 - 31x - 180 = 0$\n解得：$x = 36$ 或 $x = -5$（舍去）\n所以甲队单独做需36天，乙队需45天。"
+                        "answer": "解：设甲队单独做需 <span class='math-formula'>$x$</span> 天，则乙队需 <span class='math-formula'>$x + 9$</span> 天。<br>根据题意：<span class='math-formula'>$\\frac{1}{x} + \\frac{1}{x + 9} = \\frac{1}{20}$</span><br>两边同乘 <span class='math-formula'>$20x(x + 9)$</span> 得：<span class='math-formula'>$20(x + 9) + 20x = x(x + 9)$</span><br>整理得：<span class='math-formula'>$x^2 - 31x - 180 = 0$</span><br>解得：<span class='math-formula'>$x = 36$</span> 或 <span class='math-formula'>$x = -5$</span>（舍去）<br>所以甲队单独做需36天，乙队需45天。"
                     },
                     {
                         "id": "8-1-8",
                         "title": "根式运算",
-                        "content": "计算：$\\sqrt{12} - \\sqrt{27} + \\sqrt{48}$",
+                        "content": "计算：<span class='math-formula'>$\\sqrt{12} - \\sqrt{27} + \\sqrt{48}$</span>",
                         "type": "algebra",
                         "difficulty": "easy",
-                        "answer": "解：原式 $= 2\\sqrt{3} - 3\\sqrt{3} + 4\\sqrt{3} = (2 - 3 + 4)\\sqrt{3} = 3\\sqrt{3}$"
+                        "answer": "解：原式 <span class='math-formula'>$= 2\\sqrt{3} - 3\\sqrt{3} + 4\\sqrt{3} = (2 - 3 + 4)\\sqrt{3} = 3\\sqrt{3}$</span>"
                     },
                     {
                         "id": "8-1-9",
@@ -495,26 +638,26 @@
                         "content": "用尺规作图法作线段的垂直平分线（写出步骤）。",
                         "type": "geometry",
                         "difficulty": "easy",
-                        "answer": "作图步骤：\n1. 以线段的两个端点为圆心，以大于线段一半的长度为半径画弧，两弧在线段两侧各有一个交点\n2. 连接这两个交点，所得的直线就是该线段的垂直平分线"
+                        "answer": "作图步骤：<br>1. 以线段的两个端点为圆心，以大于线段一半的长度为半径画弧，两弧在线段两侧各有一个交点<br>2. 连接这两个交点，所得的直线就是该线段的垂直平分线"
                     },
                     {
                         "id": "8-1-10",
                         "title": "函数初步",
-                        "content": "已知函数 $y = (m - 1)x^{m^2}$ 是正比例函数，求 $m$ 的值及函数解析式。",
+                        "content": "已知函数 <span class='math-formula'>$y = (m - 1)x^{m^2}$</span> 是正比例函数，求 <span class='math-formula'>$m$</span> 的值及函数解析式。",
                         "type": "algebra",
                         "difficulty": "medium",
-                        "answer": "解：\n由正比例函数的定义得：\n1. $m^2 = 1$ ⇒ $m = \\pm1$\n2. $m - 1 \\neq 0$ ⇒ $m \\neq 1$\n所以 $m = -1$\n函数解析式为 $y = -2x$"
+                        "answer": "解：<br>由正比例函数的定义得：<br>1. <span class='math-formula'>$m^2 = 1$</span> ⇒ <span class='math-formula'>$m = \\pm1$</span><br>2. <span class='math-formula'>$m - 1 \\neq 0$</span> ⇒ <span class='math-formula'>$m \\neq 1$</span><br>所以 <span class='math-formula'>$m = -1$</span><br>函数解析式为 <span class='math-formula'>$y = -2x$</span>"
                     }
-                    // 更多题目...
+                    // 继续添加更多题目...
                 ],
                 "2": [
                     {
                         "id": "8-2-1",
                         "title": "一次函数应用",
-                        "content": "已知一次函数 $y = kx + b$ 的图像经过点 $A(1,3)$ 和 $B(-2,-3)$，求这个函数的解析式。",
+                        "content": "已知一次函数 <span class='math-formula'>$y = kx + b$</span> 的图像经过点 <span class='math-formula'>$A(1,3)$</span> 和 <span class='math-formula'>$B(-2,-3)$</span>，求这个函数的解析式。",
                         "type": "algebra",
                         "difficulty": "easy",
-                        "answer": "解：将两点坐标代入得：\n$\begin{cases} k + b = 3 \\ -2k + b = -3 \end{cases}$\n两式相减得：$3k = 6$ ⇒ $k = 2$\n代入第一式得：$2 + b = 3$ ⇒ $b = 1$\n所以函数解析式为 $y = 2x + 1$"
+                        "answer": "解：将两点坐标代入得：<br><span class='math-formula-block'>$\\begin{cases} k + b = 3 \\\\ -2k + b = -3 \\end{cases}$</span><br>两式相减得：<span class='math-formula'>$3k = 6$</span> ⇒ <span class='math-formula'>$k = 2$</span><br>代入第一式得：<span class='math-formula'>$2 + b = 3$</span> ⇒ <span class='math-formula'>$b = 1$</span><br>所以函数解析式为 <span class='math-formula'>$y = 2x + 1$</span>"
                     },
                     {
                         "id": "8-2-2",
@@ -522,15 +665,15 @@
                         "content": "在平行四边形ABCD中，对角线AC与BD相交于点O，已知AC=10，BD=6，求AB的取值范围。",
                         "type": "geometry",
                         "difficulty": "hard",
-                        "answer": "解：\n在平行四边形中，对角线互相平分，所以AO=5，BO=3\n在△ABO中，根据三角形两边之和大于第三边，两边之差小于第三边：\n$AO - BO < AB < AO + BO$ ⇒ $2 < AB < 8$\n所以AB的取值范围是 $2 < AB < 8$。"
+                        "answer": "解：<br>在平行四边形中，对角线互相平分，所以AO=5，BO=3<br>在△ABO中，根据三角形两边之和大于第三边，两边之差小于第三边：<br><span class='math-formula'>$AO - BO < AB < AO + BO$</span> ⇒ <span class='math-formula'>$2 < AB < 8$</span><br>所以AB的取值范围是 <span class='math-formula'>$2 < AB < 8$</span>。"
                     },
                     {
                         "id": "8-2-3",
                         "title": "分式化简",
-                        "content": "化简：$\\frac{x^2 - 4}{x^2 - 4x + 4} \\div \\frac{x + 2}{x - 2} \\cdot \\frac{1}{x + 2}$",
+                        "content": "化简：<span class='math-formula'>$\\frac{x^2 - 4}{x^2 - 4x + 4} \\div \\frac{x + 2}{x - 2} \\cdot \\frac{1}{x + 2}$</span>",
                         "type": "algebra",
                         "difficulty": "hard",
-                        "answer": "解：原式 $= \\frac{(x + 2)(x - 2)}{(x - 2)^2} \\times \\frac{x - 2}{x + 2} \\times \\frac{1}{x + 2} = \\frac{1}{x + 2}$"
+                        "answer": "解：原式 <span class='math-formula'>$= \\frac{(x + 2)(x - 2)}{(x - 2)^2} \\times \\frac{x - 2}{x + 2} \\times \\frac{1}{x + 2} = \\frac{1}{x + 2}$</span>"
                     },
                     {
                         "id": "8-2-4",
@@ -538,23 +681,24 @@
                         "content": "某班40名学生数学成绩的平均分为75分，其中男生平均分为72分，女生平均分为78分，求该班男、女生人数。",
                         "type": "word",
                         "difficulty": "medium",
-                        "answer": "解：设男生 $x$ 人，女生 $(40 - x)$ 人。\n根据题意：$72x + 78(40 - x) = 75 \\times 40$\n解得：$72x + 3120 - 78x = 3000$\n$-6x = -120$ ⇒ $x = 20$\n所以男生20人，女生20人。"
+                        "answer": "解：设男生 <span class='math-formula'>$x$</span> 人，女生 <span class='math-formula'>$(40 - x)$</span> 人。<br>根据题意：<span class='math-formula'>$72x + 78(40 - x) = 75 \\times 40$</span><br>解得：<span class='math-formula'>$72x + 3120 - 78x = 3000$</span><br><span class='math-formula'>$-6x = -120$</span> ⇒ <span class='math-formula'>$x = 20$</span><br>所以男生20人，女生20人。"
                     },
                     {
                         "id": "8-2-5",
                         "title": "四边形证明题",
-                        "content": "如图，在四边形ABCD中，AB=CD，∠ABC=∠DCB，求证：AD∥BC。\n（请自行画图：四边形ABCD，AB=CD，∠ABC=∠DCB）",
+                        "content": "如图，在四边形ABCD中，AB=CD，∠ABC=∠DCB，求证：AD∥BC。<br><img src='https://via.placeholder.com/300x100?text=四边形证明图示' class='question-image'>",
                         "type": "proof",
                         "difficulty": "hard",
-                        "answer": "证明：\n连接AC、BD\n在△ABC和△DCB中：\n1. AB=CD（已知）\n2. ∠ABC=∠DCB（已知）\n3. BC=CB（公共边）\n∴ △ABC≌△DCB（SAS）\n∴ AC=BD\n又∵ AB=CD（已知）\n∴ 四边形ABCD是等腰梯形\n∴ AD∥BC"
+                        "answer": "证明：<br>连接AC、BD<br>在△ABC和△DCB中：<br>1. AB=CD（已知）<br>2. ∠ABC=∠DCB（已知）<br>3. BC=CB（公共边）<br>∴ △ABC≌△DCB（SAS）<br>∴ AC=BD<br>又∵ AB=CD（已知）<br>∴ 四边形ABCD是等腰梯形<br>∴ AD∥BC"
                     },
+                    // 更多八年级下学期题目...
                     {
                         "id": "8-2-6",
                         "title": "二次根式",
-                        "content": "已知 $x = \\sqrt{3} + 1$，求 $x^2 - 2x - 2$ 的值。",
+                        "content": "已知 <span class='math-formula'>$x = \\sqrt{3} + 1$</span>，求 <span class='math-formula'>$x^2 - 2x - 2$</span> 的值。",
                         "type": "algebra",
                         "difficulty": "medium",
-                        "answer": "解：\n$x^2 - 2x - 2 = (x^2 - 2x + 1) - 3 = (x - 1)^2 - 3$\n∵ $x - 1 = \\sqrt{3}$\n∴ 原式 $= (\\sqrt{3})^2 - 3 = 3 - 3 = 0$"
+                        "answer": "解：<br><span class='math-formula'>$x^2 - 2x - 2 = (x^2 - 2x + 1) - 3 = (x - 1)^2 - 3$</span><br>∵ <span class='math-formula'>$x - 1 = \\sqrt{3}$</span><br>∴ 原式 <span class='math-formula'>$= (\\sqrt{3})^2 - 3 = 3 - 3 = 0$</span>"
                     },
                     {
                         "id": "8-2-7",
@@ -562,23 +706,23 @@
                         "content": "甲、乙两地相距240千米，一辆汽车从甲地出发，先以60千米/时的速度行驶了120千米，后因故停留了30分钟，再以80千米/时的速度行驶完剩余路程。求汽车全程的平均速度。",
                         "type": "word",
                         "difficulty": "medium",
-                        "answer": "解：\n1. 第一阶段用时：$120 ÷ 60 = 2$ 小时\n2. 停留时间：0.5小时\n3. 第二阶段路程：$240 - 120 = 120$ 千米\n4. 第二阶段用时：$120 ÷ 80 = 1.5$ 小时\n5. 总用时：$2 + 0.5 + 1.5 = 4$ 小时\n6. 平均速度：$240 ÷ 4 = 60$ 千米/时\n所以全程平均速度为60千米/时。"
+                        "answer": "解：<br>1. 第一阶段用时：<span class='math-formula'>$120 ÷ 60 = 2$</span> 小时<br>2. 停留时间：0.5小时<br>3. 第二阶段路程：<span class='math-formula'>$240 - 120 = 120$</span> 千米<br>4. 第二阶段用时：<span class='math-formula'>$120 ÷ 80 = 1.5$</span> 小时<br>5. 总用时：<span class='math-formula'>$2 + 0.5 + 1.5 = 4$</span> 小时<br>6. 平均速度：<span class='math-formula'>$240 ÷ 4 = 60$</span> 千米/时<br>所以全程平均速度为60千米/时。"
                     },
                     {
                         "id": "8-2-8",
                         "title": "不等式组",
-                        "content": "解不等式组：\n$\begin{cases} 3x - 2 > x + 4 \\ 2(x - 1) \\leq 5x + 8 \end{cases}$",
+                        "content": "解不等式组：<br><span class='math-formula-block'>$\\begin{cases} 3x - 2 > x + 4 \\\\ 2(x - 1) \\leq 5x + 8 \\end{cases}$</span>",
                         "type": "algebra",
                         "difficulty": "medium",
-                        "answer": "解：\n第一个不等式：$3x - x > 4 + 2$ ⇒ $2x > 6$ ⇒ $x > 3$\n第二个不等式：$2x - 2 \\leq 5x + 8$ ⇒ $-3x \\leq 10$ ⇒ $x \\geq -\\frac{10}{3}$\n所以不等式组的解集为 $x > 3$。"
+                        "answer": "解：<br>第一个不等式：<span class='math-formula'>$3x - x > 4 + 2$</span> ⇒ <span class='math-formula'>$2x > 6$</span> ⇒ <span class='math-formula'>$x > 3$</span><br>第二个不等式：<span class='math-formula'>$2x - 2 \\leq 5x + 8$</span> ⇒ <span class='math-formula'>$-3x \\leq 10$</span> ⇒ <span class='math-formula'>$x \\geq -\\frac{10}{3}$</span><br>所以不等式组的解集为 <span class='math-formula'>$x > 3$</span>。"
                     },
                     {
                         "id": "8-2-9",
                         "title": "几何计算题",
-                        "content": "如图，在矩形ABCD中，AB=8，BC=6，将矩形沿EF折叠，使点A与点C重合，求折痕EF的长度。\n（请自行画图）",
+                        "content": "如图，在矩形ABCD中，AB=8，BC=6，将矩形沿EF折叠，使点A与点C重合，求折痕EF的长度。<br><img src='https://via.placeholder.com/300x100?text=矩形折叠图示' class='question-image'>",
                         "type": "geometry",
                         "difficulty": "hard",
-                        "answer": "解：\n1. 连接AC，AC=10（勾股定理）\n2. EF是AC的垂直平分线\n3. 设AC与EF交于点O，则AO=5\n4. 利用相似三角形或面积法可得EF与AC的比值\n5. EF = $\\frac{2 \\times AB \\times BC}{AC} = \\frac{2 \\times 8 \\times 6}{10} = 9.6$\n所以折痕EF的长度为9.6。"
+                        "answer": "解：<br>1. 连接AC，AC=10（勾股定理）<br>2. EF是AC的垂直平分线<br>3. 设AC与EF交于点O，则AO=5<br>4. 利用相似三角形或面积法可得EF与AC的比值<br>5. EF = <span class='math-formula'>$\\frac{2 \\times AB \\times BC}{AC} = \\frac{2 \\times 8 \\times 6}{10} = 9.6$</span><br>所以折痕EF的长度为9.6。"
                     },
                     {
                         "id": "8-2-10",
@@ -586,9 +730,9 @@
                         "content": "从1,2,3,...,10这十个数中随机取出两个不同的数，求这两个数互质的概率。",
                         "type": "word",
                         "difficulty": "hard",
-                        "answer": "解：\n总的取法：C(10,2)=45\n不互质的情况有：\n(2,4),(2,6),(2,8),(2,10),(3,6),(3,9),(4,6),(4,8),(5,10),(6,8),(6,9),(6,10),(8,10)共13种\n互质的取法：45-13=32\n概率=32/45"
+                        "answer": "解：<br>总的取法：C(10,2)=45<br>不互质的情况有：<br>(2,4),(2,6),(2,8),(2,10),(3,6),(3,9),(4,6),(4,8),(5,10),(6,8),(6,9),(6,10),(8,10)共13种<br>互质的取法：45-13=32<br>概率=32/45"
                     }
-                    // 更多题目...
+                    // 继续添加更多题目...
                 ]
             },
             "9": {
@@ -596,50 +740,51 @@
                     {
                         "id": "9-1-1",
                         "title": "一元二次方程",
-                        "content": "解方程：$x^2 - 2x - 3 = 0$",
+                        "content": "解方程：<span class='math-formula'>$x^2 - 2x - 3 = 0$</span>",
                         "type": "algebra",
                         "difficulty": "easy",
-                        "answer": "解：\n因式分解得：$(x - 3)(x + 1) = 0$\n所以 $x = 3$ 或 $x = -1$"
+                        "answer": "解：<br>因式分解得：<span class='math-formula'>$(x - 3)(x + 1) = 0$</span><br>所以 <span class='math-formula'>$x = 3$</span> 或 <span class='math-formula'>$x = -1$</span>"
                     },
                     {
                         "id": "9-1-2",
                         "title": "二次函数图像",
-                        "content": "已知二次函数 $y = ax^2 + bx + c$ 的图像经过点(1,0)、(2,0)和(0,2)，求这个二次函数的解析式。",
+                        "content": "已知二次函数 <span class='math-formula'>$y = ax^2 + bx + c$</span> 的图像经过点(1,0)、(2,0)和(0,2)，求这个二次函数的解析式。",
                         "type": "algebra",
                         "difficulty": "medium",
-                        "answer": "解：\n由题意可设 $y = a(x - 1)(x - 2)$\n将(0,2)代入：$a(0 - 1)(0 - 2) = 2$ ⇒ $2a = 2$ ⇒ $a = 1$\n所以解析式为 $y = (x - 1)(x - 2) = x^2 - 3x + 2$"
+                        "answer": "解：<br>由题意可设 <span class='math-formula'>$y = a(x - 1)(x - 2)$</span><br>将(0,2)代入：<span class='math-formula'>$a(0 - 1)(0 - 2) = 2$</span> ⇒ <span class='math-formula'>$2a = 2$</span> ⇒ <span class='math-formula'>$a = 1$</span><br>所以解析式为 <span class='math-formula'>$y = (x - 1)(x - 2) = x^2 - 3x + 2$</span>"
                     },
                     {
                         "id": "9-1-3",
                         "title": "圆的性质",
-                        "content": "如图，AB是⊙O的直径，弦CD⊥AB于点E，已知CE=4，DE=6，求⊙O的半径。\n（请自行画图）",
+                        "content": "如图，AB是⊙O的直径，弦CD⊥AB于点E，已知CE=4，DE=6，求⊙O的半径。<br><img src='https://via.placeholder.com/300x100?text=圆的性质图示' class='question-image'>",
                         "type": "geometry",
                         "difficulty": "hard",
-                        "answer": "解：\n∵ CD⊥AB，AB是直径\n∴ E是CD的中点，CD=CE+DE=10\n∴ CE=ED=5（与题目矛盾，可能题目有误）\n假设CE=ED=5\n根据垂径定理：$r = \\sqrt{OE^2 + CE^2} = \\sqrt{OE^2 + 25}$\n又 $AE \\times EB = CE \\times ED = 25$\n设半径为r，则 $(r - OE)(r + OE) = 25$ ⇒ $r^2 - OE^2 = 25$\n与前面联立解得：$r = 5\\sqrt{2}/2$\n（注：题目数据可能有误，解题思路正确）"
+                        "answer": "解：<br>∵ CD⊥AB，AB是直径<br>∴ E是CD的中点，CD=CE+DE=10<br>∴ CE=ED=5（与题目矛盾，可能题目有误）<br>假设CE=ED=5<br>根据垂径定理：<span class='math-formula'>$r = \\sqrt{OE^2 + CE^2} = \\sqrt{OE^2 + 25}$</span><br>又 <span class='math-formula'>$AE \\times EB = CE \\times ED = 25$</span><br>设半径为r，则 <span class='math-formula'>$(r - OE)(r + OE) = 25$</span> ⇒ <span class='math-formula'>$r^2 - OE^2 = 25$</span><br>与前面联立解得：<span class='math-formula'>$r = 5\\sqrt{2}/2$</span><br>（注：题目数据可能有误，解题思路正确）"
                     },
                     {
                         "id": "9-1-4",
                         "title": "相似三角形",
-                        "content": "如图，在△ABC中，DE∥BC，AD=3，DB=2，DE=4，求BC的长度。\n（请自行画图：△ABC中，D在AB上，E在AC上，DE∥BC）",
+                        "content": "如图，在△ABC中，DE∥BC，AD=3，DB=2，DE=4，求BC的长度。<br><img src='https://via.placeholder.com/300x100?text=相似三角形图示' class='question-image'>",
                         "type": "geometry",
                         "difficulty": "medium",
-                        "answer": "解：\n∵ DE∥BC\n∴ △ADE∽△ABC\n∴ $\\frac{AD}{AB} = \\frac{DE}{BC}$\n$AB = AD + DB = 5$\n$\\frac{3}{5} = \\frac{4}{BC}$ ⇒ $BC = \\frac{20}{3}$"
+                        "answer": "解：<br>∵ DE∥BC<br>∴ △ADE∽△ABC<br>∴ <span class='math-formula'>$\\frac{AD}{AB} = \\frac{DE}{BC}$</span><br><span class='math-formula'>$AB = AD + DB = 5$</span><br><span class='math-formula'>$\\frac{3}{5} = \\frac{4}{BC}$</span> ⇒ <span class='math-formula'>$BC = \\frac{20}{3}$</span>"
                     },
                     {
                         "id": "9-1-5",
                         "title": "代数式求值",
-                        "content": "已知 $x + \\frac{1}{x} = 3$，求 $x^2 + \\frac{1}{x^2}$ 的值。",
+                        "content": "已知 <span class='math-formula'>$x + \\frac{1}{x} = 3$</span>，求 <span class='math-formula'>$x^2 + \\frac{1}{x^2}$</span> 的值。",
                         "type": "algebra",
                         "difficulty": "medium",
-                        "answer": "解：\n$x^2 + \\frac{1}{x^2} = \\left(x + \\frac{1}{x}\\right)^2 - 2 = 9 - 2 = 7$"
+                        "answer": "解：<br><span class='math-formula'>$x^2 + \\frac{1}{x^2} = \\left(x + \\frac{1}{x}\\right)^2 - 2 = 9 - 2 = 7$</span>"
                     },
+                    // 更多九年级上学期题目...
                     {
                         "id": "9-1-6",
                         "title": "几何证明题",
-                        "content": "如图，在△ABC中，∠ACB=90°，CD⊥AB于点D，求证：$CD^2 = AD \\times DB$。\n（请自行画图）",
+                        "content": "如图，在△ABC中，∠ACB=90°，CD⊥AB于点D，求证：<span class='math-formula'>$CD^2 = AD \\times DB$</span>。<br><img src='https://via.placeholder.com/300x100?text=直角三角形证明图示' class='question-image'>",
                         "type": "proof",
                         "difficulty": "hard",
-                        "answer": "证明：\n∵ CD⊥AB\n∴ ∠ADC=∠BDC=90°\n又 ∠ACB=90°\n∴ ∠ACD=∠B（同角的余角相等）\n∴ △ACD∽△CBD\n∴ $\\frac{AD}{CD} = \\frac{CD}{DB}$\n∴ $CD^2 = AD \\times DB$"
+                        "answer": "证明：<br>∵ CD⊥AB<br>∴ ∠ADC=∠BDC=90°<br>又 ∠ACB=90°<br>∴ ∠ACD=∠B（同角的余角相等）<br>∴ △ACD∽△CBD<br>∴ <span class='math-formula'>$\\frac{AD}{CD} = \\frac{CD}{DB}$</span><br>∴ <span class='math-formula'>$CD^2 = AD \\times DB$</span>"
                     },
                     {
                         "id": "9-1-7",
@@ -647,15 +792,15 @@
                         "content": "某商品进价为40元，售价为x元，每天可卖出(100-x)件。为使每天利润最大，售价应定为多少？最大利润是多少？",
                         "type": "word",
                         "difficulty": "hard",
-                        "answer": "解：\n利润 $P = (x - 40)(100 - x) = -x^2 + 140x - 4000$\n当 $x = -\\frac{b}{2a} = 70$ 时，P最大\n最大利润 $P = -(70)^2 + 140 \\times 70 - 4000 = 900$\n所以售价应定为70元，最大利润为900元。"
+                        "answer": "解：<br>利润 <span class='math-formula'>$P = (x - 40)(100 - x) = -x^2 + 140x - 4000$</span><br>当 <span class='math-formula'>$x = -\\frac{b}{2a} = 70$</span> 时，P最大<br>最大利润 <span class='math-formula'>$P = -(70)^2 + 140 \\times 70 - 4000 = 900$</span><br>所以售价应定为70元，最大利润为900元。"
                     },
                     {
                         "id": "9-1-8",
                         "title": "二次函数性质",
-                        "content": "已知二次函数 $y = x^2 - 2x + k$ 的图像与x轴有两个交点，求k的取值范围。",
+                        "content": "已知二次函数 <span class='math-formula'>$y = x^2 - 2x + k$</span> 的图像与x轴有两个交点，求k的取值范围。",
                         "type": "algebra",
                         "difficulty": "medium",
-                        "answer": "解：\n判别式 $\\Delta = (-2)^2 - 4 \\times 1 \\times k > 0$\n即 $4 - 4k > 0$ ⇒ $k < 1$\n所以k的取值范围是 $k < 1$。"
+                        "answer": "解：<br>判别式 <span class='math-formula'>$\\Delta = (-2)^2 - 4 \\times 1 \\times k > 0$</span><br>即 <span class='math-formula'>$4 - 4k > 0$</span> ⇒ <span class='math-formula'>$k < 1$</span><br>所以k的取值范围是 <span class='math-formula'>$k < 1$</span>。"
                     },
                     {
                         "id": "9-1-9",
@@ -663,17 +808,17 @@
                         "content": "在Rt△ABC中，∠C=90°，AC=5，BC=12，求sinA和tanB的值。",
                         "type": "geometry",
                         "difficulty": "easy",
-                        "answer": "解：\n先求斜边AB：$AB = \\sqrt{AC^2 + BC^2} = 13$\n$\\sin A = \\frac{BC}{AB} = \\frac{12}{13}$\n$\\tan B = \\frac{AC}{BC} = \\frac{5}{12}$"
+                        "answer": "解：<br>先求斜边AB：<span class='math-formula'>$AB = \\sqrt{AC^2 + BC^2} = 13$</span><br><span class='math-formula'>$\\sin A = \\frac{BC}{AB} = \\frac{12}{13}$</span><br><span class='math-formula'>$\\tan B = \\frac{AC}{BC} = \\frac{5}{12}$</span>"
                     },
                     {
                         "id": "9-1-10",
                         "title": "圆与切线",
-                        "content": "如图，PA、PB是⊙O的切线，A、B为切点，∠APB=60°，PA=6，求⊙O的半径。\n（请自行画图）",
+                        "content": "如图，PA、PB是⊙O的切线，A、B为切点，∠APB=60°，PA=6，求⊙O的半径。<br><img src='https://via.placeholder.com/300x100?text=圆的切线图示' class='question-image'>",
                         "type": "geometry",
                         "difficulty": "hard",
-                        "answer": "解：\n连接OA、OB、OP\n∵ PA、PB是切线\n∴ OA⊥PA，OB⊥PB\n又 OA=OB，PA=PB\n∴ △OAP≌△OBP\n∴ ∠APO=∠BPO=30°\n在Rt△OAP中：\n$\\tan 30° = \\frac{OA}{PA}$ ⇒ $OA = 6 \\times \\frac{\\sqrt{3}}{3} = 2\\sqrt{3}$\n所以⊙O的半径为 $2\\sqrt{3}$。"
+                        "answer": "解：<br>连接OA、OB、OP<br>∵ PA、PB是切线<br>∴ OA⊥PA，OB⊥PB<br>又 OA=OB，PA=PB<br>∴ ∠APO=∠BPO=30°<br>在Rt△OAP中：<br><span class='math-formula'>$\\tan 30° = \\frac{OA}{PA}$</span> ⇒ <span class='math-formula'>$OA = 6 \\times \\frac{\\sqrt{3}}{3} = 2\\sqrt{3}$</span><br>所以⊙O的半径为 <span class='math-formula'>$2\\sqrt{3}$</span>。"
                     }
-                    // 更多题目...
+                    // 继续添加更多题目...
                 ],
                 "2": [
                     {
@@ -682,23 +827,23 @@
                         "content": "在Rt△ABC中，∠C=90°，tanA=2，AC=3，求BC和AB的长度。",
                         "type": "geometry",
                         "difficulty": "easy",
-                        "answer": "解：\n∵ $\\tan A = \\frac{BC}{AC} = 2$\n∴ $BC = 2 \\times AC = 6$\n$AB = \\sqrt{AC^2 + BC^2} = \\sqrt{9 + 36} = 3\\sqrt{5}$"
+                        "answer": "解：<br>∵ <span class='math-formula'>$\\tan A = \\frac{BC}{AC} = 2$</span><br>∴ <span class='math-formula'>$BC = 2 \\times AC = 6$</span><br><span class='math-formula'>$AB = \\sqrt{AC^2 + BC^2} = \\sqrt{9 + 36} = 3\\sqrt{5}$</span>"
                     },
                     {
                         "id": "9-2-2",
                         "title": "圆与相似三角形",
-                        "content": "如图，AB是⊙O的直径，C是⊙O上一点，CD⊥AB于点D，求证：$CD^2 = AD \\times DB$。\n（请自行画图）",
+                        "content": "如图，AB是⊙O的直径，C是⊙O上一点，CD⊥AB于点D，求证：<span class='math-formula'>$CD^2 = AD \\times DB$</span>。<br><img src='https://via.placeholder.com/300x100?text=圆与相似三角形图示' class='question-image'>",
                         "type": "proof",
                         "difficulty": "hard",
-                        "answer": "证明：\n连接AC、BC\n∵ AB是直径\n∴ ∠ACB=90°\n又 CD⊥AB\n∴ △ACD∽△CBD\n∴ $\\frac{AD}{CD} = \\frac{CD}{DB}$\n∴ $CD^2 = AD \\times DB$"
+                        "answer": "证明：<br>连接AC、BC<br>∵ AB是直径<br>∴ ∠ACB=90°<br>又 CD⊥AB<br>∴ △ACD∽△CBD<br>∴ <span class='math-formula'>$\\frac{AD}{CD} = \\frac{CD}{DB}$</span><br>∴ <span class='math-formula'>$CD^2 = AD \\times DB$</span>"
                     },
                     {
                         "id": "9-2-3",
                         "title": "二次函数综合",
-                        "content": "已知二次函数 $y = ax^2 + bx + c$ 的图像顶点为(1,-4)，且经过点(2,-3)，求这个二次函数的解析式。",
+                        "content": "已知二次函数 <span class='math-formula'>$y = ax^2 + bx + c$</span> 的图像顶点为(1,-4)，且经过点(2,-3)，求这个二次函数的解析式。",
                         "type": "algebra",
                         "difficulty": "medium",
-                        "answer": "解：\n设顶点式：$y = a(x - 1)^2 - 4$\n将(2,-3)代入：$-3 = a(2 - 1)^2 - 4$ ⇒ $-3 = a - 4$ ⇒ $a = 1$\n所以解析式为 $y = (x - 1)^2 - 4 = x^2 - 2x - 3$"
+                        "answer": "解：<br>设顶点式：<span class='math-formula'>$y = a(x - 1)^2 - 4$</span><br>将(2,-3)代入：<span class='math-formula'>$-3 = a(2 - 1)^2 - 4$</span> ⇒ <span class='math-formula'>$-3 = a - 4$</span> ⇒ <span class='math-formula'>$a = 1$</span><br>所以解析式为 <span class='math-formula'>$y = (x - 1)^2 - 4 = x^2 - 2x - 3$</span>"
                     },
                     {
                         "id": "9-2-4",
@@ -706,23 +851,24 @@
                         "content": "一个不透明的袋子里有红、黄、蓝三种颜色的小球，红球有3个，黄球有4个，蓝球有5个。现从中随机取出两个球，求两个球颜色相同的概率。",
                         "type": "word",
                         "difficulty": "hard",
-                        "answer": "解：\n总的取法：C(12,2)=66\n同颜色的取法：\n红球：C(3,2)=3\n黄球：C(4,2)=6\n蓝球：C(5,2)=10\n共19种\n概率=19/66"
+                        "answer": "解：<br>总的取法：C(12,2)=66<br>同颜色的取法：<br>红球：C(3,2)=3<br>黄球：C(4,2)=6<br>蓝球：C(5,2)=10<br>共19种<br>概率=19/66"
                     },
                     {
                         "id": "9-2-5",
                         "title": "圆的切线",
-                        "content": "如图，PA、PB是⊙O的切线，A、B为切点，AC是⊙O的直径，若∠APB=60°，求∠BAC的度数。\n（请自行画图）",
+                        "content": "如图，PA、PB是⊙O的切线，A、B为切点，AC是⊙O的直径，若∠APB=60°，求∠BAC的度数。<br><img src='https://via.placeholder.com/300x100?text=圆的切线角度图示' class='question-image'>",
                         "type": "geometry",
                         "difficulty": "medium",
-                        "answer": "解：\n连接OB\n∵ PA、PB是切线\n∴ ∠OAP=∠OBP=90°\n又 OA=OB，PA=PB\n∴ ∠APO=∠BPO=30°\n∴ ∠AOP=60°\n∵ AC是直径\n∴ ∠ABC=90°\n∴ ∠BAC=30°"
+                        "answer": "解：<br>连接OB<br>∵ PA、PB是切线<br>∴ ∠OAP=∠OBP=90°<br>又 OA=OB，PA=PB<br>∴ ∠APO=∠BPO=30°<br>∴ ∠AOP=60°<br>∵ AC是直径<br>∴ ∠ABC=90°<br>∴ ∠BAC=30°"
                     },
+                    // 更多九年级下学期题目...
                     {
                         "id": "9-2-6",
                         "title": "代数证明",
-                        "content": "证明：对于任意实数 $a, b$，有 $\\frac{a + b}{2} \\geq \\sqrt{ab}$（算术平均数不小于几何平均数）。",
+                        "content": "证明：对于任意实数 <span class='math-formula'>$a, b$</span>，有 <span class='math-formula'>$\\frac{a + b}{2} \\geq \\sqrt{ab}$</span>（算术平均数不小于几何平均数）。",
                         "type": "proof",
                         "difficulty": "hard",
-                        "answer": "证明：\n$(\\sqrt{a} - \\sqrt{b})^2 \\geq 0$\n展开：$a - 2\\sqrt{ab} + b \\geq 0$\n移项：$a + b \\geq 2\\sqrt{ab}$\n两边除以2：$\\frac{a + b}{2} \\geq \\sqrt{ab}$\n当且仅当 $a = b$ 时等号成立。"
+                        "answer": "证明：<br><span class='math-formula'>$(\\sqrt{a} - \\sqrt{b})^2 \\geq 0$</span><br>展开：<span class='math-formula'>$a - 2\\sqrt{ab} + b \\geq 0$</span><br>移项：<span class='math-formula'>$a + b \\geq 2\\sqrt{ab}$</span><br>两边除以2：<span class='math-formula'>$\\frac{a + b}{2} \\geq \\sqrt{ab}$</span><br>当且仅当 <span class='math-formula'>$a = b$</span> 时等号成立。"
                     },
                     {
                         "id": "9-2-7",
@@ -730,33 +876,33 @@
                         "content": "用长为20米的篱笆围成一个矩形菜地，一边靠墙，求菜地的最大面积。",
                         "type": "word",
                         "difficulty": "hard",
-                        "answer": "解：\n设垂直于墙的边长为x米，则平行于墙的边长为(20-2x)米\n面积 $S = x(20 - 2x) = -2x^2 + 20x$\n当 $x = -\\frac{b}{2a} = 5$ 时，S最大\n最大面积 $S = -2 \\times 25 + 20 \\times 5 = 50$ 平方米\n所以菜地的最大面积为50平方米。"
+                        "answer": "解：<br>设垂直于墙的边长为x米，则平行于墙的边长为(20-2x)米<br>面积 <span class='math-formula'>$S = x(20 - 2x) = -2x^2 + 20x$</span><br>当 <span class='math-formula'>$x = -\\frac{b}{2a} = 5$</span> 时，S最大<br>最大面积 <span class='math-formula'>$S = -2 \\times 25 + 20 \\times 5 = 50$</span> 平方米<br>所以菜地的最大面积为50平方米。"
                     },
                     {
                         "id": "9-2-8",
                         "title": "三角函数计算",
-                        "content": "计算：$\\sin^2 30° + \\cos^2 60° + \\tan 45°$",
+                        "content": "计算：<span class='math-formula'>$\\sin^2 30° + \\cos^2 60° + \\tan 45°$</span>",
                         "type": "geometry",
                         "difficulty": "easy",
-                        "answer": "解：\n原式 $= \\left(\\frac{1}{2}\\right)^2 + \\left(\\frac{1}{2}\\right)^2 + 1 = \\frac{1}{4} + \\frac{1}{4} + 1 = 1.5$"
+                        "answer": "解：<br>原式 <span class='math-formula'>$= \\left(\\frac{1}{2}\\right)^2 + \\left(\\frac{1}{2}\\right)^2 + 1 = \\frac{1}{4} + \\frac{1}{4} + 1 = 1.5$</span>"
                     },
                     {
                         "id": "9-2-9",
                         "title": "二次函数与不等式",
-                        "content": "已知二次函数 $y = x^2 - 4x + 3$，求当 $y \\leq 0$ 时，x的取值范围。",
+                        "content": "已知二次函数 <span class='math-formula'>$y = x^2 - 4x + 3$</span>，求当 <span class='math-formula'>$y \\leq 0$</span> 时，x的取值范围。",
                         "type": "algebra",
                         "difficulty": "medium",
-                        "answer": "解：\n解方程 $x^2 - 4x + 3 = 0$ 得 $x = 1$ 或 $x = 3$\n因为二次项系数为正，抛物线开口向上\n所以 $y \\leq 0$ 的解集为 $1 \\leq x \\leq 3$"
+                        "answer": "解：<br>解方程 <span class='math-formula'>$x^2 - 4x + 3 = 0$</span> 得 <span class='math-formula'>$x = 1$</span> 或 <span class='math-formula'>$x = 3$</span><br>因为二次项系数为正，抛物线开口向上<br>所以 <span class='math-formula'>$y \\leq 0$</span> 的解集为 <span class='math-formula'>$1 \\leq x \\leq 3$</span>"
                     },
                     {
                         "id": "9-2-10",
                         "title": "几何综合题",
-                        "content": "如图，在△ABC中，AB=AC，以AB为直径的⊙O交BC于点D，DE⊥AC于点E，求证：DE是⊙O的切线。\n（请自行画图）",
+                        "content": "如图，在△ABC中，AB=AC，以AB为直径的⊙O交BC于点D，DE⊥AC于点E，求证：DE是⊙O的切线。<br><img src='https://via.placeholder.com/300x100?text=几何综合题图示' class='question-image'>",
                         "type": "proof",
                         "difficulty": "hard",
-                        "answer": "证明：\n连接AD、OD\n∵ AB是直径\n∴ AD⊥BC\n又 AB=AC\n∴ D是BC中点\n∴ OD∥AC（中位线）\n又 DE⊥AC\n∴ DE⊥OD\n∴ DE是⊙O的切线"
+                        "answer": "证明：<br>连接AD、OD<br>∵ AB是直径<br>∴ AD⊥BC<br>又 AB=AC<br>∴ D是BC中点<br>∴ OD∥AC（中位线）<br>又 DE⊥AC<br>∴ DE⊥OD<br>∴ DE是⊙O的切线"
                     }
-                    // 更多题目...
+                    // 继续添加更多题目...
                 ]
             }
         };
@@ -769,8 +915,10 @@
         let elapsedTime = 0;
         let practiceCount = {
             today: 0,
-            total: 0
+            total: 0,
+            totalTime: 0
         };
+        let practiceHistory = [];
 
         // 初始化页面
         function initializePage() {
@@ -788,6 +936,12 @@
             document.querySelector(`.tab-button[onclick="openTab('${tabName}')"]`).classList.add('active');
             
             currentTab = tabName;
+            
+            // 如果切换到练习标签页且没有当前题目，显示练习介绍
+            if (tabName === 'practice' && !currentQuestion) {
+                document.getElementById('practice-intro').classList.remove('hidden');
+                document.getElementById('practice-area').classList.add('hidden');
+            }
         }
 
         // 显示所有题目
@@ -827,13 +981,239 @@
                 item.innerHTML = `
                     <strong>${q.title}</strong> 
                     <span class="difficulty-${q.difficulty}">(${getDifficultyText(q.difficulty)})</span>
-                    <p>${q.content.substring(0, 50)}...</p>
+                    <p>${stripHtmlTags(q.content).substring(0, 50)}...</p>
                 `;
-                item.onclick = () => startPractice(q);
+                item.onclick = () => previewQuestion(q);
                 div.appendChild(item);
             });
             
             return div;
+        }
+
+        // 预览题目
+        function previewQuestion(question) {
+            document.getElementById('filtered-questions').classList.add('hidden');
+            document.getElementById('preview-area').classList.remove('hidden');
+            
+            // 显示题目预览
+            document.getElementById('preview-title').textContent = question.title;
+            document.getElementById('preview-content').innerHTML = question.content;
+            document.getElementById('preview-difficulty').textContent = getDifficultyText(question.difficulty);
+            document.getElementById('preview-difficulty').className = `difficulty-${question.difficulty}`;
+            
+            // 设置当前题目
+            currentQuestion = question;
+        }
+
+        // 从预览开始做题
+        function startPracticeFromPreview() {
+            document.getElementById('preview-area').classList.add('hidden');
+            openTab('practice');
+            startPractice(currentQuestion);
+        }
+
+        // 返回题目列表
+        function backToList() {
+            document.getElementById('preview-area').classList.add('hidden');
+            document.getElementById('filtered-questions').classList.remove('hidden');
+            currentQuestion = null;
+        }
+
+        // 开始练习
+        function startPractice(question) {
+            currentQuestion = question;
+            document.getElementById('practice-intro').classList.add('hidden');
+            document.getElementById('practice-area').classList.remove('hidden');
+            
+            // 显示题目
+            document.getElementById('question-title').textContent = question.title;
+            document.getElementById('question-content').innerHTML = question.content;
+            document.getElementById('question-difficulty').textContent = getDifficultyText(question.difficulty);
+            document.getElementById('question-difficulty').className = `difficulty-${question.difficulty}`;
+            
+            // 清空作答区和答案
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-content').innerHTML = '';
+            document.getElementById('answer-section').style.display = 'none';
+            
+            // 禁用查看答案和下一题按钮
+            document.getElementById('answer-btn').disabled = true;
+            document.getElementById('next-btn').disabled = true;
+            
+            // 开始计时
+            startTimer();
+            
+            // 滚动到顶部
+            window.scrollTo(0, 0);
+        }
+
+        // 开始随机练习
+        function startRandomPractice(difficulty) {
+            // 收集所有符合条件的题目
+            let allQuestions = [];
+            
+            for (const grade in questionBank) {
+                for (const semester in questionBank[grade]) {
+                    questionBank[grade][semester].forEach(q => {
+                        if (!difficulty || q.difficulty === difficulty) {
+                            allQuestions.push(q);
+                        }
+                    });
+                }
+            }
+            
+            if (allQuestions.length === 0) {
+                alert('没有找到符合条件的题目');
+                return;
+            }
+            
+            // 随机选择一道题目
+            const randomQuestion = allQuestions[Math.floor(Math.random() * allQuestions.length)];
+            startPractice(randomQuestion);
+        }
+
+        // 开始计时
+        function startTimer() {
+            startTime = new Date();
+            elapsedTime = 0;
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            timerInterval = setInterval(() => {
+                elapsedTime = Math.floor((new Date() - startTime) / 1000);
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        // 更新计时器显示
+        function updateTimerDisplay() {
+            const hours = Math.floor(elapsedTime / 3600);
+            const minutes = Math.floor((elapsedTime % 3600) / 60);
+            const seconds = elapsedTime % 60;
+            
+            document.getElementById('time-display').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // 提交答案
+        function submitAnswer() {
+            if (!currentQuestion) return;
+            
+            // 停止计时
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            // 启用查看答案和下一题按钮
+            document.getElementById('answer-btn').disabled = false;
+            document.getElementById('next-btn').disabled = false;
+            document.getElementById('giveup-btn').disabled = true;
+            
+            // 更新练习统计
+            updatePracticeStats();
+            
+            // 显示系统消息
+            showSystemMessage('答案已提交，可以查看参考答案了');
+        }
+
+        // 保存为草稿
+        function saveAsDraft() {
+            const answer = document.getElementById('answer-input').value;
+            if (answer.trim() === '') {
+                showSystemMessage('请输入答案后再保存');
+                return;
+            }
+            
+            // 这里可以添加实际保存草稿的逻辑
+            showSystemMessage('草稿已保存，可以稍后继续作答');
+        }
+
+        // 放弃本题
+        function giveUp() {
+            if (confirm('确定要放弃本题吗？')) {
+                // 停止计时
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                
+                // 启用查看答案和下一题按钮
+                document.getElementById('answer-btn').disabled = false;
+                document.getElementById('next-btn').disabled = false;
+                document.getElementById('giveup-btn').disabled = true;
+                
+                // 更新练习统计
+                practiceHistory.push({
+                    questionId: currentQuestion.id,
+                    timeSpent: elapsedTime,
+                    gaveUp: true
+                });
+                
+                showSystemMessage('已放弃本题，可以查看参考答案了');
+            }
+        }
+
+        // 显示答案
+        function showAnswer() {
+            if (!currentQuestion) return;
+            
+            document.getElementById('answer-content').innerHTML = currentQuestion.answer;
+            document.getElementById('answer-section').style.display = 'block';
+            
+            // 记录查看答案
+            if (!practiceHistory.some(item => item.questionId === currentQuestion.id && !item.gaveUp)) {
+                practiceHistory.push({
+                    questionId: currentQuestion.id,
+                    timeSpent: elapsedTime,
+                    gaveUp: false,
+                    viewedAnswer: true
+                });
+            }
+        }
+
+        // 评价答案理解程度
+        function rateAnswer(rating) {
+            const ratings = ['完全理解', '基本理解', '不太理解'];
+            showSystemMessage(`已记录：${ratings[rating-1]}`);
+            
+            // 更新练习历史
+            const lastPractice = practiceHistory.find(item => item.questionId === currentQuestion.id);
+            if (lastPractice) {
+                lastPractice.rating = rating;
+            }
+            
+            // 保存到本地存储
+            savePracticeStats();
+        }
+
+        // 下一题
+        function nextQuestion() {
+            document.getElementById('practice-area').classList.add('hidden');
+            document.getElementById('practice-intro').classList.remove('hidden');
+            currentQuestion = null;
+            
+            // 更新统计显示
+            updateStatsDisplay();
+        }
+
+        // 获取难度文本
+        function getDifficultyText(difficulty) {
+            switch (difficulty) {
+                case 'easy': return '简单';
+                case 'medium': return '中等';
+                case 'hard': return '困难';
+                default: return '未知';
+            }
+        }
+
+        // 去除HTML标签
+        function stripHtmlTags(html) {
+            const tmp = document.createElement("div");
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || "";
         }
 
         // 筛选题目
@@ -886,155 +1266,84 @@
                 item.innerHTML = `
                     <strong>${q.title}</strong> 
                     <span class="difficulty-${q.difficulty}">(${getDifficultyText(q.difficulty)})</span>
-                    <p>${q.content}</p>
+                    <p>${stripHtmlTags(q.content).substring(0, 50)}...</p>
                 `;
-                item.onclick = () => startPractice(q);
+                item.onclick = () => previewQuestion(q);
                 div.appendChild(item);
             });
             
             container.appendChild(div);
         }
 
-        // 开始练习
-        function startPractice(question) {
-            currentQuestion = question;
-            document.getElementById('practice-intro').classList.add('hidden');
-            document.getElementById('practice-area').classList.remove('hidden');
-            
-            // 显示题目
-            document.getElementById('question-title').textContent = question.title;
-            document.getElementById('question-content').innerHTML = question.content.replace(/\n/g, '<br>');
-            document.getElementById('question-difficulty').textContent = getDifficultyText(question.difficulty);
-            document.getElementById('question-difficulty').className = `difficulty-${question.difficulty}`;
-            
-            // 清空作答区和答案
-            document.getElementById('answer-input').value = '';
-            document.getElementById('answer-content').innerHTML = '';
-            document.getElementById('answer-section').style.display = 'none';
-            
-            // 禁用查看答案和下一题按钮
-            document.getElementById('answer-btn').disabled = true;
-            document.getElementById('next-btn').disabled = true;
-            
-            // 开始计时
-            startTimer();
-            
-            // 滚动到顶部
-            window.scrollTo(0, 0);
+        // 重置筛选条件
+        function resetFilters() {
+            document.getElementById('grade-select').value = 'all';
+            document.getElementById('semester-select').value = 'all';
+            document.getElementById('type-select').value = 'all';
+            document.getElementById('difficulty-select').value = 'all';
+            filterQuestions();
         }
 
-        // 开始随机练习
-        function startRandomPractice() {
-            // 随机选择一个年级
-            const grades = Object.keys(questionBank);
-            const randomGrade = grades[Math.floor(Math.random() * grades.length)];
+        // 显示系统消息
+        function showSystemMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'system-message';
+            messageDiv.textContent = message;
             
-            // 随机选择一个学期
-            const semesters = ['1', '2'];
-            const randomSemester = semesters[Math.floor(Math.random() * semesters.length)];
+            const answerSection = document.getElementById('answer-section');
+            answerSection.insertBefore(messageDiv, answerSection.firstChild);
             
-            // 从该年级和学期的题目中随机选择一道
-            const questions = questionBank[randomGrade][randomSemester];
-            const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
-            
-            startPractice(randomQuestion);
-        }
-
-        // 开始计时
-        function startTimer() {
-            startTime = new Date();
-            elapsedTime = 0;
-            
-            if (timerInterval) {
-                clearInterval(timerInterval);
-            }
-            
-            timerInterval = setInterval(() => {
-                elapsedTime = Math.floor((new Date() - startTime) / 1000);
-                updateTimerDisplay();
-            }, 1000);
-        }
-
-        // 更新计时器显示
-        function updateTimerDisplay() {
-            const hours = Math.floor(elapsedTime / 3600);
-            const minutes = Math.floor((elapsedTime % 3600) / 60);
-            const seconds = elapsedTime % 60;
-            
-            document.getElementById('time-display').textContent = 
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        // 提交答案
-        function submitAnswer() {
-            if (!currentQuestion) return;
-            
-            // 停止计时
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-            
-            // 启用查看答案和下一题按钮
-            document.getElementById('answer-btn').disabled = false;
-            document.getElementById('next-btn').disabled = false;
-            
-            // 更新练习统计
-            updatePracticeStats();
-        }
-
-        // 保存为草稿
-        function saveAsDraft() {
-            alert('草稿已保存，可以继续完善答案后再提交。');
-        }
-
-        // 显示答案
-        function showAnswer() {
-            if (!currentQuestion) return;
-            
-            document.getElementById('answer-content').innerHTML = currentQuestion.answer.replace(/\n/g, '<br>');
-            document.getElementById('answer-section').style.display = 'block';
-        }
-
-        // 下一题
-        function nextQuestion() {
-            document.getElementById('practice-area').classList.add('hidden');
-            document.getElementById('practice-intro').classList.remove('hidden');
-            currentQuestion = null;
-        }
-
-        // 获取难度文本
-        function getDifficultyText(difficulty) {
-            switch (difficulty) {
-                case 'easy': return '简单';
-                case 'medium': return '中等';
-                case 'hard': return '困难';
-                default: return '未知';
-            }
+            // 3秒后自动消失
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
         }
 
         // 加载练习统计
         function loadPracticeStats() {
-            // 这里可以从本地存储加载实际的统计数据
-            // 现在只是模拟
-            practiceCount = {
-                today: 5,
-                total: 127
-            };
+            // 从本地存储加载数据
+            const stats = localStorage.getItem('mathPracticeStats');
+            if (stats) {
+                practiceCount = JSON.parse(stats);
+            }
             
-            document.getElementById('today-count').textContent = practiceCount.today;
-            document.getElementById('total-count').textContent = practiceCount.total;
+            updateStatsDisplay();
         }
 
         // 更新练习统计
         function updatePracticeStats() {
             practiceCount.today++;
             practiceCount.total++;
+            practiceCount.totalTime += elapsedTime;
             
+            // 记录练习历史
+            practiceHistory.push({
+                questionId: currentQuestion.id,
+                timeSpent: elapsedTime,
+                gaveUp: false
+            });
+            
+            // 保存到本地存储
+            savePracticeStats();
+            
+            // 更新显示
+            updateStatsDisplay();
+        }
+
+        // 保存练习统计
+        function savePracticeStats() {
+            localStorage.setItem('mathPracticeStats', JSON.stringify(practiceCount));
+            localStorage.setItem('mathPracticeHistory', JSON.stringify(practiceHistory));
+        }
+
+        // 更新统计显示
+        function updateStatsDisplay() {
             document.getElementById('today-count').textContent = practiceCount.today;
             document.getElementById('total-count').textContent = practiceCount.total;
             
-            // 这里可以保存到本地存储
+            const avgTime = practiceCount.total > 0 ? 
+                Math.round(practiceCount.totalTime / practiceCount.total) : 0;
+            document.getElementById('avg-time').textContent = avgTime;
         }
 
         // 页面加载完成后初始化
