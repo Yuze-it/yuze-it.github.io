@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ 魔法星空 ✨</title>
+    <style>
+        body {
+            background-color: #0a0a2a;
+            color: #e0e0ff;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            overflow: hidden;
+            user-select: none;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            margin: 20px auto;
+            border: 2px solid #4d4dff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #4d4dff;
+            overflow: hidden;
+        }
+        
+        #player {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: gold;
+            border-radius: 50%;
+            box-shadow: 0 0 15px yellow;
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+        
+        .star {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            clip-path: polygon(
+                50% 0%, 61% 35%, 98% 35%, 68% 57%, 
+                79% 91%, 50% 70%, 21% 91%, 32% 57%, 
+                2% 35%, 39% 35%
+            );
+            animation: twinkle 1s infinite alternate;
+        }
+        
+        .comet {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle, #ff5555 30%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .comet::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 10px;
+            background: linear-gradient(90deg, #ff5555, transparent);
+            left: 25px;
+            top: 7px;
+            border-radius: 5px;
+        }
+        
+        @keyframes twinkle {
+            from { transform: scale(0.8); opacity: 0.7; }
+            to { transform: scale(1.2); opacity: 1; }
+        }
+        
+        #ui {
+            margin: 20px auto;
+            padding: 15px;
+            width: 560px;
+            background-color: rgba(10, 10, 50, 0.7);
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            background: linear-gradient(#4d4dff, #2a2a7f);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px #4d4dff;
+        }
+        
+        #score {
+            font-size: 24px;
+            margin: 10px;
+        }
+        
+        #spell-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        #game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        #game-over h2 {
+            color: #ff5555;
+            font-size: 36px;
+            text-shadow: 0 0 10px red;
+        }
+    </style>
+</head>
+<body>
+    <h1>✨ 魔法星空 ✨</h1>
+    <div id="score">能量收集: <span id="energy">0</span>/5</div>
+    <div id="game-container">
+        <div id="player"></div>
+        <div id="spell-effect"></div>
+        <div id="game-over">
+            <h2>游戏结束!</h2>
+            <button class="btn" onclick="resetGame()">再来一次</button>
+        </div>
+    </div>
+    <div id="ui">
+        <button class="btn" id="btn-spell" onclick="castSpell()">🌟 星座魔法 (3)</button>
+        <button class="btn" onclick="resetGame()">🔄 重置游戏</button>
+        <button class="btn" onclick="showHelp()">❓ 游戏帮助</button>
+    </div>
+
+    <script>
+        // 游戏变量
+        let score = 0;
+        let spells = 3;
+        let gameRunning = true;
+        const player = document.getElementById('player');
+        const gameContainer = document.getElementById('game-container');
+        const containerWidth = gameContainer.offsetWidth;
+        const containerHeight = gameContainer.offsetHeight;
+        const playerSize = 30;
+        let playerX = containerWidth / 2 - playerSize / 2;
+        let playerY = containerHeight / 2 - playerSize / 2;
+        let stars = [];
+        let comets = [];
+        
+        // 初始化游戏
+        function initGame() {
+            player.style.left = playerX + 'px';
+            player.style.top = playerY + 'px';
+            
+            // 创建星星
+            for (let i = 0; i < 5; i++) {
+                createStar();
+            }
+            
+            // 创建彗星
+            setInterval(createComet, 2000);
+            
+            // 游戏循环
+            setInterval(gameLoop, 20);
+        }
+        
+        // 游戏主循环
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            // 移动彗星
+            comets.forEach((comet, index) => {
+                comet.x -= 3;
+                comet.element.style.left = comet.x + 'px';
+                
+                // 检测碰撞
+                if (checkCollision(comet.x, comet.y, 25, playerX, playerY, playerSize)) {
+                    gameOver();
+                }
+                
+                // 移除屏幕外的彗星
+                if (comet.x < -50) {
+                    gameContainer.removeChild(comet.element);
+                    comets.splice(index, 1);
+                }
+            });
+        }
+        
+        // 创建星星
+        function createStar() {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            const x = Math.random() * (containerWidth - 40);
+            const y = Math.random() * (containerHeight - 40);
+            
+            star.style.left = x + 'px';
+            star.style.top = y + 'px';
+            
+            gameContainer.appendChild(star);
+            stars.push({ element: star, x: x, y: y, collected: false });
+        }
+        
+        // 创建彗星
+        function createComet() {
+            if (!gameRunning) return;
+            
+            const comet = document.createElement('div');
+            comet.className = 'comet';
+            
+            const x = containerWidth;
+            const y = Math.random() * (containerHeight - 40);
+            
+            comet.style.left = x + 'px';
+            comet.style.top = y + 'px';
+            
+            gameContainer.appendChild(comet);
+            comets.push({ element: comet, x: x, y: y });
+        }
+        
+        // 检测碰撞
+        function checkCollision(x1, y1, size1, x2, y2, size2) {
+            const distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+            return distance < (size1 / 2 + size2 / 2);
+        }
+        
+        // 施放魔法
+        function castSpell() {
+            if (spells <= 0 || !gameRunning) return;
+            
+            spells--;
+            document.getElementById('btn-spell').textContent = `🌟 星座魔法 (${spells})`;
+            
+            // 清除所有彗星
+            comets.forEach(comet => {
+                gameContainer.removeChild(comet.element);
+            });
+            comets = [];
+            
+            // 显示特效
+            const effect = document.getElementById('spell-effect');
+            effect.style.background = 'radial-gradient(circle, rgba(255,255,255,0.8), transparent)';
+            effect.style.opacity = '1';
+            
+            setTimeout(() => {
+                effect.style.opacity = '0';
+            }, 1000);
+        }
+        
+        // 游戏结束
+        function gameOver() {
+            gameRunning = false;
+            document.getElementById('game-over').style.display = 'flex';
+        }
+        
+        // 重置游戏
+        function resetGame() {
+            // 清除所有星星和彗星
+            stars.forEach(star => gameContainer.removeChild(star.element));
+            comets.forEach(comet => gameContainer.removeChild(comet.element));
+            
+            stars = [];
+            comets = [];
+            
+            // 重置玩家位置
+            playerX = containerWidth / 2 - playerSize / 2;
+            playerY = containerHeight / 2 - playerSize / 2;
+            player.style.left = playerX + 'px';
+            player.style.top = playerY + 'px';
+            
+            // 重置分数和魔法
+            score = 0;
+            spells = 3;
+            document.getElementById('energy').textContent = '0';
+            document.getElementById('btn-spell').textContent = '🌟 星座魔法 (3)';
+            
+            // 隐藏游戏结束画面
+            document.getElementById('game-over').style.display = 'none';
+            
+            // 重新开始游戏
+            gameRunning = true;
+            initGame();
+        }
+        
+        // 显示帮助
+        function showHelp() {
+            alert("游戏帮助:\n\n1. 使用方向键移动星星魔法师\n2. 收集⭐增加能量\n3. 避开☄️彗星\n4. 收集5个能量获胜\n5. 使用星座魔法清除所有彗星");
+        }
+        
+        // 键盘控制
+        document.addEventListener('keydown', (e) => {
+            if (!gameRunning) return;
+            
+            const speed = 10;
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                    playerY = Math.max(0, playerY - speed);
+                    break;
+                case 'ArrowDown':
+                    playerY = Math.min(containerHeight - playerSize, playerY + speed);
+                    break;
+                case 'ArrowLeft':
+                    playerX = Math.max(0, playerX - speed);
+                    break;
+                case 'ArrowRight':
+                    playerX = Math.min(containerWidth - playerSize, playerX + speed);
+                    break;
+            }
+            
+            player.style.left = playerX + 'px';
+            player.style.top = playerY + 'px';
+            
+            // 检测星星碰撞
+            stars.forEach((star, index) => {
+                if (!star.collected && checkCollision(
+                    star.x + 10, star.y + 10, 20, 
+                    playerX + playerSize/2, playerY + playerSize/2, playerSize
+                )) {
+                    star.collected = true;
+                    gameContainer.removeChild(star.element);
+                    stars.splice(index, 1);
+                    
+                    score++;
+                    document.getElementById('energy').textContent = score;
+                    
+                    // 创建新星星
+                    createStar();
+                    
+                    // 检查胜利条件
+                    if (score >= 5) {
+                        alert('恭喜! 你召唤出了星座神兽! 🎉');
+                        resetGame();
+                    }
+                }
+            });
+        });
+        
+        // 启动游戏
+        window.onload = initGame;
+    </script>
+</body>
+</html>
