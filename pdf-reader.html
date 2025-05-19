@@ -746,12 +746,7 @@
         });
         
         defaultPdf.addEventListener('click', function() {
-            // 这里应该替换为实际的PDF文件路径
-            // 由于浏览器安全限制，本地文件需要使用File API加载
-            // 这里我们使用一个示例PDF URL
-            loadPdf('https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf');
-            // 实际使用时，history.pdf应该放在同一目录下或可访问的URL
-            // loadPdf('history.pdf');
+            loadPdf('history.pdf');
         });
         
         sidebarToggle.addEventListener('click', function() {
