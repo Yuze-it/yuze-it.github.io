@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Office Suite</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --accent-color: #ea4335;
+            --dark-color: #202124;
+            --light-color: #f8f9fa;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .folder-selector {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3367d6;
+        }
+
+        .btn-secondary {
+            background-color: #f1f3f4;
+            color: #3c4043;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e8eaed;
+        }
+
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .file-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .file-item:hover {
+            background-color: #f1f3f4;
+        }
+
+        .file-item.active {
+            background-color: #e8f0fe;
+            color: var(--primary-color);
+        }
+
+        .file-icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .toolbar {
+            padding: 10px 15px;
+            background-color: white;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+        }
+
+        .editor-container {
+            flex: 1;
+            display: none;
+            overflow: auto;
+            padding: 20px;
+            background-color: white;
+        }
+
+        .editor-container.active {
+            display: block;
+        }
+
+        #pdf-viewer {
+            width: 100%;
+            height: 100%;
+        }
+
+        #pdf-controls {
+            padding: 10px;
+            background-color: #f1f3f4;
+            display: flex;
+            gap: 10px;
+        }
+
+        #word-editor, #excel-editor {
+            width: 100%;
+            height: 100%;
+            border: none;
+            resize: none;
+            padding: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        #code-editor {
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+        }
+
+        .ai-panel {
+            width: 350px;
+            background-color: white;
+            border-left: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .ai-panel-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--dark-color);
+            color: white;
+        }
+
+        .ai-conversation {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .ai-message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+        }
+
+        .ai-user {
+            background-color: #e3f2fd;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-assistant {
+            background-color: #f1f3f4;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+
+        .ai-input-area {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        #ai-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            resize: none;
+            outline: none;
+        }
+
+        #ai-send {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-bar {
+            padding: 8px 15px;
+            background-color: var(--dark-color);
+            color: white;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .tab-bar {
+            display: flex;
+            background-color: #f1f3f4;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-right: 1px solid #ddd;
+        }
+
+        .tab.active {
+            background-color: white;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .excel-grid {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .excel-grid th, .excel-grid td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            min-width: 100px;
+        }
+
+        .excel-grid th {
+            background-color: #f1f3f4;
+            text-align: center;
+        }
+
+        .excel-grid td {
+            height: 30px;
+        }
+
+        .excel-grid td:focus {
+            outline: 2px solid var(--primary-color);
+        }
+
+        .excel-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .file-type-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+
+        .toggle-ai {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #5f6368;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #dadce0;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <span class="logo-icon">📊</span>
+            <span>Advanced Office Suite</span>
+        </div>
+        <button id="toggle-ai" class="toggle-ai">AI Assistant</button>
+    </header>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>Files</h3>
+                <button id="refresh-files" class="btn-secondary">↻</button>
+            </div>
+            <div class="folder-selector">
+                <button id="select-folder" class="btn-primary">Select Folder</button>
+            </div>
+            <div class="file-list" id="file-list">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📁</div>
+                    <p>No folder selected</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="tab-bar">
+                <div class="tab" data-target="pdf-editor">PDF</div>
+                <div class="tab" data-target="word-editor">Word</div>
+                <div class="tab" data-target="excel-editor">Excel</div>
+                <div class="tab" data-target="code-editor">Code</div>
+            </div>
+            <div class="toolbar" id="toolbar">
+                <button id="save-file" class="btn-primary">Save</button>
+                <button id="new-file" class="btn-secondary">New File</button>
+                <input type="text" id="filename-input" placeholder="Filename">
+            </div>
+
+            <div class="editor-container" id="pdf-editor">
+                <div id="pdf-controls">
+                    <button id="prev-page">Previous</button>
+                    <span>Page: <span id="page-num">1</span> / <span id="page-count">0</span></span>
+                    <button id="next-page">Next</button>
+                    <button id="zoom-in">Zoom In</button>
+                    <button id="zoom-out">Zoom Out</button>
+                </div>
+                <canvas id="pdf-viewer"></canvas>
+            </div>
+
+            <div class="editor-container" id="word-editor">
+                <textarea id="word-content" placeholder="Start typing your document here..."></textarea>
+            </div>
+
+            <div class="editor-container" id="excel-editor">
+                <div class="excel-toolbar">
+                    <button id="add-row">Add Row</button>
+                    <button id="add-col">Add Column</button>
+                </div>
+                <table class="excel-grid" id="excel-grid">
+                    <thead>
+                        <tr>
+                            <th>A</th>
+                            <th>B</th>
+                            <th>C</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td contenteditable="true"></td>
+                            <td contenteditable="true"></td>
+                            <td contenteditable="true"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="editor-container" id="code-editor">
+                <div id="code-editor" class="ace_editor"></div>
+            </div>
+
+            <div class="empty-state" id="no-file-selected">
+                <div class="empty-state-icon">📄</div>
+                <p>No file selected</p>
+            </div>
+        </div>
+
+        <div class="ai-panel" id="ai-panel">
+            <div class="ai-panel-header">
+                <h3>AI Assistant (Kimi)</h3>
+                <button id="close-ai">×</button>
+            </div>
+            <div class="ai-conversation" id="ai-conversation"></div>
+            <div class="ai-input-area">
+                <textarea id="ai-input" placeholder="Ask me anything..."></textarea>
+                <button id="ai-send">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div id="status-message">Ready</div>
+        <div id="file-info"></div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_KEY = "sk-N46UhIXp3ra7OqrixuUSJqrZS3HPPQ6hu73RohOwyHnlaFSu";
+        const API_ENDPOINT = "https://api.moonshot.cn/v1/chat/completions";
+        const MODEL = "kimi-latest";
+
+        // State variables
+        let currentFolderHandle = null;
+        let currentFileHandle = null;
+        let currentFileType = null;
+        let pdfDoc = null;
+        let currentPage = 1;
+        let currentScale = 1.0;
+        let excelData = [];
+        let aceEditor = null;
+        let conversationHistory = [];
+
+        // DOM Elements
+        const fileList = document.getElementById('file-list');
+        const selectFolderBtn = document.getElementById('select-folder');
+        const refreshFilesBtn = document.getElementById('refresh-files');
+        const saveFileBtn = document.getElementById('save-file');
+        const newFileBtn = document.getElementById('new-file');
+        const filenameInput = document.getElementById('filename-input');
+        const toggleAiBtn = document.getElementById('toggle-ai');
+        const closeAiBtn = document.getElementById('close-ai');
+        const aiPanel = document.getElementById('ai-panel');
+        const aiInput = document.getElementById('ai-input');
+        const aiSendBtn = document.getElementById('ai-send');
+        const aiConversation = document.getElementById('ai-conversation');
+        const statusMessage = document.getElementById('status-message');
+        const fileInfo = document.getElementById('file-info');
+        const noFileSelected = document.getElementById('no-file-selected');
+
+        // Editor containers
+        const editorContainers = {
+            'pdf-editor': document.getElementById('pdf-editor'),
+            'word-editor': document.getElementById('word-editor'),
+            'excel-editor': document.getElementById('excel-editor'),
+            'code-editor': document.getElementById('code-editor')
+        };
+
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                Object.values(editorContainers).forEach(container => {
+                    container.classList.remove('active');
+                });
+                
+                const target = tab.getAttribute('data-target');
+                editorContainers[target].classList.add('active');
+                
+                if (currentFileHandle) {
+                    loadFile(currentFileHandle);
+                }
+            });
+        });
+
+        // Initialize PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.worker.min.js';
+
+        // Initialize ACE Editor
+        function initAceEditor() {
+            aceEditor = ace.edit("code-editor");
+            aceEditor.setTheme("ace/theme/chrome");
+            aceEditor.session.setMode("ace/mode/c_cpp");
+            aceEditor.setOptions({
+                fontSize: "14px",
+                enableBasicAutocompletion: true,
+                enableLiveAutocompletion: true
+            });
+        }
+
+        // Initialize app
+        function init() {
+            initAceEditor();
+            setupEventListeners();
+            updateUI();
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            selectFolderBtn.addEventListener('click', selectFolder);
+            refreshFilesBtn.addEventListener('click', refreshFiles);
+            saveFileBtn.addEventListener('click', saveFile);
+            newFileBtn.addEventListener('click', createNewFile);
+            toggleAiBtn.addEventListener('click', toggleAiPanel);
+            closeAiBtn.addEventListener('click', toggleAiPanel);
+            aiSendBtn.addEventListener('click', sendMessage);
+            aiInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // PDF controls
+            document.getElementById('prev-page').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderPDFPage();
+                }
+            });
+
+            document.getElementById('next-page').addEventListener('click', () => {
+                if (pdfDoc && currentPage < pdfDoc.numPages) {
+                    currentPage++;
+                    renderPDFPage();
+                }
+            });
+
+            document.getElementById('zoom-in').addEventListener('click', () => {
+                currentScale += 0.25;
+                renderPDFPage();
+            });
+
+            document.getElementById('zoom-out').addEventListener('click', () => {
+                if (currentScale > 0.5) {
+                    currentScale -= 0.25;
+                    renderPDFPage();
+                }
+            });
+
+            // Excel controls
+            document.getElementById('add-row').addEventListener('click', addExcelRow);
+            document.getElementById('add-col').addEventListener('click', addExcelColumn);
+        }
+
+        // Select folder using File System Access API
+        async function selectFolder() {
+            try {
+                currentFolderHandle = await window.showDirectoryPicker();
+                statusMessage.textContent = `Folder selected: ${currentFolderHandle.name}`;
+                refreshFiles();
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    statusMessage.textContent = 'Error selecting folder';
+                    console.error(error);
+                }
+            }
+        }
+
+        // Refresh file list
+        async function refreshFiles() {
+            if (!currentFolderHandle) {
+                statusMessage.textContent = 'No folder selected';
+                return;
+            }
+
+            try {
+                fileList.innerHTML = '';
+                statusMessage.textContent = 'Loading files...';
+                
+                for await (const entry of currentFolderHandle.values()) {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <span class="file-icon">${getFileIcon(entry.name)}</span>
+                        <span>${entry.name}</span>
+                    `;
+                    fileItem.addEventListener('click', () => handleFileClick(entry));
+                    fileList.appendChild(fileItem);
+                }
+                
+                statusMessage.textContent = `Loaded files from ${currentFolderHandle.name}`;
+                
+                if (fileList.children.length === 0) {
+                    fileList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📁</div>
+                            <p>Folder is empty</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusMessage.textContent = 'Error loading files';
+                console.error(error);
+            }
+        }
+
+        // Get appropriate icon for file type
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            if (ext === 'pdf') return '📄';
+            if (ext === 'doc' || ext === 'docx') return '📝';
+            if (ext === 'xls' || ext === 'xlsx') return '📊';
+            if (ext === 'cpp' || ext === 'h' || ext === 'c' || ext === 'hpp') return '💻';
+            return '📁';
+        }
+
+        // Handle file click
+        async function handleFileClick(fileHandle) {
+            try {
+                currentFileHandle = fileHandle;
+                filenameInput.value = fileHandle.name;
+                fileInfo.textContent = fileHandle.name;
+                
+                // Show the appropriate editor based on file type
+                const ext = fileHandle.name.split('.').pop().toLowerCase();
+                
+                if (ext === 'pdf') {
+                    document.querySelector('.tab[data-target="pdf-editor"]').click();
+                } else if (ext === 'doc' || ext === 'docx' || ext === 'txt') {
+                    document.querySelector('.tab[data-target="word-editor"]').click();
+                } else if (ext === 'xls' || ext === 'xlsx') {
+                    document.querySelector('.tab[data-target="excel-editor"]').click();
+                } else if (ext === 'cpp' || ext === 'h' || ext === 'c' || ext === 'hpp') {
+                    document.querySelector('.tab[data-target="code-editor"]').click();
+                }
+                
+                loadFile(fileHandle);
+                noFileSelected.style.display = 'none';
+            } catch (error) {
+                statusMessage.textContent = 'Error opening file';
+                console.error(error);
+            }
+        }
+
+        // Load file content
+        async function loadFile(fileHandle) {
+            try {
+                const file = await fileHandle.getFile();
+                const ext = file.name.split('.').pop().toLowerCase();
+                
+                if (ext === 'pdf') {
+                    loadPDF(file);
+                } else if (ext === 'doc' || ext === 'docx') {
+                    loadWordDocument(file);
+                } else if (ext === 'xls' || ext === 'xlsx') {
+                    loadExcelFile(file);
+                } else if (ext === 'txt') {
+                    loadTextFile(file);
+                } else if (ext === 'cpp' || ext === 'h' || ext === 'c' || ext === 'hpp') {
+                    loadCodeFile(file);
+                }
+                
+                statusMessage.textContent = `Loaded ${file.name}`;
+            } catch (error) {
+                statusMessage.textContent = 'Error loading file';
+                console.error(error);
+            }
+        }
+
+        // Load PDF file
+        async function loadPDF(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            pdfDoc = await pdfjsLib.getDocument(arrayBuffer).promise;
+            
+            document.getElementById('page-count').textContent = pdfDoc.numPages;
+            currentPage = 1;
+            renderPDFPage();
+        }
+
+        // Render PDF page
+        async function renderPDFPage() {
+            const page = await pdfDoc.getPage(currentPage);
+            const viewport = page.getViewport({ scale: currentScale });
+            const canvas = document.getElementById('pdf-viewer');
+            const context = canvas.getContext('2d');
+            
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            
+            document.getElementById('page-num').textContent = currentPage;
+            
+            await page.render({
+                canvasContext: context,
+                viewport: viewport
+            }).promise;
+        }
+
+        // Load Word document
+        async function loadWordDocument(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const result = await mammoth.extractRawText({ arrayBuffer });
+                document.getElementById('word-content').value = result.value;
+            } catch (error) {
+                console.error('Error loading Word document:', error);
+                document.getElementById('word-content').value = 'Error loading document';
+            }
+        }
+
+        // Load Excel file
+        async function loadExcelFile(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const data = new Uint8Array(arrayBuffer);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                // Get first sheet
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // Convert to JSON
+                excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                // Render Excel grid
+                renderExcelGrid();
+            } catch (error) {
+                console.error('Error loading Excel file:', error);
+                document.getElementById('excel-grid').innerHTML = '<tr><td>Error loading spreadsheet</td></tr>';
+            }
+        }
+
+        // Render Excel grid
+        function renderExcelGrid() {
+            const table = document.getElementById('excel-grid');
+            table.innerHTML = '';
+            
+            // Create header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            
+            // Determine number of columns
+            let colCount = 0;
+            excelData.forEach(row => {
+                if (row.length > colCount) colCount = row.length;
+            });
+            
+            // Add column headers (A, B, C, ...)
+            for (let i = 0; i < (colCount || 3); i++) {
+                const th = document.createElement('th');
+                th.textContent = String.fromCharCode(65 + i);
+                headerRow.appendChild(th);
+            }
+            
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Create body
+            const tbody = document.createElement('tbody');
+            
+            // Add rows
+            excelData.forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+                
+                for (let i = 0; i < (colCount || 3); i++) {
+                    const td = document.createElement('td');
+                    td.contentEditable = true;
+                    td.textContent = row[i] || '';
+                    
+                    td.addEventListener('focus', () => {
+                        td.dataset.originalValue = td.textContent;
+                    });
+                    
+                    td.addEventListener('blur', () => {
+                        if (td.textContent !== td.dataset.originalValue) {
+                            if (!excelData[rowIndex]) excelData[rowIndex] = [];
+                            excelData[rowIndex][i] = td.textContent;
+                        }
+                    });
+                    
+                    tr.appendChild(td);
+                }
+                
+                tbody.appendChild(tr);
+            });
+            
+            // If no data, add one empty row
+            if (excelData.length === 0) {
+                const tr = document.createElement('tr');
+                for (let i = 0; i < 3; i++) {
+                    const td = document.createElement('td');
+                    td.contentEditable = true;
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+                excelData.push(['', '', '']);
+            }
+            
+            table.appendChild(tbody);
+        }
+
+        // Add row to Excel grid
+        function addExcelRow() {
+            const table = document.getElementById('excel-grid');
+            const tbody = table.querySelector('tbody');
+            const colCount = table.querySelector('thead tr').children.length;
+            
+            const tr = document.createElement('tr');
+            for (let i = 0; i < colCount; i++) {
+                const td = document.createElement('td');
+                td.contentEditable = true;
+                tr.appendChild(td);
+            }
+            
+            tbody.appendChild(tr);
+            excelData.push(Array(colCount).fill(''));
+        }
+
+        // Add column to Excel grid
+        function addExcelColumn() {
+            const table = document.getElementById('excel-grid');
+            const headerRow = table.querySelector('thead tr');
+            const bodyRows = table.querySelectorAll('tbody tr');
+            
+            // Add header
+            const newColIndex = headerRow.children.length;
+            const th = document.createElement('th');
+            th.textContent = String.fromCharCode(65 + newColIndex);
+            headerRow.appendChild(th);
+            
+            // Add cells to each row
+            bodyRows.forEach((row, rowIndex) => {
+                const td = document.createElement('td');
+                td.contentEditable = true;
+                row.appendChild(td);
+                
+                if (!excelData[rowIndex]) excelData[rowIndex] = [];
+                excelData[rowIndex][newColIndex] = '';
+            });
+        }
+
+        // Load text file
+        async function loadTextFile(file) {
+            try {
+                const text = await file.text();
+                document.getElementById('word-content').value = text;
+            } catch (error) {
+                console.error('Error loading text file:', error);
+                document.getElementById('word-content').value = 'Error loading file';
+            }
+        }
+
+        // Load code file
+        async function loadCodeFile(file) {
+            try {
+                const text = await file.text();
+                aceEditor.setValue(text);
+                aceEditor.clearSelection();
+                
+                // Set appropriate mode
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (ext === 'cpp' || ext === 'hpp' || ext === 'c' || ext === 'h') {
+                    aceEditor.session.setMode("ace/mode/c_cpp");
+                }
+            } catch (error) {
+                console.error('Error loading code file:', error);
+                aceEditor.setValue('Error loading file');
+            }
+        }
+
+        // Save current file
+        async function saveFile() {
+            if (!currentFileHandle) {
+                statusMessage.textContent = 'No file selected to save';
+                return;
+            }
+            
+            try {
+                let content;
+                const ext = currentFileHandle.name.split('.').pop().toLowerCase();
+                
+                if (ext === 'pdf') {
+                    statusMessage.textContent = 'PDF editing not supported (read-only)';
+                    return;
+                } else if (ext === 'doc' || ext === 'docx' || ext === 'txt') {
+                    content = document.getElementById('word-content').value;
+                } else if (ext === 'xls' || ext === 'xlsx') {
+                    // Convert excelData to worksheet
+                    const ws = XLSX.utils.aoa_to_sheet(excelData);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                    content = XLSX.write(wb, { type: 'array', bookType: ext });
+                } else if (ext === 'cpp' || ext === 'h' || ext === 'c' || ext === 'hpp') {
+                    content = aceEditor.getValue();
+                }
+                
+                // Create writable stream
+                const writable = await currentFileHandle.createWritable();
+                
+                if (ext === 'xls' || ext === 'xlsx') {
+                    // For Excel files, write ArrayBuffer
+                    await writable.write(content);
+                } else {
+                    // For text files, write string
+                    await writable.write(content);
+                }
+                
+                await writable.close();
+                
+                statusMessage.textContent = `Saved ${currentFileHandle.name}`;
+            } catch (error) {
+                statusMessage.textContent = 'Error saving file';
+                console.error(error);
+            }
+        }
+
+        // Create new file
+        async function createNewFile() {
+            if (!currentFolderHandle) {
+                statusMessage.textContent = 'Please select a folder first';
+                return;
+            }
+            
+            const filename = filenameInput.value.trim();
+            if (!filename) {
+                statusMessage.textContent = 'Please enter a filename';
+                return;
+            }
+            
+            try {
+                // Create new file handle
+                currentFileHandle = await currentFolderHandle.getFileHandle(filename, { create: true });
+                
+                // Initialize empty content based on file extension
+                const ext = filename.split('.').pop().toLowerCase();
+                
+                if (ext === 'pdf') {
+                    // Can't create empty PDFs in browser
+                    statusMessage.textContent = 'Cannot create PDF files (use Word or Text instead)';
+                    return;
+                } else if (ext === 'doc' || ext === 'docx' || ext === 'txt') {
+                    document.getElementById('word-content').value = '';
+                    document.querySelector('.tab[data-target="word-editor"]').click();
+                } else if (ext === 'xls' || ext === 'xlsx') {
+                    excelData = [['', '', ''], ['', '', ''], ['', '', '']];
+                    renderExcelGrid();
+                    document.querySelector('.tab[data-target="excel-editor"]').click();
+                } else if (ext === 'cpp' || ext === 'h' || ext === 'c' || ext === 'hpp') {
+                    aceEditor.setValue('');
+                    document.querySelector('.tab[data-target="code-editor"]').click();
+                } else {
+                    // Default to text file
+                    document.getElementById('word-content').value = '';
+                    document.querySelector('.tab[data-target="word-editor"]').click();
+                }
+                
+                // Add to file list
+                refreshFiles();
+                noFileSelected.style.display = 'none';
+                statusMessage.textContent = `Created new file: ${filename}`;
+            } catch (error) {
+                statusMessage.textContent = 'Error creating file';
+                console.error(error);
+            }
+        }
+
+        // Toggle AI panel
+        function toggleAiPanel() {
+            aiPanel.style.display = aiPanel.style.display === 'none' ? 'flex' : 'none';
+            toggleAiBtn.textContent = aiPanel.style.display === 'none' ? 'AI Assistant' : 'Close AI';
+        }
+
+        // Send message to AI
+        async function sendMessage() {
+            const message = aiInput.value.trim();
+            if (!message) return;
+            
+            // Add user message to conversation
+            addMessageToConversation('user', message);
+            aiInput.value = '';
+            
+            // Prepare conversation history
+            const messages = [
+                {
+                    role: "system",
+                    content: "You are Kimi, a helpful AI assistant integrated into an office suite. Help users with their documents, spreadsheets, code, and other office tasks."
+                },
+                ...conversationHistory.map(msg => ({
+                    role: msg.role,
+                    content: msg.content
+                })),
+                {
+                    role: "user",
+                    content: message
+                }
+            ];
+            
+            try {
+                // Show loading indicator
+                const loadingElement = document.createElement('div');
+                loadingElement.className = 'ai-message ai-assistant';
+                loadingElement.innerHTML = '<div class="loading"></div>';
+                aiConversation.appendChild(loadingElement);
+                aiConversation.scrollTop = aiConversation.scrollHeight;
+                
+                // Call API
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: MODEL,
+                        messages: messages,
+                        temperature: 0.7
+                    })
+                });
+                
+                // Remove loading indicator
+                aiConversation.removeChild(loadingElement);
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const assistantMessage = data.choices[0].message.content;
+                
+                // Add assistant message to conversation
+                addMessageToConversation('assistant', assistantMessage);
+                
+                // Update conversation history (limit to last 10 messages to avoid too much context)
+                conversationHistory.push({ role: 'user', content: message });
+                conversationHistory.push({ role: 'assistant', content: assistantMessage });
+                
+                if (conversationHistory.length > 10) {
+                    conversationHistory = conversationHistory.slice(-10);
+                }
+            } catch (error) {
+                console.error('Error calling AI API:', error);
+                addMessageToConversation('assistant', 'Sorry, I encountered an error. Please try again later.');
+            }
+        }
+
+        // Add message to conversation UI
+        function addMessageToConversation(role, content) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `ai-message ai-${role === 'user' ? 'user' : 'assistant'}`;
+            messageElement.textContent = content;
+            aiConversation.appendChild(messageElement);
+            aiConversation.scrollTop = aiConversation.scrollHeight;
+        }
+
+        // Update UI based on current state
+        function updateUI() {
+            if (currentFileHandle) {
+                noFileSelected.style.display = 'none';
+            } else {
+                noFileSelected.style.display = 'flex';
+            }
+        }
+
+        // Initialize the app
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
