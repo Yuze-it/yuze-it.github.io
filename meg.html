@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能麦克风扩音器</title>
+    <style>
+        :root {
+            --primary-color: #4a6bff;
+            --secondary-color: #6c5ce7;
+            --dark-color: #2d3436;
+            --light-color: #f5f6fa;
+            --success-color: #00b894;
+            --warning-color: #fdcb6e;
+            --danger-color: #d63031;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        h1 {
+            color: var(--dark-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .description {
+            color: #636e72;
+            margin-bottom: 30px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .mic-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .mic-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(74, 107, 255, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .mic-icon {
+            font-size: 60px;
+            color: white;
+        }
+        
+        .mic-button {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(74, 107, 255, 0.4);
+            transition: all 0.3s;
+            outline: none;
+            width: 80%;
+            max-width: 250px;
+        }
+        
+        .mic-button:hover {
+            background-color: #3a5bef;
+            transform: translateX(-50%) scale(1.05);
+        }
+        
+        .mic-button:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+        
+        .mic-button.active {
+            background-color: var(--danger-color);
+            box-shadow: 0 5px 15px rgba(214, 48, 49, 0.4);
+        }
+        
+        .volume-control {
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .volume-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: var(--dark-color);
+            font-size: 14px;
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 10px;
+            background: #dfe6e9;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: var(--secondary-color);
+        }
+        
+        .bluetooth-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dfe6e9;
+        }
+        
+        .bluetooth-button {
+            background-color: var(--dark-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            transition: all 0.3s;
+        }
+        
+        .bluetooth-button:hover {
+            background-color: #1e272e;
+        }
+        
+        .bluetooth-icon {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .device-list {
+            margin-top: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            text-align: left;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 10px;
+            display: none;
+        }
+        
+        .device-item {
+            padding: 8px 10px;
+            border-bottom: 1px solid #dfe6e9;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .device-item:hover {
+            background-color: #e9ecef;
+        }
+        
+        .device-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #636e72;
+            font-style: italic;
+        }
+        
+        .key-hint {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #636e72;
+            display: none;
+        }
+        
+        .wave {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            animation: pulse 2s infinite;
+            display: none;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .mic-container {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .mic-icon {
+                font-size: 40px;
+            }
+            
+            .key-hint {
+                display: block;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>智能麦克风扩音器</h1>
+        <p class="description">按住按钮或空格键说话，您的声音将被实时放大并通过扬声器播放。支持蓝牙设备连接。</p>
+        
+        <div class="mic-container">
+            <div class="mic-circle">
+                <i class="fas fa-microphone mic-icon"></i>
+                <div class="wave" id="wave"></div>
+            </div>
+        </div>
+        
+        <button class="mic-button" id="micButton">
+            <i class="fas fa-microphone"></i> 按住说话
+        </button>
+        
+        <div class="volume-control">
+            <div class="volume-label">
+                <span>音量</span>
+                <span id="volumeValue">50%</span>
+            </div>
+            <input type="range" id="volumeSlider" min="0" max="100" value="50">
+        </div>
+        
+        <div class="bluetooth-section">
+            <button class="bluetooth-button" id="bluetoothButton">
+                <i class="fas fa-bluetooth-b bluetooth-icon"></i> 连接蓝牙设备
+            </button>
+            <div class="device-list" id="deviceList"></div>
+        </div>
+        
+        <p class="status" id="status">准备就绪</p>
+        <p class="key-hint">提示：在电脑上可以使用空格键按住说话</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const micButton = document.getElementById('micButton');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumeValue = document.getElementById('volumeValue');
+            const bluetoothButton = document.getElementById('bluetoothButton');
+            const deviceList = document.getElementById('deviceList');
+            const statusElement = document.getElementById('status');
+            const waveElement = document.getElementById('wave');
+            
+            // 音频相关变量
+            let audioContext;
+            let microphone;
+            let gainNode;
+            let isMicActive = false;
+            let volume = 0.5;
+            
+            // 初始化音频上下文
+            function initAudio() {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    gainNode = audioContext.createGain();
+                    gainNode.gain.value = volume;
+                    gainNode.connect(audioContext.destination);
+                    
+                    statusElement.textContent = "音频系统已初始化";
+                } catch (error) {
+                    statusElement.textContent = "无法初始化音频系统: " + error.message;
+                    console.error(error);
+                }
+            }
+            
+            // 开始录音
+            async function startRecording() {
+                if (isMicActive) return;
+                
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    microphone = audioContext.createMediaStreamSource(stream);
+                    microphone.connect(gainNode);
+                    
+                    isMicActive = true;
+                    micButton.classList.add('active');
+                    waveElement.style.display = 'block';
+                    statusElement.textContent = "正在扩音...";
+                } catch (error) {
+                    statusElement.textContent = "无法访问麦克风: " + error.message;
+                    console.error(error);
+                }
+            }
+            
+            // 停止录音
+            function stopRecording() {
+                if (!isMicActive) return;
+                
+                if (microphone) {
+                    microphone.disconnect();
+                }
+                
+                isMicActive = false;
+                micButton.classList.remove('active');
+                waveElement.style.display = 'none';
+                statusElement.textContent = "准备就绪";
+            }
+            
+            // 按钮事件
+            micButton.addEventListener('mousedown', startRecording);
+            micButton.addEventListener('touchstart', startRecording);
+            
+            micButton.addEventListener('mouseup', stopRecording);
+            micButton.addEventListener('touchend', stopRecording);
+            micButton.addEventListener('mouseleave', stopRecording);
+            
+            // 键盘事件
+            document.addEventListener('keydown', function(e) {
+                if (e.code === 'Space' && !isMicActive) {
+                    e.preventDefault();
+                    startRecording();
+                }
+            });
+            
+            document.addEventListener('keyup', function(e) {
+                if (e.code === 'Space' && isMicActive) {
+                    e.preventDefault();
+                    stopRecording();
+                }
+            });
+            
+            // 音量控制
+            volumeSlider.addEventListener('input', function() {
+                volume = this.value / 100;
+                volumeValue.textContent = this.value + '%';
+                
+                if (gainNode) {
+                    gainNode.gain.value = volume;
+                }
+            });
+            
+            // 蓝牙功能
+            bluetoothButton.addEventListener('click', async function() {
+                statusElement.textContent = "正在搜索蓝牙设备...";
+                
+                try {
+                    // 注意: 目前Web Bluetooth API需要用户手势触发
+                    const device = await navigator.bluetooth.requestDevice({
+                        acceptAllDevices: true,
+                        optionalServices: ['generic_access']
+                    });
+                    
+                    statusElement.textContent = `已连接: ${device.name || '未知设备'}`;
+                    
+                    // 这里可以添加更多蓝牙设备交互代码
+                    // 例如连接到特定服务或特征
+                    
+                } catch (error) {
+                    statusElement.textContent = "蓝牙连接错误: " + error.message;
+                    console.error(error);
+                }
+            });
+            
+            // 检查蓝牙API是否可用
+            if (!navigator.bluetooth) {
+                bluetoothButton.disabled = true;
+                bluetoothButton.title = "您的浏览器不支持Web Bluetooth API";
+                statusElement.textContent = "注意: 您的浏览器不支持蓝牙功能";
+            }
+            
+            // 初始化音频系统
+            initAudio();
+        });
+    </script>
+</body>
+</html>
