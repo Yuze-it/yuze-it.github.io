@@ -1,136 +1,137 @@
 <!DOCTYPE html>
-<html class="https://yuze.netlify.app">
+<html>
 
-<head class="https://yuze.netlify.app">
-
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>
-        YUZE-IT
-    </title>
+    <title>YUZE-IT</title>
     <link rel="icon" href="./static/img/favicon.ico">
     <meta name="description" content="整天非半吊子和非不学无术的好孩子,梦想成为科技大厦里的读书人.....">
     <meta name="keywords" content="yuze,雨泽YU,YUZE-IT,雨泽主页,YUZE-IT引导页,yuze">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="./static/css/style.css">
     <link rel="stylesheet" href="./static/css/root.css">
-
+    <style>
+        /* 弹窗样式 */
+        .custom-popup-wrapper {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.5); display: none; z-index: 9999;
+            align-items: center; justify-content: center;
+            animation: fadeIn 0.4s;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .custom-popup-content {
+            background: #fff; padding: 30px 25px 18px 25px; border-radius: 18px;
+            box-shadow: 0 4px 28px rgba(0,0,0,0.18); max-width: 360px; width:90vw;
+            text-align: center; position: relative; animation: popupIn 0.4s;
+        }
+        @keyframes popupIn { from { transform: scale(0.8); opacity:0; } to { transform:scale(1); opacity:1; } }
+        .popup-close {
+            position: absolute; right: 14px; top: 10px; background: none;
+            border: none; font-size: 26px; color: #888; cursor: pointer;
+            transition: color 0.2s;
+        }
+        .popup-close:hover { color: #e74c3c; }
+        
+        /* 模态窗口样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 60%;
+            max-width: 600px;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* 侧边栏样式 */
+        .sidebar-toggle {
+            position: fixed;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border-radius: 10px 0 0 10px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .sidebar-toggle:hover {
+            background: #f0f0f0;
+        }
+        
+        .sidebar-icon {
+            width: 100%;
+            height: 100%;
+            background: url('./static/svg/ai-icon.svg') center center no-repeat;
+            background-size: 70%;
+        }
+        
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.08); z-index: 9998; transition: opacity 0.2s;
+        }
+        
+        .sidebar {
+            position: fixed; top: 0; right: -250px; width: 250px; height: 100%;
+            background: #fff; box-shadow: -2px 0 10px rgba(0,0,0,0.14);
+            transition: right 0.3s cubic-bezier(.85,.01,.16,1);
+            z-index: 9999; overflow: hidden;
+        }
+        
+        .sidebar.open { right: 0; }
+        .sidebar-overlay.open { display: block; opacity: 1; }
+        
+        @media (max-width:650px) {
+            .sidebar { width: 88vw; }
+        }
+    </style>
 </head>
 
 <body>
     <!-- 跳转推荐弹窗 -->
-<div id="custom-popup" class="custom-popup-wrapper">
-    <div class="custom-popup-content">
-      <h3>🎉 体验升级提示</h3>
-      <p>我们发现新版页面能提供更好的浏览体验，是否立即前往？</p>
-      <div class="button-group">
-        <button class="stay-btn" onclick="closePopup()">暂时留在此页</button>
-        <button class="go-btn" onclick="navigateToNew()">立即前往新页</button>
-      </div>
+    <div id="custom-popup" class="custom-popup-wrapper">
+        <div class="custom-popup-content">
+            <button class="popup-close" title="关闭">&times;</button>
+            <h3>🎉 体验升级提示</h3>
+            <p>我们发现新版页面能提供更好的浏览体验，是否立即前往？</p>
+            <div class="button-group">
+                <button class="stay-btn" onclick="closePopup()">暂时留在此页</button>
+                <button class="go-btn" onclick="navigateToNew()">立即前往新页</button>
+            </div>
+        </div>
     </div>
-  </div>
-  
-  <style>
-  .custom-popup-wrapper {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-  }
-  
-  .custom-popup-wrapper.show {
-      display: flex;
-      opacity: 1;
-  }
-  
-  .custom-popup-content {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      max-width: 400px;
-      text-align: center;
-      transform: scale(0.9);
-      transition: transform 0.3s ease;
-  }
-  
-  .custom-popup-wrapper.show .custom-popup-content {
-      transform: scale(1);
-  }
-  
-  .custom-popup-content h3 {
-    margin: 0 0 15px 0;
-    color: #2c3e50;
-  }
-  
-  .custom-popup-content p {
-    color: #7f8c8d;
-    line-height: 1.6;
-    margin-bottom: 20px;
-  }
-  
-  .button-group {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-  }
-  
-  button {
-    padding: 10px 25px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-  
-  .stay-btn {
-    background: #f1f2f6;
-    color: #2d3436;
-  }
-  
-  .stay-btn:hover {
-    background: #dfe4ea;
-  }
-  
-  .go-btn {
-    background: #2ecc71;
-    color: white;
-  }
-  
-  .go-btn:hover {
-    background: #27ae60;
-  }
-  </style>
-  
-  <script>
-  // 页面加载完成后显示弹窗
-  window.addEventListener('DOMContentLoaded', (event) => {
-      const popup = document.getElementById('custom-popup');
-      popup.classList.add('show');
-  });
-  
-  function closePopup() {
-      const popup = document.getElementById('custom-popup');
-      popup.classList.remove('show');
-      // 延迟隐藏，等待动画完成
-      setTimeout(() => {
-          popup.style.display = 'none';
-      }, 300);
-  }
-  
-  function navigateToNew() {
-      window.location.href = '/home';
-  }
-  </script>
+
     <div id="zyyo-loading">
         <div id="zyyo-loading-center">
         </div>
@@ -282,7 +283,8 @@
                 <div class="tanChiShe">
                     <img id="tanChiShe" src="./static/svg/snake-Light.svg" alt="">
                 </div>
-            </header><!-- 模态窗口开始 -->
+            </header>
+<!-- 模态窗口开始 -->
 <div id="myModal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
@@ -323,31 +325,15 @@
           modal.style.display = "none";
       }
   }
-  <script>
   function toggleSidebar() {
-      var sidebar = document.getElementById('sidebar');
-      if (sidebar.style.right === '0px') {
-          sidebar.style.right = '-250px';
-      } else {
-          sidebar.style.right = '0px';
-      }
-  }
-  
-  // 添加点击其他位置收起侧边栏的功能
-  document.addEventListener('click', function(event) {
-      const sidebar = document.getElementById('sidebar');
-      const sidebarToggle = document.querySelector('.sidebar-toggle');
-      
-      // 检查点击是否发生在侧边栏或侧边栏切换按钮之外
-      if (
-          sidebar.style.right === '0px' &&
-          !sidebar.contains(event.target) &&
-          !sidebarToggle.contains(event.target)
-      ) {
-          sidebar.style.right = '-250px';
-      }
-  });
-  </script>
+    var sidebar = document.getElementById('sidebar');
+    if (sidebar.style.right === '0px') {
+        sidebar.style.right = '-250px';
+    } else {
+        sidebar.style.right = '0px';
+    }
+}
+
   </script>
   
   <style>
@@ -573,13 +559,68 @@
         </div>
 
     </div>
-    <div class="sidebar-toggle" onclick="toggleSidebar()">
-        <div class="sidebar-icon"></div>
-    </div>
-    <div class="sidebar" id="sidebar">
-        <h5>YUZE_AI</h5>
-        <iframe src="/ai" frameborder="0" style="width:100%; height:100%;"></iframe>
-    </div>
+    <!-- 增加遮罩层和优化侧边栏 -->
+<div class="sidebar-toggle" onclick="toggleSidebar()">
+    <div class="sidebar-icon"></div>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="sidebar" id="sidebar">
+    <h5>YUZE_AI</h5>
+    <iframe src="/ai" frameborder="0" style="width:100%; height:100%;"></iframe>
+</div>
+<style>
+.sidebar-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.08); z-index: 9998; transition: opacity 0.2s;
+}
+.sidebar {
+    position: fixed; top: 0; right: -250px; width: 250px; height: 100%;
+    background: #fff; box-shadow: -2px 0 10px rgba(0,0,0,0.14);
+    transition: right 0.3s cubic-bezier(.85,.01,.16,1);
+    z-index: 9999; overflow: hidden;
+}
+.sidebar.open { right: 0; }
+.sidebar-overlay.open { display: block; opacity: 1; }
+@media (max-width:650px) {
+    .sidebar { width: 88vw; }
+}
+</style>
+<script>
+function toggleSidebar() {
+    var sidebar = document.getElementById('sidebar');
+    var overlay = document.getElementById('sidebarOverlay');
+    var opened = sidebar.classList.contains('open');
+    if (!opened) {
+        sidebar.classList.add('open');
+        overlay.classList.add('open');
+    } else {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+    }
+}
+document.getElementById('sidebarOverlay').onclick = function() {
+    document.getElementById('sidebar').classList.remove('open');
+    this.classList.remove('open');
+};
+// ESC关闭侧边栏
+window.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+});
+// 点击侧边栏以外区域收起
+document.body.addEventListener('click', function(e){
+    var sidebar = document.getElementById('sidebar');
+    var overlay = document.getElementById('sidebarOverlay');
+    if(sidebar.classList.contains('open')) {
+        if (!sidebar.contains(e.target) && !document.querySelector('.sidebar-toggle').contains(e.target)) {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+    }
+}, true);
+</script>
     
 </body>
 <script src="./static/js/script.js"></script>
