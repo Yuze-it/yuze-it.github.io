@@ -393,14 +393,34 @@ header {
 </footer>
 
 <script>
+    function makeMulti(fn) {
+    const str = fn.toString();
+    const start = str.indexOf("/*") + 2;  // +2 跳过 "/*"
+    const end = str.lastIndexOf("*/");
+    return str.substring(start, end).trim();  // 使用 substring 并 trim 去除多余空白
+}
+
+let string = function () {
+/*  /$$     /$$ /$$   /$$ /$$$$$$$$ /$$$$$$$$
+|  $$   /$$/| $$  | $$|_____ $$ | $$_____/
+ \  $$ /$$/ | $$  | $$     /$$/ | $$      
+  \  $$$$/  | $$  | $$    /$$/  | $$$$$   
+   \  $$/   | $$  | $$   /$$/   | $$__/   
+    | $$    | $$  | $$  /$$/    | $$      
+    | $$    |  $$$$$$/ /$$$$$$$$| $$$$$$$$
+    |__/     \______/ |________/|________/=       
+*/
+};
+
+console.log(makeMulti(string));
+console.log("%cYUZE-IT 技术工作室欢迎您~", "color: #3498db; font-weight: bold;");
 console.log('%c ', `
   padding: 100px 150px;
-  background-image: url('https://d33wubrfki0l68.cloudfront.net/11157aa9-9cda-49aa-b1d5-984aafa849c6/f1b82546-f048-4222-8dec-ae4b95474908.png');
+  background-image: url('/wish.png');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
 `);
-    console.log('%c🚀 欢迎访问 YUZE-IT 技术工作室！', 'color: #9b59b6; font-weight: bold;');
     // 初始化实时时钟
     function updateCompactClock() {
         const date = new Date();
