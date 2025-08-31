@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自动全屏图片展示器</title>
+    <title>全屏图片展示器</title>
     <style>
         * {
             margin: 0;
@@ -17,15 +17,29 @@
             color: white;
             min-height: 100vh;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         
         .container {
-            width: 100vw;
-            height: 100vh;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .image-container {
+            width: 100%;
+            height: 80vh;
+            overflow: hidden;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #000;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
         }
         
         #displayed-image {
@@ -41,12 +55,11 @@
         }
         
         .loading {
-            position: fixed;
+            position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            z-index: 100;
         }
         
         .spinner {
@@ -79,109 +92,105 @@
             60%, 100% { content: '...'; }
         }
         
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 14px 28px;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-3px);
+        }
+        
         .error {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             color: #ff6b6b;
             font-weight: bold;
+            margin: 20px 0;
             text-align: center;
             display: none;
             max-width: 500px;
             line-height: 1.5;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            z-index: 100;
         }
         
-        .exit-hint {
+        .fullscreen-notice {
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 20px;
+            right: 20px;
             background: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
+            padding: 10px 15px;
             border-radius: 8px;
             font-size: 0.9rem;
-            opacity: 0.8;
-            animation: fadeInOut 3s infinite;
-            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
         }
         
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 0.9; }
+        .show-notice {
+            opacity: 1;
         }
         
-        .show-exit-hint {
-            display: block;
-        }
-        
-        .api-info {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            opacity: 0.7;
+        @media (max-width: 768px) {
+            .image-container {
+                height: 70vh;
+            }
+            
+            button {
+                padding: 12px 24px;
+                font-size: 0.9rem;
+            }
+            
+            .spinner {
+                width: 50px;
+                height: 50px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="loading">
-            <div class="spinner"></div>
-            <p class="loading-text">加载图片<span class="dots"></span></p>
+        <div class="image-container">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p class="loading-text">加载图片<span class="dots"></span></p>
+            </div>
+            <img id="displayed-image" alt="从API获取的图片">
         </div>
-        <img id="displayed-image" alt="从API获取的图片">
         
         <div class="error" id="error-message"></div>
         
-        <div class="exit-hint" id="exit-hint">
-            按ESC键或F11退出全屏
+        <div class="controls">
+            <button id="load-image">加载新图片</button>
+            <button id="fullscreen">全屏查看</button>
         </div>
         
-        <div class="api-info">
-            API: lolicon.app/setu/v2
+        <div class="fullscreen-notice" id="fullscreen-notice">
+            按ESC键退出全屏
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 使用CORS代理绕过跨域限制
             const apiUrl = 'https://api.lolicon.app/setu/v2';
-            const corsProxy = 'https://corsproxy.io/?';
-            
             const displayedImage = document.getElementById('displayed-image');
+            const loadButton = document.getElementById('load-image');
+            const fullscreenButton = document.getElementById('fullscreen');
             const errorMessage = document.getElementById('error-message');
             const loadingElement = document.querySelector('.loading');
-            const exitHint = document.getElementById('exit-hint');
-            
-            // 自动进入全屏函数
-            function enterFullscreen() {
-                const elem = document.documentElement;
-                
-                if (!document.fullscreenElement) {
-                    if (elem.requestFullscreen) {
-                        elem.requestFullscreen().catch(err => {
-                            console.error('全屏请求错误:', err);
-                        });
-                    } else if (elem.webkitRequestFullscreen) {
-                        elem.webkitRequestFullscreen();
-                    } else if (elem.msRequestFullscreen) {
-                        elem.msRequestFullscreen();
-                    }
-                    
-                    // 显示退出提示
-                    setTimeout(() => {
-                        exitHint.classList.add('show-exit-hint');
-                    }, 2000);
-                }
-            }
+            const fullscreenNotice = document.getElementById('fullscreen-notice');
             
             // 加载图片函数
             function loadImage() {
@@ -190,8 +199,8 @@
                 displayedImage.classList.remove('image-loaded');
                 loadingElement.style.display = 'block';
                 
-                // 使用fetch调用API，通过CORS代理
-                fetch(corsProxy + encodeURIComponent(apiUrl))
+                // 使用fetch调用API
+                fetch(apiUrl)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error(`网络错误: ${response.status}`);
@@ -199,10 +208,7 @@
                         return response.json();
                     })
                     .then(data => processData(data))
-                    .catch(error => {
-                        console.error('获取数据失败:', error);
-                        showError('获取图片失败，可能是网络或CORS限制问题。请重试或检查控制台获取详细信息。');
-                    });
+                    .catch(error => showError(error.message));
             }
             
             // 处理返回的数据
@@ -223,9 +229,6 @@
                 displayedImage.onload = function() {
                     loadingElement.style.display = 'none';
                     displayedImage.classList.add('image-loaded');
-                    
-                    // 图片加载完成后自动进入全屏
-                    enterFullscreen();
                 };
                 
                 displayedImage.onerror = function() {
@@ -233,7 +236,6 @@
                     loadingElement.style.display = 'none';
                 };
                 
-                // 使用代理加载图片以避免可能的CORS问题
                 displayedImage.src = imageData.urls.original;
             }
             
@@ -244,22 +246,40 @@
                 loadingElement.style.display = 'none';
             }
             
+            // 全屏查看
+            function enterFullscreen() {
+                const elem = document.querySelector('.image-container');
+                
+                if (!document.fullscreenElement) {
+                    if (elem.requestFullscreen) {
+                        elem.requestFullscreen();
+                    } else if (elem.webkitRequestFullscreen) {
+                        elem.webkitRequestFullscreen();
+                    } else if (elem.msRequestFullscreen) {
+                        elem.msRequestFullscreen();
+                    }
+                    
+                    // 显示全屏提示
+                    fullscreenNotice.classList.add('show-notice');
+                    setTimeout(() => {
+                        fullscreenNotice.classList.remove('show-notice');
+                    }, 3000);
+                }
+            }
+            
             // 退出全屏时隐藏提示
             document.addEventListener('fullscreenchange', function() {
                 if (!document.fullscreenElement) {
-                    exitHint.classList.remove('show-exit-hint');
+                    fullscreenNotice.classList.remove('show-notice');
                 }
             });
+            
+            // 添加事件监听
+            loadButton.addEventListener('click', loadImage);
+            fullscreenButton.addEventListener('click', enterFullscreen);
             
             // 初始加载一张图片
             loadImage();
-            
-            // 添加键盘事件监听 - ESC键退出提示
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && document.fullscreenElement) {
-                    exitHint.classList.remove('show-exit-hint');
-                }
-            });
         });
     </script>
 </body>
