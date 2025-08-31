@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动全屏图片展示器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+        
+        #displayed-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        
+        .image-loaded {
+            opacity: 1 !important;
+        }
+        
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 100;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1.2s ease-in-out infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+        
+        .dots:after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        .error {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff6b6b;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+            max-width: 500px;
+            line-height: 1.5;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 100;
+        }
+        
+        .exit-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            animation: fadeInOut 3s infinite;
+            display: none;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.9; }
+        }
+        
+        .show-exit-hint {
+            display: block;
+        }
+        
+        .api-info {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p class="loading-text">加载图片<span class="dots"></span></p>
+        </div>
+        <img id="displayed-image" alt="从API获取的图片">
+        
+        <div class="error" id="error-message"></div>
+        
+        <div class="exit-hint" id="exit-hint">
+            按ESC键或F11退出全屏
+        </div>
+        
+        <div class="api-info">
+            API: lolicon.app/setu/v2
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 使用CORS代理绕过跨域限制
+            const apiUrl = 'https://api.lolicon.app/setu/v2';
+            const corsProxy = 'https://corsproxy.io/?';
+            
+            const displayedImage = document.getElementById('displayed-image');
+            const errorMessage = document.getElementById('error-message');
+            const loadingElement = document.querySelector('.loading');
+            const exitHint = document.getElementById('exit-hint');
+            
+            // 自动进入全屏函数
+            function enterFullscreen() {
+                const elem = document.documentElement;
+                
+                if (!document.fullscreenElement) {
+                    if (elem.requestFullscreen) {
+                        elem.requestFullscreen().catch(err => {
+                            console.error('全屏请求错误:', err);
+                        });
+                    } else if (elem.webkitRequestFullscreen) {
+                        elem.webkitRequestFullscreen();
+                    } else if (elem.msRequestFullscreen) {
+                        elem.msRequestFullscreen();
+                    }
+                    
+                    // 显示退出提示
+                    setTimeout(() => {
+                        exitHint.classList.add('show-exit-hint');
+                    }, 2000);
+                }
+            }
+            
+            // 加载图片函数
+            function loadImage() {
+                // 重置状态
+                errorMessage.style.display = 'none';
+                displayedImage.classList.remove('image-loaded');
+                loadingElement.style.display = 'block';
+                
+                // 使用fetch调用API，通过CORS代理
+                fetch(corsProxy + encodeURIComponent(apiUrl))
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`网络错误: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => processData(data))
+                    .catch(error => {
+                        console.error('获取数据失败:', error);
+                        showError('获取图片失败，可能是网络或CORS限制问题。请重试或检查控制台获取详细信息。');
+                    });
+            }
+            
+            // 处理返回的数据
+            function processData(data) {
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                
+                if (!data.data || data.data.length === 0) {
+                    showError('未找到图片数据');
+                    return;
+                }
+                
+                const imageData = data.data[0];
+                
+                // 设置图片源
+                displayedImage.onload = function() {
+                    loadingElement.style.display = 'none';
+                    displayedImage.classList.add('image-loaded');
+                    
+                    // 图片加载完成后自动进入全屏
+                    enterFullscreen();
+                };
+                
+                displayedImage.onerror = function() {
+                    showError('图片加载失败');
+                    loadingElement.style.display = 'none';
+                };
+                
+                // 使用代理加载图片以避免可能的CORS问题
+                displayedImage.src = imageData.urls.original;
+            }
+            
+            // 显示错误信息
+            function showError(message) {
+                errorMessage.textContent = `错误: ${message}`;
+                errorMessage.style.display = 'block';
+                loadingElement.style.display = 'none';
+            }
+            
+            // 退出全屏时隐藏提示
+            document.addEventListener('fullscreenchange', function() {
+                if (!document.fullscreenElement) {
+                    exitHint.classList.remove('show-exit-hint');
+                }
+            });
+            
+            // 初始加载一张图片
+            loadImage();
+            
+            // 添加键盘事件监听 - ESC键退出提示
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.fullscreenElement) {
+                    exitHint.classList.remove('show-exit-hint');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
